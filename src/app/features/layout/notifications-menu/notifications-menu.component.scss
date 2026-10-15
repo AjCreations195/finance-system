@@ -4,9 +4,9 @@
 }
 
 .unread-dot {
-  /* on the circle's edge at about 1–2 o'clock (a square corner would sit outside the circle) */
+  /* inside the rounded square's top inline-end corner */
   position: absolute;
-  top: 0.4rem;
+  top: 0.45rem;
   inset-inline-end: 0.5rem;
   width: 0.45rem;
   height: 0.45rem;
@@ -25,10 +25,10 @@
   max-height: min(560px, calc(100vh - 6rem));
   display: flex;
   flex-direction: column;
-  background: var(--fs-surface);
-  border: 1px solid var(--fs-border);
+  background: var(--fs-control-bg);
+  border: 1px solid var(--fs-control-border);
   border-radius: var(--fs-radius);
-  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.14);
+  box-shadow: var(--fs-control-shadow);
   animation: drop 0.18s ease-out;
 }
 

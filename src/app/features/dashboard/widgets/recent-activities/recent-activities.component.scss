@@ -128,6 +128,11 @@
   font-weight: 600;
 }
 
+/* #6938ef is too dark on navy (2.7:1); the lighter violet reads at 6:1 */
+:host-context([data-bs-theme='dark']) .toggle-all {
+  color: var(--fs-badge-sent);
+}
+
 .empty {
   color: var(--fs-text-muted);
   text-align: center;

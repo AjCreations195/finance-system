@@ -55,7 +55,7 @@ describe('NavbarComponent', () => {
     userButton().click();
     await fixture.whenStable();
 
-    el.querySelector<HTMLButtonElement>('.user-menu .text-danger')!.click();
+    el.querySelector<HTMLButtonElement>('.user-menu .logout-item')!.click();
 
     expect(auth.isAuthenticated()).toBe(false);
     expect(navigate).toHaveBeenCalledWith(['/login']);
@@ -68,8 +68,52 @@ describe('NavbarComponent', () => {
     expect(emitted).toHaveBeenCalled();
   });
 
+  it('the user menu holds the language and theme controls (for phones), and stays open while they are used', async () => {
+    userButton().click();
+    await fixture.whenStable();
+    const menu = el.querySelector('.user-menu [role="menu"]')!;
+    expect(menu.querySelector('app-language-switcher')).not.toBeNull();
+
+    menu.querySelector<HTMLButtonElement>('app-theme-toggle button')!.click();
+    await fixture.whenStable();
+    expect(menuOpen()).toBe(true);
+  });
+
+  describe('user menu focus', () => {
+    const menu = () => el.querySelector<HTMLElement>('.user-menu [role="menu"]')!;
+    const focusOut = (to: HTMLElement) => menu().dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: to }));
+
+    beforeEach(async () => {
+      userButton().click();
+      await fixture.whenStable();
+    });
+
+    it('focuses the panel (not Logout) when it opens', () => {
+      expect(document.activeElement).toBe(menu());
+    });
+
+    it('Escape closes it and gives focus back to the avatar button', async () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      await fixture.whenStable();
+      expect(menuOpen()).toBe(false);
+      expect(document.activeElement).toBe(userButton());
+    });
+
+    it('stays open while focus moves between its own controls', async () => {
+      focusOut(el.querySelector<HTMLElement>('.user-menu .logout-item')!);
+      await fixture.whenStable();
+      expect(menuOpen()).toBe(true);
+    });
+
+    it('closes when focus leaves it', async () => {
+      focusOut(el.querySelector<HTMLElement>('button[aria-label="Messages"]')!);
+      await fixture.whenStable();
+      expect(menuOpen()).toBe(false);
+    });
+  });
+
   it('modules outside the demo show an info toast', () => {
-    el.querySelector<HTMLButtonElement>('button[aria-label="Calendar"]')!.click();
+    el.querySelector<HTMLButtonElement>('button[aria-label="Messages"]')!.click();
     expect(TestBed.inject(ToastService).toasts().at(-1)?.type).toBe('info');
   });
 });

@@ -38,6 +38,8 @@ export const EN = {
     actions: 'Actions',
     soon: 'Soon',
     language: 'Language',
+    theme: 'Theme',
+    preferences: 'Preferences',
     toggleTheme: 'Toggle dark / light mode',
     lightMode: 'Light mode',
     darkMode: 'Dark mode',
@@ -138,7 +140,6 @@ export const EN = {
   },
   layout: {
     searchPlaceholder: 'Search',
-    calendar: 'Calendar',
     messages: 'Messages',
     notifications: 'Notifications',
     breadcrumb: 'Breadcrumb',

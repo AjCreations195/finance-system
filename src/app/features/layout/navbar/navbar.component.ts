@@ -1,4 +1,4 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, ElementRef, Injector, afterNextRender, inject, output, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { LanguageService } from '../../../core/services/language.service';
@@ -16,10 +16,12 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
  * Top bar from the design, in reading order:
  *   [logo][system name | department] ··· [search] ··· [user ▾] [icons…]
  *
- * Icon group: calendar, messages, language, Dark/Light toggle, notifications.
+ * Icon group: messages, language, Dark/Light toggle, notifications.
  * The language button isn't in the Figma but is required by the task.
- * On phones the search and the text parts are hidden, and a hamburger
- * button opens the sidebar.
+ * The search box shows only on xl+ (below that it crowds the bar).
+ * Below lg (phones, tablets) the system name is hidden too, and a hamburger
+ * button opens the sidebar. On phones the language and theme controls move
+ * into the user menu, leaving [☰][logo] ··· [avatar][bell].
  */
 @Component({
   selector: 'app-navbar',
@@ -28,7 +30,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
   styleUrl: './navbar.component.scss',
   host: {
     '(document:click)': 'onDocumentClick($event)',
-    '(document:keydown.escape)': 'userMenuOpen.set(false)',
+    '(document:keydown.escape)': 'closeUserMenu(true)',
   },
 })
 export class NavbarComponent {
@@ -36,15 +38,37 @@ export class NavbarComponent {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   private readonly language = inject(LanguageService);
+  private readonly injector = inject(Injector);
 
   /** Asks the layout to open the mobile sidebar. */
   readonly menuToggle = output<void>();
 
   protected readonly userMenuOpen = signal(false);
+  private readonly userBtn = viewChild<ElementRef<HTMLButtonElement>>('userBtn');
+  private readonly userDropdown = viewChild<ElementRef<HTMLElement>>('userDropdown');
 
   protected toggleUserMenu(event: MouseEvent): void {
     event.stopPropagation();
-    this.userMenuOpen.update((o) => !o);
+    if (this.userMenuOpen()) {
+      this.closeUserMenu();
+      return;
+    }
+    this.userMenuOpen.set(true);
+    // Focus moves to the panel itself, not to Logout, so a stray Enter can't sign out.
+    afterNextRender(() => this.userDropdown()?.nativeElement.focus(), { injector: this.injector });
+  }
+
+  /** Closes the menu; with `restoreFocus` (Esc) focus goes back to the avatar button. */
+  protected closeUserMenu(restoreFocus = false): void {
+    if (!this.userMenuOpen()) return;
+    this.userMenuOpen.set(false);
+    if (restoreFocus) this.userBtn()?.nativeElement.focus();
+  }
+
+  /** Tabbing out of the menu closes it (moving between its own controls doesn't). */
+  protected onMenuFocusOut(event: FocusEvent): void {
+    const next = event.relatedTarget as HTMLElement | null;
+    if (next && !next.closest('.user-menu')) this.closeUserMenu();
   }
 
   protected onDocumentClick(event: MouseEvent): void {
@@ -53,7 +77,7 @@ export class NavbarComponent {
     }
   }
 
-  /** Calendar / messages / global search: modules outside this task. */
+  /** Messages / global search: modules outside this task. */
   protected notAvailable(): void {
     this.toast.show(this.language.translate('login.featureNotAvailable'), 'info');
   }

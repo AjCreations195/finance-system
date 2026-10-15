@@ -1,67 +1,100 @@
 <header class="navbar-fs">
   <!-- Hamburger (below lg) -->
-  <button type="button" class="icon-btn icon-btn-sm d-lg-none" (click)="menuToggle.emit(); $event.stopPropagation()" [attr.aria-label]="'common.toggleMenu' | translate">
+  <button type="button" class="icon-btn icon-btn-sm d-lg-none" (click)="menuToggle.emit(); $event.stopPropagation()"
+    [attr.aria-label]="'common.toggleMenu' | translate">
     <app-icon name="menu" class="menu-icon" />
   </button>
 
-  <!-- ===== Brand: logo (the image already includes the ministry name) ===== -->
+  <!-- ===== Brand: logo  ===== -->
   <div class="brand">
-    <img src="images/logo-moi.png" [alt]="'app.ministry' | translate" class="brand-logo" width="132" height="48" />
+    <img src="images/logo-moi.png" [alt]="'app.ministry' | translate" class="brand-logo" width="188" height="61" />
   </div>
 
   <!-- ===== System name | department ===== -->
-  <div class="system d-none d-md-flex">
+  <!-- From lg (992px): on tablets the bar is too tight, and the logo already identifies it -->
+  <div class="system d-none d-lg-flex">
     <span class="system-name">{{ 'app.name' | translate }}</span>
-    <!-- Department only on wide screens, so the navbar never overflows on tablets -->
-    <span class="system-sep d-none d-xl-inline-block" aria-hidden="true"></span>
-    <span class="system-dept d-none d-xl-inline">{{ 'app.department' | translate }}</span>
+    <!-- Department only from xxl (1400px): below that it squeezes the search box -->
+    <span class="system-sep d-none d-xxl-inline-block" aria-hidden="true"></span>
+    <span class="system-dept d-none d-xxl-inline">{{ 'app.department' | translate }}</span>
   </div>
 
-  <!-- ===== Global search (centered, hidden on small screens) ===== -->
-  <form class="global-search search-box d-none d-lg-flex" role="search" (submit)="$event.preventDefault(); notAvailable()">
+  <!-- ===== Global search (centered, xl+ only, where it doesn't crowd the navbar;
+       icon on the end side as in Figma) ===== -->
+  <form class="global-search search-box d-none d-xl-flex" role="search"
+    (submit)="$event.preventDefault(); notAvailable()">
+    <input type="search" [placeholder]="'layout.searchPlaceholder' | translate"
+      [attr.aria-label]="'common.search' | translate" />
     <app-icon name="search" class="search-icon" />
-    <input type="search" [placeholder]="'layout.searchPlaceholder' | translate" [attr.aria-label]="'common.search' | translate" />
   </form>
 
   <!-- ===== End side: user + icon buttons ===== -->
   <div class="end-group">
     @if (auth.user(); as user) {
-      <div class="user-menu position-relative">
-        <button type="button" class="user-btn" (click)="toggleUserMenu($event)" [attr.aria-expanded]="userMenuOpen()" aria-haspopup="menu">
-          <img [src]="user.avatarUrl" alt="" class="avatar" width="40" height="40" />
-          <span class="d-none d-xl-flex flex-column text-start lh-sm">
-            <span class="user-name">{{ user.name | localize }}</span>
-            <span class="user-role">{{ user.role | localize }}</span>
-          </span>
-          <app-icon name="chevron-down" class="chevron d-none d-xl-inline-block" />
-        </button>
+    <div class="user-menu position-relative">
+      <button #userBtn type="button" class="user-btn" (click)="toggleUserMenu($event)" [attr.aria-expanded]="userMenuOpen()"
+        aria-haspopup="menu" aria-controls="user-menu">
+        <img [src]="user.avatarUrl" alt="" class="avatar" width="40" height="40" />
+        <!-- Name, role and chevron from xxl (1400px); below that just the avatar -->
+        <span class="d-none d-xxl-flex flex-column text-start lh-sm">
+          <span class="user-name">{{ user.name | localize }}</span>
+          <span class="user-role">{{ user.role | localize }}</span>
+        </span>
+        <app-icon name="chevron-down" class="chevron d-none d-xxl-inline-block" [class.open]="userMenuOpen()" />
+      </button>
 
-        @if (userMenuOpen()) {
-          <ul class="dropdown-menu show user-dropdown" role="menu">
-            <li class="px-3 py-2">
-              <div class="fw-semibold small">{{ user.name | localize }}</div>
-              <div class="text-muted-fs small">{{ user.email }}</div>
-            </li>
-            <li><hr class="dropdown-divider" /></li>
-            <li>
-              <button type="button" class="dropdown-item text-danger" role="menuitem" (click)="logout()">
-                <app-icon name="logout" class="logout-icon me-2 flip-rtl" />{{ 'nav.logout' | translate }}
-              </button>
-            </li>
-          </ul>
-        }
+      @if (userMenuOpen()) {
+      <!-- ===== User menu: profile card · (phones) preferences · logout ===== -->
+      <div #userDropdown id="user-menu" class="user-dropdown" role="menu" tabindex="-1"
+        [attr.aria-label]="user.name | localize" (focusout)="onMenuFocusOut($event)">
+        <!-- Profile card -->
+        <div class="profile-card" role="none">
+          <span class="profile-avatar">
+            <img [src]="user.avatarUrl" alt="" width="48" height="48" />
+            <span class="online-dot" aria-hidden="true"></span>
+          </span>
+          <div class="profile-text">
+            <div class="profile-name">{{ user.name | localize }}</div>
+            <span class="profile-role">{{ user.role | localize }}</span>
+            <div class="profile-email" [title]="user.email">{{ user.email }}</div>
+          </div>
+        </div>
+
+        <!-- Phones: language and theme live here instead of in the crowded bar -->
+        <div class="menu-section d-sm-none" role="group" [attr.aria-label]="'common.preferences' | translate">
+          <div class="menu-heading" aria-hidden="true">{{ 'common.preferences' | translate }}</div>
+          <div class="menu-setting">
+            <span class="menu-icon-tile"><app-icon name="bi-translate" /></span>
+            <span class="menu-label">{{ 'common.language' | translate }}</span>
+            <app-language-switcher [compact]="true" />
+          </div>
+          <div class="menu-setting">
+            <span class="menu-icon-tile"><app-icon name="bi-circle-half" /></span>
+            <span class="menu-label">{{ 'common.theme' | translate }}</span>
+            <app-theme-toggle [compact]="true" />
+          </div>
+        </div>
+
+        <!-- Logout -->
+        <div class="menu-section" role="none">
+          <button type="button" class="menu-item logout-item" role="menuitem" (click)="logout()">
+            <span class="menu-icon-tile"><app-icon name="logout" class="flip-rtl" /></span>
+            <span class="menu-label">{{ 'nav.logout' | translate }}</span>
+          </button>
+        </div>
       </div>
+      }
+    </div>
     }
 
     <div class="icon-group">
-      <button type="button" class="circle-btn d-none d-sm-inline-flex" (click)="notAvailable()" [attr.aria-label]="'layout.calendar' | translate">
-        <app-icon name="calendar" />
-      </button>
-      <button type="button" class="circle-btn d-none d-sm-inline-flex" (click)="notAvailable()" [attr.aria-label]="'layout.messages' | translate">
+      <button type="button" class="nav-btn d-none d-sm-inline-flex" (click)="notAvailable()"
+        [attr.aria-label]="'layout.messages' | translate" [title]="'layout.messages' | translate">
         <app-icon name="chat" />
       </button>
-      <app-language-switcher [compact]="true" />
-      <app-theme-toggle [compact]="true" />
+      <!-- On phones these two move into the user menu -->
+      <app-language-switcher [compact]="true" class="d-none d-sm-flex" />
+      <app-theme-toggle [compact]="true" class="d-none d-sm-flex" />
       <app-notifications-menu />
     </div>
   </div>

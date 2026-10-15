@@ -9,8 +9,8 @@ import { IconComponent } from '../icon/icon.component';
  * Button that switches between Light and Dark mode. It shows the mode
  * you'll switch TO: the moon while light, the sun while dark.
  * - Login (Figma): white rounded square with the filled navy moon.
- * - Navbar (`compact`): the shared grey .circle-btn, like the other
- *   navbar buttons.
+ * - Navbar (`compact`): the shared .nav-btn, like the other navbar
+ *   buttons.
  */
 @Component({
   selector: 'app-theme-toggle',
@@ -18,7 +18,7 @@ import { IconComponent } from '../icon/icon.component';
   template: `
     <button
       type="button"
-      [class]="compact() ? 'circle-btn' : 'theme-btn'"
+      [class]="compact() ? 'nav-btn' : 'theme-btn'"
       (click)="theme.toggle()"
       [attr.aria-label]="'common.toggleTheme' | translate"
       [title]="(theme.isDark() ? 'common.lightMode' : 'common.darkMode') | translate"
@@ -59,6 +59,6 @@ import { IconComponent } from '../icon/icon.component';
 export class ThemeToggleComponent {
   protected readonly theme = inject(ThemeService);
 
-  /** Navbar look: the 40px grey circle (.circle-btn) instead of the square. */
+  /** Navbar look: the shared 40px .nav-btn instead of the larger login square. */
   readonly compact = input(false);
 }

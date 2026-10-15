@@ -51,7 +51,7 @@
   --fs-primary-hover: #67102f;
   --fs-primary-rgb: 127, 21, 59;
   --fs-primary-soft: #f9eef2; /* active sidebar item background */
-  --fs-navy: #2b3674; /* system name, links, transaction numbers */
+  --fs-navy: #2b3674; /* links, transaction numbers */
 
   /* Surfaces & text */
   --fs-body-bg: #ffffff;
@@ -93,11 +93,15 @@
   /* Effects */
   --fs-shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.04);
   --fs-radius: 0.75rem;
+  /* Navbar buttons and their menus (Figma) */
+  --fs-control-bg: #ffffff;
+  --fs-control-border: #0e253c1a;
+  --fs-control-shadow: 1px 1px 3px 0 #00000026;
 
   /* Layout */
   --fs-sidebar-width: 248px; /* ≈16% of the 1440px Figma frame */
   --fs-sidebar-collapsed-width: 76px;
-  --fs-navbar-height: 72px;
+  --fs-navbar-height: 84px; /* Figma: 84.27px including the 1px bottom border */
 }
 
 /* --------------------------------------------------------------------------
@@ -115,9 +119,9 @@
   --fs-body-bg: #0b1437;
   --fs-surface: #111c44;
   --fs-surface-2: #1b2559;
-  --fs-row-alt: #13204d;
+  --fs-row-alt: #16234f; /* light enough for the zebra stripes to show */
   --fs-row-selected: #1d2a63;
-  --fs-border: #24306a;
+  --fs-border: #2e3b7d; /* separates cards from the page background */
   --fs-text: #eef1fb;
   --fs-text-muted: #a3aed0;
 
@@ -147,6 +151,9 @@
   --fs-down: #f97066;
 
   --fs-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+  --fs-control-bg: var(--fs-surface);
+  --fs-control-border: var(--fs-border);
+  --fs-control-shadow: 1px 1px 3px 0 rgba(0, 0, 0, 0.4);
 }
 
 /* --------------------------------------------------------------------------
@@ -266,10 +273,10 @@ body {
   color: var(--fs-text-muted) !important;
 }
 
-/* Round icon-only button (theme toggle, menu, table actions). */
-/* Navbar round buttons (Figma): light grey circle, soft shadow, navy icon.
+/* Navbar icon buttons (Figma): white rounded square, thin navy-tint border,
+   small shadow, navy icon.
    Used by the navbar, the theme toggle (compact) and the notifications bell. */
-.circle-btn {
+.nav-btn {
   display: inline-grid;
   place-items: center;
   justify-content: center; /* also centers when d-*-inline-flex switches it to flex */
@@ -277,28 +284,41 @@ body {
   width: 2.5rem;
   height: 2.5rem;
   padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: var(--fs-surface-2);
+  border: 1px solid var(--fs-control-border);
+  border-radius: 0.75rem;
+  background: var(--fs-control-bg);
   color: #0e253c;
   font-size: 1.125rem;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 2px 6px rgba(16, 24, 40, 0.08);
-  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: var(--fs-control-shadow);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 
   &:hover {
-    background: color-mix(in srgb, var(--fs-surface-2), #0a0d12 6%);
+    background: var(--fs-surface-2);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  /* Keyboard focus, and the bell while its panel is open */
+  &:focus-visible,
+  &[aria-expanded='true'] {
+    outline: none;
+    border-color: rgba(var(--fs-primary-rgb), 0.4);
+    box-shadow: 0 0 0 0.2rem rgba(var(--fs-primary-rgb), 0.12);
   }
 }
 
 /* Phones: a little smaller so the navbar fits 360px screens */
 @media (max-width: 575.98px) {
-  .navbar-fs .circle-btn {
+  .navbar-fs .nav-btn {
     width: 2.25rem;
     height: 2.25rem;
+    border-radius: 0.625rem;
   }
 }
 
-[data-bs-theme='dark'] .circle-btn {
+[data-bs-theme='dark'] .nav-btn {
   color: var(--fs-text);
 }
 
@@ -724,9 +744,17 @@ body {
   }
 }
 
-/* Keep the burgundy readable in dark mode too */
+/* Dark mode: same lighter brand color and navy text as .btn-primary, since
+   the Figma burgundy barely stands out from the navy cards (1.8:1) */
 [data-bs-theme='dark'] .action-btn.primary {
+  --btn-bg: var(--fs-primary);
+  --btn-fg: var(--fs-body-bg);
   --btn-edge: rgba(255, 255, 255, 0.16);
+
+  &:hover:not(:disabled),
+  &:active:not(:disabled) {
+    --btn-bg: var(--fs-primary-hover);
+  }
 }
 
 /* Search input with icon at the start and a shortcut hint at the end */

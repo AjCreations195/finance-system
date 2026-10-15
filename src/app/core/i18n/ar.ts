@@ -38,6 +38,8 @@ export const AR: TranslationDictionary = {
     actions: 'الإجراءات',
     soon: 'قريباً',
     language: 'اللغة',
+    theme: 'المظهر',
+    preferences: 'التفضيلات',
     toggleTheme: 'التبديل بين الوضع الداكن والفاتح',
     lightMode: 'الوضع الفاتح',
     darkMode: 'الوضع الداكن',
@@ -138,7 +140,6 @@ export const AR: TranslationDictionary = {
   },
   layout: {
     searchPlaceholder: 'بحث',
-    calendar: 'التقويم',
     messages: 'الرسائل',
     notifications: 'الإشعارات',
     breadcrumb: 'مسار التنقل',
