@@ -356,7 +356,7 @@ a.link-muted:hover {
   color: #fff;
   background:
     linear-gradient(to top, rgba(28, 30, 58, 0.66) 0%, rgba(28, 30, 58, 0.28) 45%, transparent 75%),
-    url('/images/login-bg-sm.webp') 58% 54% / cover no-repeat,
+    url('../../../../../public/images/login-bg-sm.webp') 58% 54% / cover no-repeat,
     linear-gradient(180deg, #d9dbe6 0%, #c9cbdc 45%, #a9a9c4 100%);
 
   @media (min-width: 576px) {
@@ -369,7 +369,7 @@ a.link-muted:hover {
     padding: 3rem clamp(2rem, 4vw, 4rem);
     background:
       linear-gradient(to top, rgba(28, 30, 58, 0.62) 0%, rgba(28, 30, 58, 0.25) 35%, transparent 60%),
-      url('/images/login-bg.webp') 58% 54% / cover no-repeat,
+      url('../../../../../public/images/login-bg.webp') 58% 54% / cover no-repeat,
       linear-gradient(180deg, #d9dbe6 0%, #c9cbdc 45%, #a9a9c4 100%);
   }
 
@@ -380,7 +380,7 @@ a.link-muted:hover {
     content: '';
     position: absolute;
     inset: 0;
-    background: url('/images/login-pattern.webp') top center / cover no-repeat;
+    background: url('../../../../../public/images/login-pattern.webp') top center / cover no-repeat;
     pointer-events: none;
   }
 }
