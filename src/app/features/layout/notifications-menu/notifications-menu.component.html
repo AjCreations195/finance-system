@@ -1,0 +1,75 @@
+<div class="position-relative">
+  <!-- Bell button with unread dot -->
+  <button
+    type="button"
+    class="circle-btn position-relative"
+    (click)="toggle($event)"
+    [attr.aria-label]="'layout.notifications' | translate"
+    [attr.aria-expanded]="open()"
+    aria-haspopup="dialog"
+  >
+    <app-icon name="bell" class="bell-icon" />
+    @if (data.unreadCount() > 0) {
+      <span class="unread-dot" aria-hidden="true"></span>
+    }
+  </button>
+
+  @if (open()) {
+    <!-- ===================== PANEL ===================== -->
+    <section class="notif-panel" role="dialog" [attr.aria-label]="'notifications.title' | translate">
+      <header class="notif-header">
+        <div class="d-flex align-items-center gap-2">
+          <h2 class="notif-title">{{ 'notifications.title' | translate }}</h2>
+          <!-- All / Unread filter -->
+          <select class="notif-filter" [value]="filter()" (change)="filter.set($any($event.target).value)" [attr.aria-label]="'common.filter' | translate">
+            <option value="all">{{ 'notifications.all' | translate }}</option>
+            <option value="unread">{{ 'notifications.unread' | translate }}</option>
+          </select>
+        </div>
+        <button type="button" class="mark-read" (click)="data.markAllRead()" [disabled]="data.unreadCount() === 0">
+          <i class="bi bi-check2-all" aria-hidden="true"></i>
+          {{ 'notifications.markAllRead' | translate }}
+        </button>
+      </header>
+
+      <ul class="notif-list">
+        @for (n of items(); track n.id) {
+          <li class="notif-item" [class.unread]="n.unread">
+            <p class="notif-message">
+              {{ n.message | translate }}
+              <span class="notif-ref">{{ n.reference }}</span>
+            </p>
+
+            <!-- Optional: action buttons -->
+            @if (n.actions) {
+              <div class="d-flex gap-2 mb-2">
+                <button type="button" class="btn btn-sm btn-primary px-3" (click)="act(n.id, 'review')">{{ 'notifications.review' | translate }}</button>
+                <button type="button" class="btn-fs btn-sm" (click)="act(n.id, 'reject')">{{ 'notifications.reject' | translate }}</button>
+              </div>
+            }
+
+            <!-- Optional: attachment -->
+            @if (n.attachment; as file) {
+              <div class="notif-file">
+                <span class="file-icon">PDF</span>
+                <div>
+                  <div class="file-name">{{ file.name }}</div>
+                  <small class="text-muted-fs">{{ file.size }}</small>
+                </div>
+              </div>
+            }
+
+            <!-- Optional: comment -->
+            @if (n.comment) {
+              <blockquote class="notif-comment">{{ n.comment | localize }}</blockquote>
+            }
+
+            <time class="notif-time">{{ n.date | localDate: 'dateTime' }}</time>
+          </li>
+        } @empty {
+          <li class="notif-empty">{{ 'notifications.empty' | translate }}</li>
+        }
+      </ul>
+    </section>
+  }
+</div>

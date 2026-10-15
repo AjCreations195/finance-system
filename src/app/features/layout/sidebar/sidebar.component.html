@@ -1,0 +1,156 @@
+<!-- Burgundy tab on the sidebar edge: collapse / expand (desktop only) -->
+<button
+  type="button"
+  class="collapse-tab d-none d-lg-grid"
+  (click)="toggleCollapse.emit()"
+  [attr.aria-label]="(collapsed() ? 'nav.expand' : 'nav.collapse') | translate"
+  [attr.aria-expanded]="!collapsed()"
+>
+  <!-- chevron-down.svg rotated to point toward the collapse direction (mirrored in Arabic by CSS) -->
+  <app-icon name="chevron-down" class="tab-chevron" [class.collapsed]="collapsed()" />
+</button>
+
+<div class="sidebar-inner">
+  <!-- ===================== USER BLOCK ===================== -->
+  @if (auth.user(); as user) {
+    <div class="user-block">
+      <img [src]="user.avatarUrl" alt="" class="user-avatar" width="36" height="36" />
+      <div class="user-text">
+        <div class="user-name">{{ user.name | localize }}</div>
+        <div class="user-role">{{ 'app.department' | translate }}</div>
+      </div>
+    </div>
+  }
+
+  <!-- ===================== MENU SEARCH ===================== -->
+  <div class="search-section">
+    <label for="menu-search" class="search-title">{{ 'nav.search' | translate }}</label>
+    <div class="search-box">
+      <app-icon name="search" class="search-icon" />
+      <input
+        #searchInput
+        id="menu-search"
+        type="search"
+        [value]="query()"
+        (input)="query.set($any($event.target).value)"
+        [placeholder]="'common.search' | translate"
+        [attr.aria-label]="'nav.searchMenu' | translate"
+        aria-keyshortcuts="Control+K Meta+K"
+      />
+      <!-- Shortcut hint: the Figma ⌘K artwork on Apple devices, "Ctrl K" elsewhere -->
+      <kbd class="kbd-hint" aria-hidden="true">
+        @if (isApple) {
+          <app-icon name="shortcut" class="kbd-icon" />
+        } @else {
+          Ctrl K
+        }
+      </kbd>
+    </div>
+  </div>
+
+  <!-- ===================== MENU TREE ===================== -->
+  <nav class="menu" [attr.aria-label]="'nav.main' | translate">
+    <ul class="menu-list">
+      @for (node of primary(); track node.label) {
+        <ng-container [ngTemplateOutlet]="item" [ngTemplateOutletContext]="{ $implicit: node, level: 0 }" />
+      }
+    </ul>
+
+    @if (primary().length && secondary().length) {
+      <hr class="menu-divider" />
+    }
+
+    <ul class="menu-list">
+      @for (node of secondary(); track node.label) {
+        <ng-container [ngTemplateOutlet]="item" [ngTemplateOutletContext]="{ $implicit: node, level: 0 }" />
+      }
+    </ul>
+
+    @if (noMatches()) {
+      <p class="no-match">{{ 'common.noResults' | translate }}</p>
+    }
+  </nav>
+
+  <!-- ===================== FOOTER ===================== -->
+  <ul class="menu-list menu-footer">
+    @for (node of footerItems; track node.label) {
+      <ng-container [ngTemplateOutlet]="item" [ngTemplateOutletContext]="{ $implicit: node, level: 0 }" />
+    }
+  </ul>
+</div>
+
+<!--
+  Recursive template for one menu node.
+  - group (has children) → toggle button + nested list
+  - leaf with route     → routerLink
+  - leaf without route  → button that shows a "not in demo" notice
+-->
+<ng-template #item let-node let-level="level">
+  <li [class.has-children]="node.children" [attr.data-level]="level">
+    @if (node.children) {
+      <button
+        type="button"
+        class="menu-link group-toggle"
+        [class.level-0]="level === 0"
+        (click)="toggleGroup(node)"
+        [attr.aria-expanded]="isExpanded(node)"
+        [title]="node.label | translate"
+      >
+        <!-- Figma SVG (public/icons) once exported; Bootstrap icon ("bi-…") until then -->
+        @if (node.icon.startsWith('bi-')) {
+          <i class="bi {{ node.icon }} menu-icon" aria-hidden="true"></i>
+        } @else {
+          <app-icon [name]="node.icon" class="menu-icon" />
+        }
+        <span class="menu-text">{{ node.label | translate }}</span>
+        <app-icon name="chevron-down" class="chevron" [class.open]="isExpanded(node)" />
+      </button>
+
+      @if (isExpanded(node) && !collapsed()) {
+        <ul class="submenu">
+          @for (child of node.children; track child.label) {
+            <ng-container [ngTemplateOutlet]="item" [ngTemplateOutletContext]="{ $implicit: child, level: level + 1 }" />
+          }
+        </ul>
+      }
+    } @else if (node.route) {
+      <a
+        class="menu-link"
+        [class.level-0]="level === 0"
+        [routerLink]="node.route"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        [title]="node.label | translate"
+      >
+        <!-- Figma SVG (public/icons) once exported; Bootstrap icon ("bi-…") until then -->
+        @if (node.icon.startsWith('bi-')) {
+          <i class="bi {{ node.icon }} menu-icon" aria-hidden="true"></i>
+        } @else {
+          <app-icon [name]="node.icon" class="menu-icon" />
+        }
+        <span class="menu-text">{{ node.label | translate }}</span>
+      </a>
+    } @else {
+      <button
+        type="button"
+        class="menu-link"
+        [class.level-0]="level === 0"
+        [class.disabled]="node.disabled"
+        [attr.aria-disabled]="node.disabled || null"
+        (click)="notAvailable(node)"
+        [title]="node.label | translate"
+      >
+        <!-- Figma SVG (public/icons) once exported; Bootstrap icon ("bi-…") until then -->
+        @if (node.icon.startsWith('bi-')) {
+          <i class="bi {{ node.icon }} menu-icon" aria-hidden="true"></i>
+        } @else {
+          <app-icon [name]="node.icon" class="menu-icon" />
+        }
+        <span class="menu-text">{{ node.label | translate }}</span>
+        @if (node.badge) {
+          <span class="menu-badge">{{ node.badge }}</span>
+        }
+      </button>
+    }
+  </li>
+</ng-template>

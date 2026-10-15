@@ -1,0 +1,22 @@
+<app-dashboard-card title="budget.title" icon="chart">
+  <div card-actions>
+    <app-filter-menu [options]="seriesOptions" [(value)]="series" />
+  </div>
+
+  <!-- Chart title + total of visible data -->
+  <div class="chart-head">
+    <h3 class="chart-title">{{ 'budget.chartTitle' | translate }}</h3>
+    <span class="total">{{ 'budget.totalRevenue' | translate }} <strong dir="ltr">${{ total() }}</strong></span>
+  </div>
+
+  <div class="chart-body">
+    <app-chart [options]="chartOptions()" />
+  </div>
+
+  <!-- Year selector (bottom center, as in the design) -->
+  <select class="form-select form-select-sm year-select" [value]="year()" (change)="year.set(+$any($event.target).value)" [attr.aria-label]="'budget.year' | translate">
+    @for (y of years; track y) {
+      <option [value]="y">{{ y }}</option>
+    }
+  </select>
+</app-dashboard-card>

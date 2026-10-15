@@ -1,0 +1,70 @@
+.sub-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--fs-border);
+}
+
+.sub-title {
+  margin: 0;
+  color: var(--fs-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.body-row {
+  padding: 0.5rem 1rem 1rem;
+}
+
+/* 2-column grid with inner dividers, as in the design */
+.breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0;
+}
+
+.breakdown-item {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--fs-border);
+
+  &:nth-child(odd) {
+    border-inline-end: 1px solid var(--fs-border);
+  }
+
+  /* Last row: the odd item among the last two starts it (works for 1 or 2 items) */
+  &:nth-child(odd):nth-last-child(-n + 2),
+  &:nth-child(odd):nth-last-child(-n + 2) ~ & {
+    border-bottom: 0;
+  }
+
+  /* A lone item in the last row has no neighbour to divide from */
+  &:nth-child(odd):last-child {
+    border-inline-end: 0;
+  }
+
+  dt {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--fs-text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+
+    /* Figma state icons are drawn on a 28px canvas */
+    .state-icon {
+      color: var(--fs-navy);
+      font-size: 1.5rem;
+    }
+  }
+
+  dd {
+    margin: 0;
+    color: var(--fs-text);
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+}

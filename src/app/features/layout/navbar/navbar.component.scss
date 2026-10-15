@@ -1,0 +1,179 @@
+:host {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 1045;
+}
+
+.navbar-fs {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: var(--fs-navbar-height);
+  padding-inline: 1rem;
+  background: var(--fs-surface);
+  border-bottom: 1px solid var(--fs-border);
+  transition: background-color 0.25s ease;
+
+  @media (min-width: 992px) {
+    gap: 1.25rem;
+    padding-inline: 1.5rem;
+  }
+}
+
+/* ---- Brand ---- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Wide logo: fixed height, width follows the image's aspect ratio */
+.brand-logo {
+  height: 48px;
+  width: auto;
+
+  @media (max-width: 575.98px) {
+    height: 30px;
+  }
+}
+
+/* ---- System name | department ---- */
+.system {
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.system-name {
+  color: var(--fs-navy);
+  font-size: 1.25rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.system-sep {
+  width: 2px;
+  height: 1.25rem;
+  background: var(--fs-primary);
+  border-radius: 1px;
+}
+
+.system-dept {
+  color: var(--fs-navy);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+/* ---- Global search ---- */
+.global-search {
+  flex: 1;
+  max-width: 420px;
+  margin-inline: auto;
+
+  input {
+    height: 2.5rem;
+    padding-inline-end: 0.75rem;
+  }
+}
+
+/* ---- End group ---- */
+.end-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-inline-start: auto;
+}
+
+/* With the search visible (lg+), it already pushes this group to the end */
+@media (min-width: 992px) {
+  .end-group {
+    margin-inline-start: 0;
+  }
+}
+
+.icon-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Phones (< 576px): the design's 40px buttons and the EN | Ar toggle don't fit
+   a 360–414px screen, so tighten the gaps (buttons/toggle shrink in their own
+   styles). Tablets and desktop keep the design sizes. */
+@media (max-width: 575.98px) {
+  .navbar-fs {
+    gap: 0.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  .end-group,
+  .icon-group {
+    gap: 0.375rem;
+  }
+}
+
+.user-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fs-text);
+
+  &:hover {
+    background: var(--fs-surface-2);
+  }
+}
+
+.avatar {
+  border-radius: 50%;
+}
+
+.user-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.user-role {
+  color: var(--fs-text-muted);
+  font-size: 0.6875rem;
+}
+
+.user-dropdown {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 0.5rem);
+  min-width: 14rem;
+}
+
+/* Figma icons: search (20px) and the user-menu chevron (16px), in the design's navy */
+.global-search .search-icon {
+  color: #0e253c;
+  font-size: 1.25rem;
+}
+
+.user-btn .chevron {
+  color: #0e253c;
+  font-size: 1rem;
+}
+
+:host-context([data-bs-theme='dark']) {
+  .global-search .search-icon,
+  .user-btn .chevron {
+    color: var(--fs-text);
+  }
+}
+
+/* Material icons (menu, logout) have built-in padding: a little larger than the text */
+.menu-icon {
+  font-size: 1.25rem;
+}
+
+.logout-icon {
+  font-size: 1.125rem;
+  vertical-align: -0.2em;
+}

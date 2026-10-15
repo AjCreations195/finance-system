@@ -1,0 +1,36 @@
+<app-dashboard-card title="procurement.title" icon="tag">
+  <div card-actions>
+    <app-multi-filter-menu [options]="stateOptions" [(value)]="states" legend="procurement.statusFilter" />
+  </div>
+
+  <!-- Sub-header: title + category dropdown + month picker -->
+  <div class="sub-header">
+    <h3 class="sub-title">{{ 'procurement.title' | translate }}</h3>
+    <div class="d-flex flex-wrap gap-2">
+      <app-select-menu [options]="categoryOptions" [(value)]="category" ariaLabel="procurement.category" />
+      <app-month-picker [(value)]="month" ariaLabel="procurement.month" />
+    </div>
+  </div>
+
+  <div class="row g-0 align-items-center body-row">
+    <!-- Breakdown grid (2 columns) -->
+    <div class="col-12 col-md-6">
+      <dl class="breakdown">
+        @for (item of gridItems(); track item.state) {
+          <div class="breakdown-item">
+            <dt>
+              <app-icon [name]="item.icon" class="state-icon" />
+              {{ 'procurement.states.' + item.state | translate }}
+            </dt>
+            <dd>{{ item.count }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+
+    <!-- Donut chart -->
+    <div class="col-12 col-md-6">
+      <app-chart [options]="chartOptions()" />
+    </div>
+  </div>
+</app-dashboard-card>

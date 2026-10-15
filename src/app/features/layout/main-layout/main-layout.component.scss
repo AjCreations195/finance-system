@@ -1,0 +1,66 @@
+/* The page scrolls inside .content, not the window. Chrome/Edge always keep
+   the window scrollbar on the right, even with <html dir="rtl">; an inner
+   scroll container follows the direction, so in Arabic its scrollbar is on
+   the left. The host fills the viewport and leaves room for the fixed navbar,
+   so the scrollbar starts below it. */
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  padding-top: var(--fs-navbar-height);
+  background: var(--fs-body-bg);
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1035;
+  background: rgba(11, 20, 55, 0.5);
+  animation: fade-in 0.2s ease;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Page content: below the fixed navbar, beside the fixed sidebar */
+.content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  /* No bottom padding here: sticky elements (e.g. the purchase requests
+     action bar) stick at the padding edge, which left a 2rem gap below them
+     where the scrolled content showed through. The space is added by
+     ::after instead. */
+  padding: 1rem 1rem 0;
+  transition: margin 0.25s ease;
+
+  &::after {
+    content: '';
+    display: block;
+    height: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    padding-inline: 1.5rem;
+  }
+
+  @media (min-width: 992px) {
+    margin-inline-start: var(--fs-sidebar-width);
+  }
+}
+
+@media (min-width: 992px) {
+  :host(.sidebar-collapsed) .content {
+    margin-inline-start: var(--fs-sidebar-collapsed-width);
+  }
+}
+
+/* Full-screen cards lock page scrolling with body.overflow-hidden; the page
+   now scrolls here, so lock this container too. */
+:host-context(body.overflow-hidden) .content {
+  overflow: hidden;
+}

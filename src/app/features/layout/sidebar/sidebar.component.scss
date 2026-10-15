@@ -1,0 +1,262 @@
+/* ======================================================================
+   Sidebar. Sits on the inline-start side (right in Arabic, left in English)
+   under the navbar. All positioning uses logical properties.
+   ====================================================================== */
+
+:host {
+  position: fixed;
+  inset-block: var(--fs-navbar-height) 0;
+  inset-inline-start: 0;
+  z-index: 1040;
+  width: var(--fs-sidebar-width);
+  background: var(--fs-surface);
+  border-inline-end: 1px solid var(--fs-border);
+  transition: width 0.25s ease, transform 0.3s ease, background-color 0.25s ease;
+
+  /* Mobile / tablet: full height, hidden off-screen until opened.
+     `visibility: hidden` (applied after the slide-out finishes) stops the closed
+     sidebar from widening the page and from receiving keyboard focus. */
+  @media (max-width: 991.98px) {
+    inset-block-start: 0;
+    transform: translateX(-100%);
+    visibility: hidden;
+    box-shadow: var(--fs-shadow);
+    transition: transform 0.3s ease, visibility 0s linear 0.3s;
+  }
+}
+
+@media (max-width: 991.98px) {
+  /* RTL: hide off the right edge instead */
+  :host-context([dir='rtl']) {
+    transform: translateX(100%);
+  }
+
+  :host(.open) {
+    transform: none !important;
+    visibility: visible;
+    transition: transform 0.3s ease, visibility 0s;
+  }
+}
+
+/* Desktop narrow rail */
+@media (min-width: 992px) {
+  :host(.collapsed) {
+    width: var(--fs-sidebar-collapsed-width);
+
+    .user-text,
+    .search-section,
+    .menu-text,
+    .chevron,
+    .menu-badge,
+    .no-match {
+      display: none;
+    }
+
+    .user-block,
+    .menu-link {
+      justify-content: center;
+    }
+  }
+}
+
+.sidebar-inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fs-border) transparent;
+  padding: 1.25rem 0.875rem 1rem;
+}
+
+/* ---- Collapse tab (burgundy, on the sidebar's outer edge) ---- */
+.collapse-tab {
+  position: absolute;
+  top: 1.25rem;
+  inset-inline-end: -0.875rem;
+  z-index: 1;
+  place-items: center;
+  width: 0.875rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-start-end-radius: 0.375rem;
+  border-end-end-radius: 0.375rem;
+  background: var(--fs-primary);
+  color: #fff;
+  font-size: 0.75rem;
+}
+
+/* chevron-down.svg turned sideways: points to the collapse direction
+   (left in English, right in Arabic), and the other way when collapsed. */
+.tab-chevron {
+  transform: rotate(90deg);
+  transition: transform 0.2s ease;
+
+  &.collapsed {
+    transform: rotate(-90deg);
+  }
+}
+
+:host-context([dir='rtl']) .tab-chevron {
+  transform: rotate(-90deg);
+
+  &.collapsed {
+    transform: rotate(90deg);
+  }
+}
+
+/* ---- User block ---- */
+.user-block {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--fs-border);
+}
+
+.user-avatar {
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.user-name {
+  color: var(--fs-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.user-role {
+  color: var(--fs-text-muted);
+  font-size: 0.75rem;
+}
+
+/* ---- Search ---- */
+.search-section {
+  margin-bottom: 1rem;
+}
+
+.search-title {
+  display: block;
+  color: var(--fs-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+/* ---- Menu ---- */
+.menu {
+  flex: 1;
+}
+
+.menu-list,
+.submenu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Nested levels: indented, with the vertical guide line from the design */
+.submenu {
+  position: relative;
+  margin-inline-start: 1.125rem;
+  padding-inline-start: 0.5rem;
+  border-inline-start: 1px solid var(--fs-border);
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.625rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--fs-text);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-align: start;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &.level-0 {
+    font-weight: 700;
+    font-size: 0.875rem;
+  }
+
+  &:hover:not(.disabled) {
+    background: var(--fs-surface-2);
+  }
+
+  /* Active page (design: burgundy text on light pink) */
+  &.active {
+    background: var(--fs-primary-soft);
+    color: var(--fs-primary);
+  }
+
+  &.disabled {
+    color: var(--fs-text-muted);
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.menu-icon {
+  flex-shrink: 0;
+  font-size: 1.1875rem; /* Figma menu icons are drawn on 17–19px canvases */
+  color: var(--fs-text-muted);
+
+  .active > & {
+    color: var(--fs-primary);
+  }
+}
+
+.menu-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chevron {
+  font-size: 1rem; /* Figma chevron-down.svg, 16px */
+  color: var(--fs-text-muted);
+  transition: transform 0.2s ease;
+
+  &.open {
+    transform: rotate(180deg);
+  }
+}
+
+.menu-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 999px;
+  background: var(--fs-surface-2);
+  color: var(--fs-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.menu-divider {
+  margin: 0.75rem 0;
+  border-color: var(--fs-border);
+  opacity: 1;
+}
+
+.no-match {
+  color: var(--fs-text-muted);
+  font-size: 0.8125rem;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.menu-footer {
+  padding-top: 1rem;
+}

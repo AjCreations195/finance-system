@@ -1,1 +1,870 @@
-/* You can add global styles to this file, and also import other style files */
+/* ==========================================================================
+   Global styles
+   --------------------------------------------------------------------------
+   Bootstrap itself is loaded through <link id="bootstrap-css"> in index.html
+   (LTR or RTL build). This file contains:
+     1. Design tokens (CSS variables) for the Light and Dark themes
+     2. Bootstrap overrides that point Bootstrap at those tokens
+     3. Shared utility classes used across several components
+
+   RTL rule: custom CSS uses logical properties (margin-inline-start,
+   inset-inline-end, padding-inline…) instead of left / right, so the
+   layout mirrors automatically when <html dir="rtl">.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   0. Lusail font (from the design). Uses an installed copy if there is one,
+      otherwise the files in public/fonts/. Until those files exist, the
+      fallbacks in --bs-font-sans-serif are used.
+   -------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Lusail';
+  src: local('Lusail+'), local('Lusail'), local('Lusail Regular'), url('/fonts/Lusail-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lusail';
+  src: local('Lusail+ Medium'), local('Lusail Medium'), url('/fonts/Lusail-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lusail';
+  src: local('Lusail+ Bold'), local('Lusail Bold'), url('/fonts/Lusail-Bold.woff2') format('woff2');
+  font-weight: 600 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --------------------------------------------------------------------------
+   1. Design tokens: Light theme (default), taken from the Figma design
+   -------------------------------------------------------------------------- */
+:root,
+[data-bs-theme='light'] {
+  /* Brand */
+  --fs-primary: #7f153b; /* burgundy: active items, buttons, checkboxes */
+  --fs-primary-hover: #67102f;
+  --fs-primary-rgb: 127, 21, 59;
+  --fs-primary-soft: #f9eef2; /* active sidebar item background */
+  --fs-navy: #2b3674; /* system name, links, transaction numbers */
+
+  /* Surfaces & text */
+  --fs-body-bg: #ffffff;
+  --fs-surface: #ffffff;
+  --fs-surface-2: #f6f8f9; /* stat-card top, inactive tabs, table headers */
+  --fs-row-alt: #fafafa; /* zebra rows */
+  --fs-row-selected: #f5f8ff; /* checked table row */
+  --fs-border: #eaecf0;
+  --fs-text: #1f2635;
+  --fs-text-muted: #667085;
+
+  /* Request status badges: text / background / border */
+  --fs-badge-completed: #079455;
+  --fs-badge-completed-bg: #ecfdf3;
+  --fs-badge-completed-border: #abefc6;
+  --fs-badge-inProgress: #e04f16;
+  --fs-badge-inProgress-bg: #fff6ed;
+  --fs-badge-inProgress-border: #f9dbaf;
+  --fs-badge-executed: #0086c9;
+  --fs-badge-executed-bg: #f0f9ff;
+  --fs-badge-executed-border: #b9e6fe;
+  --fs-badge-review: #475467;
+  --fs-badge-review-bg: #f9fafb;
+  --fs-badge-review-border: #eaecf0;
+  --fs-badge-sent: #6938ef;
+  --fs-badge-sent-bg: #f4f3ff;
+  --fs-badge-sent-border: #d9d6fe;
+  --fs-badge-rejected: #d92d20;
+  --fs-badge-rejected-bg: #fef3f2;
+  --fs-badge-rejected-border: #fecdca;
+  --fs-badge-pending: #c01048;
+  --fs-badge-pending-bg: #fff1f3;
+  --fs-badge-pending-border: #fecdd6;
+
+  /* Trend indicators */
+  --fs-up: #17b26a;
+  --fs-down: #f04438;
+
+  /* Effects */
+  --fs-shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.04);
+  --fs-radius: 0.75rem;
+
+  /* Layout */
+  --fs-sidebar-width: 248px; /* ≈16% of the 1440px Figma frame */
+  --fs-sidebar-collapsed-width: 76px;
+  --fs-navbar-height: 72px;
+}
+
+/* --------------------------------------------------------------------------
+   1b. Design tokens: Dark theme
+   Applied when ThemeService sets <html data-bs-theme="dark">.
+   -------------------------------------------------------------------------- */
+[data-bs-theme='dark'] {
+  /* Derived from the light design: navy surfaces, lighter burgundy for contrast */
+  --fs-primary: #e0708f;
+  --fs-primary-hover: #ea8ca6;
+  --fs-primary-rgb: 224, 112, 143;
+  --fs-primary-soft: rgba(224, 112, 143, 0.14);
+  --fs-navy: #c3cbf5;
+
+  --fs-body-bg: #0b1437;
+  --fs-surface: #111c44;
+  --fs-surface-2: #1b2559;
+  --fs-row-alt: #13204d;
+  --fs-row-selected: #1d2a63;
+  --fs-border: #24306a;
+  --fs-text: #eef1fb;
+  --fs-text-muted: #a3aed0;
+
+  --fs-badge-completed: #47cd89;
+  --fs-badge-completed-bg: rgba(71, 205, 137, 0.12);
+  --fs-badge-completed-border: rgba(71, 205, 137, 0.35);
+  --fs-badge-inProgress: #fd853a;
+  --fs-badge-inProgress-bg: rgba(253, 133, 58, 0.12);
+  --fs-badge-inProgress-border: rgba(253, 133, 58, 0.35);
+  --fs-badge-executed: #36bffa;
+  --fs-badge-executed-bg: rgba(54, 191, 250, 0.12);
+  --fs-badge-executed-border: rgba(54, 191, 250, 0.35);
+  --fs-badge-review: #cecfd2;
+  --fs-badge-review-bg: rgba(206, 207, 210, 0.08);
+  --fs-badge-review-border: rgba(206, 207, 210, 0.25);
+  --fs-badge-sent: #a48afb;
+  --fs-badge-sent-bg: rgba(164, 138, 251, 0.12);
+  --fs-badge-sent-border: rgba(164, 138, 251, 0.35);
+  --fs-badge-rejected: #f97066;
+  --fs-badge-rejected-bg: rgba(249, 112, 102, 0.12);
+  --fs-badge-rejected-border: rgba(249, 112, 102, 0.35);
+  --fs-badge-pending: #fd6f8e;
+  --fs-badge-pending-bg: rgba(253, 111, 142, 0.12);
+  --fs-badge-pending-border: rgba(253, 111, 142, 0.35);
+
+  --fs-up: #47cd89;
+  --fs-down: #f97066;
+
+  --fs-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   2. Bootstrap overrides
+   Bootstrap reads its own --bs-* variables; we map them to our tokens so
+   every Bootstrap component (cards, tables, forms, dropdowns) follows the theme.
+   -------------------------------------------------------------------------- */
+:root,
+[data-bs-theme] {
+  --bs-body-bg: var(--fs-body-bg);
+  --bs-body-color: var(--fs-text);
+  --bs-secondary-color: var(--fs-text-muted);
+  --bs-border-color: var(--fs-border);
+  --bs-primary: var(--fs-primary);
+  --bs-primary-rgb: var(--fs-primary-rgb);
+  --bs-link-color: var(--fs-primary);
+  --bs-link-color-rgb: var(--fs-primary-rgb);
+  --bs-link-hover-color: var(--fs-primary-hover);
+  --bs-border-radius: 0.625rem;
+  --bs-font-sans-serif: 'Lusail', 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Lusail covers Latin and Arabic; for Arabic the fallback is IBM Plex Sans Arabic. */
+html[lang='ar'] {
+  --bs-font-sans-serif: 'Lusail', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+
+  /* Letter-spacing breaks the joins between Arabic letters, so turn it off. */
+  * {
+    letter-spacing: 0 !important;
+  }
+}
+
+body {
+  background-color: var(--fs-body-bg);
+  color: var(--fs-text);
+  -webkit-font-smoothing: antialiased;
+  /* Smooth color change when switching themes */
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Primary button uses the brand color. Compiled Bootstrap hard-codes its
+   button colors, so we re-point the button-level variables. */
+.btn-primary {
+  --bs-btn-bg: var(--fs-primary);
+  --bs-btn-border-color: var(--fs-primary);
+  --bs-btn-hover-bg: var(--fs-primary-hover);
+  --bs-btn-hover-border-color: var(--fs-primary-hover);
+  --bs-btn-active-bg: var(--fs-primary-hover);
+  --bs-btn-active-border-color: var(--fs-primary-hover);
+  --bs-btn-disabled-bg: var(--fs-primary);
+  --bs-btn-disabled-border-color: var(--fs-primary);
+  --bs-btn-color: #fff;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-color: #fff;
+  --bs-btn-disabled-color: #fff;
+}
+
+[data-bs-theme='dark'] .btn-primary {
+  --bs-btn-color: #0b1437;
+  --bs-btn-hover-color: #0b1437;
+  --bs-btn-active-color: #0b1437;
+  --bs-btn-disabled-color: #0b1437;
+}
+
+/* Form controls: themed background and brand-colored focus ring. */
+.form-control,
+.form-select {
+  background-color: var(--fs-surface);
+  border-color: var(--fs-border);
+  color: var(--fs-text);
+
+  &:focus {
+    border-color: var(--fs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--fs-primary-rgb), 0.18);
+  }
+}
+
+.form-check-input:checked {
+  background-color: var(--fs-primary);
+  border-color: var(--fs-primary);
+}
+
+/* Tables pick up the surface color instead of Bootstrap's default. */
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--fs-text);
+  --bs-table-border-color: var(--fs-border);
+  --bs-table-hover-bg: var(--fs-surface-2);
+  --bs-table-hover-color: var(--fs-text);
+}
+
+.dropdown-menu {
+  --bs-dropdown-bg: var(--fs-surface);
+  --bs-dropdown-border-color: var(--fs-border);
+  --bs-dropdown-link-color: var(--fs-text);
+  --bs-dropdown-link-hover-bg: var(--fs-surface-2);
+  --bs-dropdown-link-active-bg: var(--fs-primary);
+  box-shadow: var(--fs-shadow);
+}
+
+.modal-content {
+  background-color: var(--fs-surface);
+  border-color: var(--fs-border);
+}
+
+/* Visible keyboard focus everywhere (accessibility). */
+:focus-visible {
+  outline: 2px solid var(--fs-primary);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   3. Shared utility classes
+   -------------------------------------------------------------------------- */
+
+.text-muted-fs {
+  color: var(--fs-text-muted) !important;
+}
+
+/* Round icon-only button (theme toggle, menu, table actions). */
+/* Navbar round buttons (Figma): light grey circle, soft shadow, navy icon.
+   Used by the navbar, the theme toggle (compact) and the notifications bell. */
+.circle-btn {
+  display: inline-grid;
+  place-items: center;
+  justify-content: center; /* also centers when d-*-inline-flex switches it to flex */
+  align-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fs-surface-2);
+  color: #0e253c;
+  font-size: 1.125rem;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 2px 6px rgba(16, 24, 40, 0.08);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--fs-surface-2), #0a0d12 6%);
+  }
+}
+
+/* Phones: a little smaller so the navbar fits 360px screens */
+@media (max-width: 575.98px) {
+  .navbar-fs .circle-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
+
+[data-bs-theme='dark'] .circle-btn {
+  color: var(--fs-text);
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  justify-content: center; /* also centers when switched to inline-flex by d-*-inline-flex */
+  align-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--fs-border);
+  background: var(--fs-surface);
+  color: var(--fs-text);
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: var(--fs-primary-soft);
+    color: var(--fs-primary);
+    border-color: transparent;
+  }
+
+  &.icon-btn-sm {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Navbar icon row (design: small white squares with a soft shadow).
+   Global so it also reaches child components like <app-theme-toggle>. */
+.icon-group .icon-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+}
+
+/* Scrolling table wrapper. `position: relative` makes it the containing block
+   for absolutely positioned content inside the table (e.g. Bootstrap's
+   .visually-hidden labels). Without it, that content escapes the scroll
+   area and stretches the whole page, causing a page-level horizontal scrollbar. */
+.table-responsive {
+  position: relative;
+}
+
+/* ---- Data table used by all dashboard widgets (design: zebra rows, light header) ---- */
+.fs-table {
+  margin-bottom: 0;
+  font-size: 0.7495rem;
+
+  th {
+    background: var(--fs-surface);
+    color: var(--fs-text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    padding-block: 0.75rem;
+  }
+
+  td {
+    padding-block: 0.875rem;
+    color: var(--fs-text-muted);
+    vertical-align: middle;
+  }
+
+  th,
+  td {
+    padding-inline: 0.625rem;
+    border-color: var(--fs-border);
+
+    &:first-child {
+      padding-inline-start: 1.25rem;
+    }
+  }
+
+  tbody tr:nth-child(odd) td {
+    background: var(--fs-row-alt);
+  }
+
+  tbody tr.selected td {
+    background: var(--fs-row-selected);
+  }
+
+  /* Low-priority columns (counts) are hidden on laptops/tablets so the main
+     columns fit without a horizontal scrollbar; they return on wide screens. */
+  @media (max-width: 1399.98px) {
+    .col-optional {
+      display: none;
+    }
+  }
+
+  /* Long text that may wrap onto two lines instead of widening the table */
+  .cell-wrap {
+    min-width: 8rem;
+    max-width: 12rem;
+  }
+
+  /* Sort indicator next to column titles */
+  .sort-icon {
+    font-size: 0.65rem;
+    opacity: 0.6;
+    margin-inline-start: 0.25rem;
+  }
+}
+
+/* Clickable column title (sorting) that looks like plain header text */
+.sort-header {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--fs-text);
+  }
+}
+
+/* Icon-only row action buttons (approve, return, view, more…) */
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+
+  button {
+    display: inline-grid;
+    place-items: center;
+    width: 1.875rem;
+    height: 1.875rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0.375rem;
+    background: transparent;
+    color: var(--fs-text-muted);
+
+    &:hover:not(:disabled) {
+      background: var(--fs-surface-2);
+      color: var(--fs-primary);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+    }
+  }
+}
+
+/* Footer row under a table: "Page 1 of 10" + Previous / Next */
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  border-top: 1px solid var(--fs-border);
+  color: var(--fs-text);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+/* "Show N more…" link centered under compact tables */
+.show-more {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: auto;
+  padding: 0.75rem;
+  border: 0;
+  border-top: 1px solid var(--fs-border);
+  background: none;
+  color: var(--fs-text-muted);
+  font-size: 0.75rem;
+  width: 100%;
+
+  &:hover {
+    color: var(--fs-primary);
+  }
+
+  /* Design: a white arrow in a filled grey circle, pointing toward the end of
+     the line (left in Arabic, right in English). arrow-left.svg points left,
+     so it's mirrored in English. */
+  .show-more-arrow {
+    display: inline-grid;
+    place-items: center;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: var(--fs-text-muted);
+    color: var(--fs-surface);
+    font-size: 0.75rem;
+    transition: background-color 0.15s ease;
+  }
+
+  &:hover .show-more-arrow {
+    background: var(--fs-primary);
+  }
+}
+
+[dir='ltr'] .show-more .show-more-arrow app-icon {
+  transform: scaleX(-1);
+}
+
+/* Reference numbers (BDRS/2026/BR/8008) shown as navy links */
+.ref-link {
+  color: var(--fs-navy);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  direction: ltr;
+  unicode-bidi: isolate;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Person cell: round avatar + name + email */
+.person-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 9rem;
+
+  .person-avatar {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--fs-surface-2);
+    color: var(--fs-text-muted);
+
+    /* Figma person.svg: 24px icon in a 40px circle, scaled to this 32px circle */
+    app-icon {
+      font-size: 1.2rem;
+    }
+  }
+
+  .person-name {
+    color: var(--fs-text);
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .person-email {
+    font-size: 0.75rem;
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+}
+
+/* Request status badge (design: rounded pill with border + icon) */
+.task-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+
+  @each $status in completed, inProgress, executed, review, sent, rejected, pending {
+    &.badge-#{$status} {
+      color: var(--fs-badge-#{$status});
+      background: var(--fs-badge-#{$status}-bg);
+      border-color: var(--fs-badge-#{$status}-border);
+    }
+  }
+}
+
+/* Small outlined button used in widget toolbars ("Filter", "Previous"…) */
+.btn-fs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2.25rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--fs-border);
+  border-radius: 0.5rem;
+  background: var(--fs-surface);
+  color: var(--fs-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+
+  &:hover:not(:disabled) {
+    background: var(--fs-surface-2);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+
+  &.active {
+    border-color: var(--fs-primary);
+    color: var(--fs-primary);
+  }
+}
+
+/* Segmented control (Today / Week / Month, High / Low balances) */
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--fs-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+
+  button {
+    padding: 0.4rem 0.875rem;
+    border: 0;
+    background: var(--fs-surface);
+    color: var(--fs-text);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+
+    & + button {
+      border-inline-start: 1px solid var(--fs-border);
+    }
+
+    &.active {
+      background: var(--fs-surface-2);
+    }
+  }
+}
+
+/* Large action buttons, from the Figma spec (Untitled UI "lg" skeuomorphic buttons):
+   44px high, 8px radius (radius-md), 6px gap, 16px side padding (spacing-xl),
+   a 2px white→transparent gradient border and three layered shadows. The
+   gradient border is drawn with background layers because `border-image`
+   can't follow rounded corners. */
+.action-btn {
+  --btn-bg: var(--fs-surface);
+  --btn-fg: var(--fs-text);
+  --btn-edge: rgba(255, 255, 255, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 16px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background:
+    linear-gradient(var(--btn-bg), var(--btn-bg)) padding-box,
+    linear-gradient(180deg, var(--btn-edge) 0%, rgba(255, 255, 255, 0) 100%) border-box,
+    var(--btn-bg) border-box;
+  color: var(--btn-fg);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  /* No dark inner outline (the design has none): only the soft drop shadow
+     and the bottom-edge inset that gives the button its slight depth. */
+  box-shadow:
+    0 1px 2px 0 rgba(10, 13, 18, 0.05),
+    inset 0 -2px 0 0 rgba(10, 13, 18, 0.05);
+  transition: background-color 0.15s ease, filter 0.15s ease;
+
+  .bi {
+    font-size: 1.25rem;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--fs-primary);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Approve / Approve and send */
+  &.primary {
+    --btn-bg: #8a1538;
+    --btn-fg: #fff;
+
+    &:hover:not(:disabled) {
+      --btn-bg: #74112f;
+    }
+
+    &:active:not(:disabled) {
+      --btn-bg: #5f0e27;
+    }
+  }
+
+  /* Share: white with a grey border (the inner-border shadow draws it) */
+  &.secondary {
+    --btn-edge: transparent;
+    box-shadow:
+      0 1px 2px 0 rgba(10, 13, 18, 0.05),
+      inset 0 -2px 0 0 rgba(10, 13, 18, 0.05),
+      inset 0 0 0 1px var(--fs-border);
+
+    &:hover:not(:disabled) {
+      --btn-bg: var(--fs-surface-2);
+    }
+  }
+
+  /* ⋮ more actions: soft grey square, no border, navy dots */
+  &.icon-only {
+    /* a touch darker than the grey action strip it sits on */
+    --btn-bg: color-mix(in srgb, var(--fs-surface-2), #0a0d12 5%);
+    --btn-fg: var(--fs-navy);
+    --btn-edge: transparent;
+    width: 44px;
+    padding: 0;
+    box-shadow: none;
+
+    &:hover {
+      filter: brightness(0.96);
+    }
+  }
+}
+
+/* Keep the burgundy readable in dark mode too */
+[data-bs-theme='dark'] .action-btn.primary {
+  --btn-edge: rgba(255, 255, 255, 0.16);
+}
+
+/* Search input with icon at the start and a shortcut hint at the end */
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  /* Bootstrap icon or a Figma <app-icon class="search-icon"> */
+  > .bi-search,
+  > .search-icon {
+    position: absolute;
+    inset-inline-start: 0.75rem;
+    color: var(--fs-text-muted);
+    pointer-events: none;
+  }
+
+  /* The Figma search icon has built-in padding: a little larger to match */
+  > .search-icon {
+    font-size: 1.125rem;
+  }
+
+  input {
+    height: 2.25rem;
+    width: 100%;
+    /* room for the search icon; the end side only needs space for a shortcut hint */
+    padding-inline: 2.25rem 0.75rem;
+    border: 1px solid var(--fs-border);
+    border-radius: 0.5rem;
+    background: var(--fs-surface);
+    color: var(--fs-text);
+    font-size: 0.8125rem;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+
+    &:focus {
+      outline: none;
+      border-color: var(--fs-primary);
+      box-shadow: 0 0 0 0.2rem rgba(var(--fs-primary-rgb), 0.12);
+    }
+
+    &::placeholder {
+      color: var(--fs-text-muted);
+    }
+  }
+
+  /* Keyboard hint. Don't set `direction` here: Chrome resolves inset-inline-*
+     from the element's own direction, which would move it to the wrong side. */
+  &:has(.kbd-hint) input {
+    padding-inline-end: 3.75rem; /* fits "Ctrl K" */
+  }
+
+  /* Figma ⌘K artwork (shortcut.svg, 18×9) inside the hint */
+  .kbd-hint .kbd-icon {
+    width: 18px;
+    height: 9px;
+    vertical-align: 0;
+  }
+
+  .kbd-hint {
+    position: absolute;
+    font-family: inherit; /* app font, not the browser's monospace <kbd> font */
+    inset-inline-end: 0.5rem;
+    padding: 0 0.3rem;
+    border: 1px solid var(--fs-border);
+    border-radius: 0.25rem;
+    background: transparent; /* override Bootstrap's dark <kbd> */
+    box-shadow: none;
+    color: var(--fs-text-muted);
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    unicode-bidi: isolate;
+  }
+}
+
+/* Icons that point in a reading direction (arrows, chevrons) flip in RTL. */
+[dir='rtl'] .flip-rtl {
+  transform: scaleX(-1);
+}
+
+/* Printing: hide the app chrome and print the page content only. */
+@media print {
+  app-navbar,
+  app-sidebar,
+  app-workspace-tabs,
+  app-toast-container {
+    display: none !important;
+  }
+
+  /* The page normally scrolls inside .content (a fixed-height box), and
+     browsers only print what's visible in a scroll box. Let the layout grow
+     to its full height so long pages continue onto the next sheets. */
+  app-main-layout {
+    display: block !important;
+    height: auto !important;
+    padding-top: 0 !important;
+  }
+
+  .content {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+
+    &::after {
+      display: none !important;
+    }
+  }
+}
+
+/* Landscape with modest margins: wide tables fit an A4 / Letter sheet. */
+@page {
+  size: landscape;
+  margin: 12mm;
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Trend arrows (trend-up / trend-down.svg) are wide and short (15×8), so give
+   them a little more room than a square icon to read at the same weight. */
+app-icon.trend-icon {
+  width: 1.35em;
+  height: 1em;
+}
+
+/* filter.svg is wide (17×12): a little larger so it reads like the other button icons */
+app-icon.filter-icon {
+  font-size: 1.125rem;
+}
+
+/* in-progress.svg points ← = forward in Arabic; mirror it in English so it
+   still points forward (→), wherever it's used (My tasks, Purchase requests). */
+[dir='ltr'] app-icon[data-icon='in-progress'] {
+  transform: scaleX(-1);
+}

@@ -1,0 +1,107 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.dash-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--fs-surface);
+  border: 1px solid var(--fs-border);
+  border-radius: var(--fs-radius);
+  box-shadow: var(--fs-shadow);
+  overflow: hidden;
+  transition: background-color 0.25s ease;
+
+  /* Full-screen mode */
+  &.expanded {
+    position: fixed;
+    inset: 1rem;
+    z-index: 1070;
+    height: auto;
+    box-shadow: 0 24px 48px rgba(16, 24, 40, 0.2);
+
+    .dash-card-body {
+      overflow: auto;
+    }
+  }
+}
+
+.expand-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1065;
+  background: rgba(11, 20, 55, 0.45);
+}
+
+.dash-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--fs-border);
+}
+
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.title-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--fs-border);
+  border-radius: 0.5rem;
+  color: var(--fs-text-muted);
+  font-size: 0.9375rem; /* Figma card icons are 13–15px */
+}
+
+.dash-card-title {
+  margin: 0;
+  color: var(--fs-text);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.title-sep {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--fs-border);
+}
+
+.expand-btn {
+  padding: 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--fs-text-muted);
+
+  &:hover {
+    color: var(--fs-primary);
+  }
+}
+
+/* Takes the space left next to the title, so a shrinkable toolbar (e.g. a
+   flexible search box) shrinks first and only wraps below the title when
+   even its smallest size doesn't fit. */
+.card-actions {
+  flex: 1 1 0;
+  min-width: min-content;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.dash-card-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}

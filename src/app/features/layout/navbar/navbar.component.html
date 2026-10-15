@@ -1,0 +1,68 @@
+<header class="navbar-fs">
+  <!-- Hamburger (below lg) -->
+  <button type="button" class="icon-btn icon-btn-sm d-lg-none" (click)="menuToggle.emit(); $event.stopPropagation()" [attr.aria-label]="'common.toggleMenu' | translate">
+    <app-icon name="menu" class="menu-icon" />
+  </button>
+
+  <!-- ===== Brand: logo (the image already includes the ministry name) ===== -->
+  <div class="brand">
+    <img src="images/logo-moi.png" [alt]="'app.ministry' | translate" class="brand-logo" width="132" height="48" />
+  </div>
+
+  <!-- ===== System name | department ===== -->
+  <div class="system d-none d-md-flex">
+    <span class="system-name">{{ 'app.name' | translate }}</span>
+    <!-- Department only on wide screens, so the navbar never overflows on tablets -->
+    <span class="system-sep d-none d-xl-inline-block" aria-hidden="true"></span>
+    <span class="system-dept d-none d-xl-inline">{{ 'app.department' | translate }}</span>
+  </div>
+
+  <!-- ===== Global search (centered, hidden on small screens) ===== -->
+  <form class="global-search search-box d-none d-lg-flex" role="search" (submit)="$event.preventDefault(); notAvailable()">
+    <app-icon name="search" class="search-icon" />
+    <input type="search" [placeholder]="'layout.searchPlaceholder' | translate" [attr.aria-label]="'common.search' | translate" />
+  </form>
+
+  <!-- ===== End side: user + icon buttons ===== -->
+  <div class="end-group">
+    @if (auth.user(); as user) {
+      <div class="user-menu position-relative">
+        <button type="button" class="user-btn" (click)="toggleUserMenu($event)" [attr.aria-expanded]="userMenuOpen()" aria-haspopup="menu">
+          <img [src]="user.avatarUrl" alt="" class="avatar" width="40" height="40" />
+          <span class="d-none d-xl-flex flex-column text-start lh-sm">
+            <span class="user-name">{{ user.name | localize }}</span>
+            <span class="user-role">{{ user.role | localize }}</span>
+          </span>
+          <app-icon name="chevron-down" class="chevron d-none d-xl-inline-block" />
+        </button>
+
+        @if (userMenuOpen()) {
+          <ul class="dropdown-menu show user-dropdown" role="menu">
+            <li class="px-3 py-2">
+              <div class="fw-semibold small">{{ user.name | localize }}</div>
+              <div class="text-muted-fs small">{{ user.email }}</div>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <button type="button" class="dropdown-item text-danger" role="menuitem" (click)="logout()">
+                <app-icon name="logout" class="logout-icon me-2 flip-rtl" />{{ 'nav.logout' | translate }}
+              </button>
+            </li>
+          </ul>
+        }
+      </div>
+    }
+
+    <div class="icon-group">
+      <button type="button" class="circle-btn d-none d-sm-inline-flex" (click)="notAvailable()" [attr.aria-label]="'layout.calendar' | translate">
+        <app-icon name="calendar" />
+      </button>
+      <button type="button" class="circle-btn d-none d-sm-inline-flex" (click)="notAvailable()" [attr.aria-label]="'layout.messages' | translate">
+        <app-icon name="chat" />
+      </button>
+      <app-language-switcher [compact]="true" />
+      <app-theme-toggle [compact]="true" />
+      <app-notifications-menu />
+    </div>
+  </div>
+</header>

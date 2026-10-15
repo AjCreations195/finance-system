@@ -1,0 +1,96 @@
+<app-dashboard-card title="tasks.title" icon="tasks">
+  <!-- ===== Toolbar: filter + search ===== -->
+  <div card-actions class="d-flex flex-wrap gap-2">
+    <app-filter-menu [options]="statusOptions" [value]="status()" (valueChange)="onStatus($event)" />
+    <div class="search-box" style="width: 15rem">
+      <app-icon name="search" class="search-icon" />
+      <input type="search" [value]="search()" (input)="onSearch($any($event.target).value)" [placeholder]="'common.search' | translate" [attr.aria-label]="'common.search' | translate" />
+    </div>
+  </div>
+
+  <!-- ===== Table ===== -->
+  <div class="table-responsive">
+    <table class="table fs-table">
+      <thead>
+        <tr>
+          <th scope="col" style="width: 2.5rem">
+            <input type="checkbox" class="form-check-input" [checked]="allOnPageSelected()" (change)="toggleAllOnPage()" [attr.aria-label]="'tasks.selectAll' | translate" />
+          </th>
+          @for (col of columns; track col) {
+            <th scope="col" [attr.aria-sort]="sort.aria(col)" [class.col-optional]="col === 'attachments' || col === 'notes'">
+              <button type="button" class="sort-header" (click)="sort.toggle(col)">
+                {{ 'tasks.columns.' + col | translate }}
+                <i [class]="sort.icon(col)" aria-hidden="true"></i>
+              </button>
+            </th>
+          }
+          <th scope="col"><span class="visually-hidden">{{ 'common.actions' | translate }}</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (task of rows(); track task.id) {
+          <tr [class.selected]="selected().has(task.id)">
+            <td>
+              <input type="checkbox" class="form-check-input" [checked]="selected().has(task.id)" (change)="toggleRow(task.id)" [attr.aria-label]="('tasks.selectRow' | translate) + ' ' + task.number" />
+            </td>
+            <td><a href="#" class="ref-link" (click)="$event.preventDefault(); notAvailable()">{{ task.number }}</a></td>
+            <td class="cell-wrap">{{ task.description | localize }}</td>
+            <td class="text-nowrap col-optional">{{ 'tasks.documents' | translate: { count: task.attachments } }}</td>
+            <td class="text-nowrap col-optional">
+              <app-icon name="notes" class="me-1" />{{ pad(task.notes) }}
+            </td>
+            <td>
+              <span class="task-badge badge-{{ task.status }}">
+                {{ 'tasks.status.' + task.status | translate }}
+                <app-icon [name]="statusIcons[task.status]" />
+              </span>
+            </td>
+            <td>
+              <div class="person-cell">
+                <span class="person-avatar"><app-icon name="person" /></span>
+                <div>
+                  <div class="person-name">{{ task.creator.name | localize }}</div>
+                  <div class="person-email">{{ task.creator.email }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="text-nowrap">{{ task.date | localDate: 'long' }}</td>
+            <!-- Row actions (design: approve, return, reject, view, more) -->
+            <td>
+              <div class="row-actions">
+                <button type="button" (click)="approve(task)" [disabled]="task.status === 'completed'" [title]="'tasks.actions.approve' | translate" [attr.aria-label]="'tasks.actions.approve' | translate">
+                  <app-icon name="approve" />
+                </button>
+                <button type="button" (click)="returnTask(task)" [disabled]="task.status === 'review'" [title]="'tasks.actions.return' | translate" [attr.aria-label]="'tasks.actions.return' | translate">
+                  <app-icon name="return" />
+                </button>
+                <button type="button" (click)="notAvailable()" [title]="'tasks.actions.reject' | translate" [attr.aria-label]="'tasks.actions.reject' | translate">
+                  <app-icon name="reject" />
+                </button>
+                <button type="button" (click)="notAvailable()" [title]="'tasks.actions.view' | translate" [attr.aria-label]="'tasks.actions.view' | translate">
+                  <app-icon name="eye" />
+                </button>
+                <button type="button" (click)="notAvailable()" [attr.aria-label]="'common.moreOptions' | translate">
+                  <app-icon name="more-vertical" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="9" class="text-center py-5">{{ 'tasks.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== Pagination: "Page X of Y" + Previous / Next ===== -->
+  <div class="pager">
+    <span>{{ 'common.pageOf' | translate: { page: currentPage(), total: totalPages() } }}</span>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn-fs" (click)="goTo(currentPage() - 1)" [disabled]="currentPage() === 1">{{ 'common.previous' | translate }}</button>
+      <button type="button" class="btn-fs" (click)="goTo(currentPage() + 1)" [disabled]="currentPage() === totalPages()">{{ 'common.next' | translate }}</button>
+    </div>
+  </div>
+</app-dashboard-card>

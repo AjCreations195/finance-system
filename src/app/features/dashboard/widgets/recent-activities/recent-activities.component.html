@@ -1,0 +1,50 @@
+<app-dashboard-card title="activities.title" icon="activity">
+  <!-- Today / Week / Month -->
+  <div card-actions class="segmented" role="group" [attr.aria-label]="'activities.title' | translate">
+    @for (p of periods; track p) {
+      <button type="button" [class.active]="period() === p" [attr.aria-pressed]="period() === p" (click)="period.set(p); showAll.set(false)">
+        {{ 'common.' + p | translate }}
+      </button>
+    }
+  </div>
+
+  <div class="timeline-wrap">
+    @for (group of groups(); track group.label) {
+      <h3 class="day-label">{{ group.label }}</h3>
+      <ol class="timeline">
+        @for (a of group.items; track a.id) {
+          <li [class.is-reply]="a.kind === 'reply'">
+            <!-- Solid colored dot with a white speech bubble. A reply has no dot:
+                 it sits under the message it answers (an empty slot keeps the text aligned). -->
+            @if (a.kind === 'reply') {
+              <span class="dot-slot" aria-hidden="true"></span>
+            } @else {
+              <span class="dot" [style.--dot]="kindStyle[a.kind].color"><app-icon name="chat" /></span>
+            }
+            <!-- Sentence: time • actor action target -->
+            <p class="entry">
+              <span class="time">{{ timeLabel(a.date) }}</span>
+              <span class="bullet" aria-hidden="true">•</span>
+              <span class="actor">{{ a.actor | localize }}</span>
+              {{ a.action | translate }}
+              <span class="target">{{ a.target | localize }}</span>
+              @if (a.kind === 'reply') {
+                <!-- ↶ chip marking a reply (design) -->
+                <span class="reply-chip"><app-icon name="return" /></span>
+              }
+            </p>
+          </li>
+        }
+      </ol>
+    } @empty {
+      <p class="empty">{{ 'activities.empty' | translate }}</p>
+    }
+
+    @if (hasMore()) {
+      <button type="button" class="toggle-all" (click)="showAll.set(!showAll())" [attr.aria-expanded]="showAll()">
+        <app-icon name="chevron-down" class="toggle-chevron" [class.up]="showAll()" />
+        {{ (showAll() ? 'activities.showLess' : 'activities.showAll') | translate }}
+      </button>
+    }
+  </div>
+</app-dashboard-card>

@@ -1,0 +1,56 @@
+<section class="carousel" [attr.aria-label]="'dashboard.stats.label' | translate">
+  <!-- Previous (start side) -->
+  <button type="button" class="nav-arrow prev" (click)="scroll(-1)" [attr.aria-label]="'dashboard.stats.previous' | translate">
+    <i class="bi bi-chevron-left flip-rtl" aria-hidden="true"></i>
+  </button>
+
+  <!-- Scrollable track -->
+  <div class="track" #track>
+    @for (stat of stats(); track stat.id) {
+      <article class="stat-card" [class.selectable]="selectable()" [class.active]="selectable() && stat.id === activeId()">
+        <!-- Filter cards: one button covering the whole card (the text stays readable as normal content) -->
+        @if (selectable()) {
+          <button type="button" class="stat-hit" (click)="statSelect.emit(stat.id)" [attr.aria-pressed]="stat.id === activeId()"
+                  [attr.aria-label]="'dashboard.stats.showInTable' | translate: { label: (stat.label | translate) }"></button>
+        }
+        <!-- Top: icon + label + amount (light grey area) -->
+        <div class="stat-top">
+          <span class="stat-icon">
+            @if (stat.icon.startsWith('bi-')) {
+              <i class="bi {{ stat.icon }}" aria-hidden="true"></i>
+            } @else {
+              <!-- Figma badge symbol on the full 56px canvas, so it keeps the design's size and position -->
+              <app-icon [name]="stat.icon" class="stat-glyph" />
+            }
+          </span>
+          <div class="min-w-0">
+            <p class="stat-label">{{ stat.label | translate }}</p>
+            <p class="stat-value">{{ formatAmount(stat.amount) }}</p>
+            @if (stat.count !== undefined) {
+              <p class="stat-count">{{ 'dashboard.stats.count' | translate: { count: stat.count } }}</p>
+            }
+          </div>
+        </div>
+
+        <!-- Bottom: comparison period + trend (text or pill style) -->
+        <div class="stat-bottom">
+          <span>{{ stat.period | translate: stat.periodParams }}</span>
+          <span class="trend" [class.pill]="stat.trendStyle === 'pill'" [class.good]="isPositive(stat)" [class.bad]="!isPositive(stat)">
+            @if (stat.trendStyle === 'pill') {
+              <span dir="ltr">{{ stat.change >= 0 ? '+' : '−' }}{{ stat.change < 0 ? -stat.change : stat.change }}%</span>
+            } @else {
+              <app-icon [name]="stat.change >= 0 ? 'trend-up' : 'trend-down'" class="trend-icon" />
+              <!-- Direction is shown by the arrow icon, so print the absolute value -->
+              <span dir="ltr">{{ stat.change < 0 ? -stat.change : stat.change }}%</span>
+            }
+          </span>
+        </div>
+      </article>
+    }
+  </div>
+
+  <!-- Next (end side) -->
+  <button type="button" class="nav-arrow next" (click)="scroll(1)" [attr.aria-label]="'dashboard.stats.next' | translate">
+    <i class="bi bi-chevron-right flip-rtl" aria-hidden="true"></i>
+  </button>
+</section>

@@ -1,0 +1,214 @@
+.carousel {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.track {
+  --per-view: 1.2;
+  --gap: 1rem;
+
+  display: flex;
+  gap: var(--gap);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding: 0.25rem 0.125rem 0.5rem;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (min-width: 576px) {
+    --per-view: 2;
+  }
+  @media (min-width: 992px) {
+    --per-view: 3;
+  }
+  /* 4 per view on laptops (beside the sidebar), all 5 on wide screens */
+  @media (min-width: 1300px) {
+    --per-view: 4;
+  }
+  @media (min-width: 1680px) {
+    --per-view: 5;
+  }
+}
+
+.stat-card {
+  /* Width so that exactly --per-view cards fit (minus the gaps) */
+  flex: 0 0 calc((100% - (var(--per-view) - 1) * var(--gap)) / var(--per-view));
+  scroll-snap-align: start;
+  overflow: hidden;
+  border: 1px solid var(--fs-border);
+  border-radius: var(--fs-radius);
+  background: var(--fs-surface);
+  box-shadow: var(--fs-shadow);
+}
+
+.stat-top {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1.125rem 1rem;
+  background: var(--fs-surface-2);
+}
+
+/* Figma badge: 56px circle, #F4F7FE fill, #EAEAEA border, burgundy symbol */
+.stat-icon {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 1px solid #eaeaea;
+  border-radius: 50%;
+  background: #f4f7fe;
+  color: #7f153b;
+  font-size: 1.25rem;
+}
+
+/* The symbol SVGs keep the badge's 56×56 canvas, so filling the circle
+   reproduces the design's symbol size and position exactly. */
+.stat-glyph {
+  font-size: 3.5rem;
+}
+
+:host-context([data-bs-theme='dark']) .stat-icon {
+  border-color: var(--fs-border);
+  background: var(--fs-surface);
+  color: var(--fs-primary);
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+.stat-label {
+  margin: 0 0 0.25rem;
+  color: var(--fs-text-muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-value {
+  margin: 0;
+  color: var(--fs-text);
+  font-size: 1.125rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.stat-count {
+  margin: 0.125rem 0 0;
+  color: var(--fs-text-muted);
+  font-size: 0.75rem;
+}
+
+/* ---- Filter cards (selectable): whole card clickable; the selected one is not styled differently ---- */
+.stat-card.selectable {
+  position: relative;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--fs-primary) 35%, var(--fs-border));
+    transform: translateY(-1px);
+  }
+
+  /* Rings are drawn inside the card: the scrolling track would clip anything outside */
+  &:has(.stat-hit:focus-visible) {
+    outline: 2px solid var(--fs-primary);
+    outline-offset: -2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stat-card.selectable:hover {
+    transform: none;
+  }
+}
+
+.stat-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: none; /* drawn on the card instead */
+  }
+}
+
+.stat-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: var(--fs-text-muted);
+  font-size: 0.75rem;
+}
+
+.trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 600;
+
+  &.good {
+    color: var(--fs-up);
+  }
+
+  &.bad {
+    color: var(--fs-down);
+  }
+
+  /* Pill variant (Purchase Requests design): soft rounded badge */
+  &.pill {
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.6875rem;
+
+    &.good {
+      background: var(--fs-badge-completed-bg);
+    }
+
+    &.bad {
+      background: var(--fs-badge-rejected-bg);
+    }
+  }
+}
+
+/* Small round arrows on the carousel edges */
+.nav-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 1px solid var(--fs-border);
+  border-radius: 50%;
+  background: var(--fs-surface);
+  color: var(--fs-text-muted);
+  font-size: 0.75rem;
+  box-shadow: var(--fs-shadow);
+  transform: translateY(-50%);
+
+  &:hover {
+    color: var(--fs-primary);
+  }
+
+  &.prev {
+    inset-inline-start: -0.75rem;
+  }
+
+  &.next {
+    inset-inline-end: -0.75rem;
+  }
+}

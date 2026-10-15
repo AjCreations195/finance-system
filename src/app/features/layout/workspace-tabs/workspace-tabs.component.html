@@ -1,0 +1,175 @@
+<!-- ===== Breadcrumb: Home › section › page (› request) ===== -->
+<nav class="crumbs" [attr.aria-label]="'layout.breadcrumb' | translate">
+  <ol>
+    <li>
+      <a routerLink="/dashboard"><i class="bi bi-house" aria-hidden="true"></i> {{ 'nav.home' | translate }}</a>
+    </li>
+    @for (crumb of breadcrumb(); track $index; let last = $last) {
+      <li [class.current]="last" [attr.aria-current]="last ? 'page' : null">
+        <i class="bi bi-chevron-right flip-rtl sep" aria-hidden="true"></i>
+        @if (crumb.link) {
+          <a [routerLink]="crumb.link">{{ crumb.label }}</a>
+        } @else {
+          <!-- bdi: request numbers like "BDRS/2016/019/0008" keep their order in Arabic -->
+          <bdi>{{ crumb.label }}</bdi>
+        }
+      </li>
+    }
+  </ol>
+</nav>
+
+<!-- ===== Browser-style tabs: open pages and open requests =====
+     Navigation (each tab is a page), so a list of buttons with aria-current,
+     not a tablist. One tab stop: arrow keys move inside the strip. -->
+<nav class="tabs-bar" [attr.aria-label]="'layout.tabs.label' | translate" aria-describedby="tabs-keyboard-hint">
+  <p id="tabs-keyboard-hint" class="visually-hidden">{{ 'layout.tabs.keyboardHint' | translate }}</p>
+
+  <ul class="tabs-strip">
+    @for (v of views(); track v.tab.id; let i = $index) {
+      <li class="tab" [class.active]="v.active" [class.record]="v.tab.kind === 'record'" [class.pinned]="v.pinned"
+          (auxclick)="onAuxClick(v, $event)" (mousedown)="$event.button === 1 && $event.preventDefault()"
+          (contextmenu)="openTabMenu(v, $event)" (mouseenter)="showTip(v.tab.id)" (mouseleave)="hideTip()">
+        <button type="button" class="tab-label" [attr.data-tab]="v.tab.id"
+                [attr.aria-current]="v.active ? 'page' : null" [tabindex]="v.tab.id === focusId() ? 0 : -1"
+                [attr.aria-keyshortcuts]="i < 8 ? 'Alt+' + (i + 1) : null"
+                [attr.aria-describedby]="tip()?.id === v.tab.id ? 'tab-tip' : null"
+                (click)="select(v)" (keydown)="onTabKey(v, i, $event)" (focus)="onTipFocus(v.tab.id, $event)" (blur)="hideTip(0)">
+          @if (v.dot) {
+            <span class="status-dot" [style.background]="v.dot" aria-hidden="true"></span>
+          }
+          <span class="tab-text" [attr.dir]="v.tab.kind === 'record' ? 'ltr' : null">{{ v.label }}</span>
+          @if (v.badge) {
+            <span class="tab-count" aria-hidden="true">{{ v.badge }}</span>
+            <span class="visually-hidden">({{ 'layout.tabs.underProcedure' | translate: { count: v.badge } }})</span>
+          }
+          @if (v.pinned) {
+            <i class="bi bi-pin-angle pin" aria-hidden="true"></i>
+            <span class="visually-hidden">({{ 'layout.tabs.pinned' | translate }})</span>
+          }
+        </button>
+        @if (!v.pinned) {
+          <!-- Keyboard users close with Delete / Alt+W, so the × isn't an extra tab stop -->
+          <button type="button" class="tab-close" tabindex="-1" (click)="close(v, $event)"
+                  [attr.aria-label]="('layout.tabs.close' | translate) + ': ' + v.label">
+            <i class="bi bi-x" aria-hidden="true"></i>
+          </button>
+        }
+      </li>
+    }
+  </ul>
+
+  <button type="button" class="tab-add" (click)="toggleAddMenu($event)" [attr.aria-label]="'layout.tabs.add' | translate"
+          aria-haspopup="dialog" [attr.aria-expanded]="!!addMenu()"
+          (mouseenter)="showTip(addTip)" (mouseleave)="hideTip()" (focus)="onTipFocus(addTip, $event)" (blur)="hideTip(0)">
+    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+  </button>
+</nav>
+
+<!-- ===== Tab tooltip (fixed, so the scrolling strip can't clip it) ===== -->
+@if (tip(); as t) {
+  @if (tipContent(); as c) {
+    <div class="tab-tip" id="tab-tip" role="tooltip" [style.top.px]="t.top" [style.left.px]="t.left" [style.--caret]="t.caret + 'px'"
+         (mouseenter)="keepTip()" (mouseleave)="hideTip()">
+      <div class="tip-head">
+        <strong [attr.dir]="c.ltr ? 'ltr' : null">{{ c.heading }}</strong>
+        @if (c.status; as s) {
+          <span class="task-badge badge-{{ s.family }}">{{ s.label }}</span>
+        }
+      </div>
+      @if (c.detail) {
+        <p class="tip-detail">{{ c.detail }}</p>
+      }
+      @if (c.count) {
+        <p class="tip-count"><i class="bi bi-hourglass-split" aria-hidden="true"></i>{{ c.count }}</p>
+      }
+    </div>
+  }
+}
+
+<!-- ===== Tab context menu ===== -->
+@if (tabMenu(); as m) {
+  <div class="pop-menu tab-menu" role="menu" [attr.aria-label]="'layout.tabs.actions' | translate"
+       [style.top.px]="m.top" [style.left.px]="m.left"
+       (click)="$event.stopPropagation()" (contextmenu)="$event.preventDefault()" (keydown)="onMenuKey($event)">
+    <button type="button" class="menu-item" role="menuitem" (click)="menuAction('close')" [disabled]="menuTab()?.pinned">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>{{ 'layout.tabs.close' | translate }}<kbd>Alt+W</kbd>
+    </button>
+    <button type="button" class="menu-item" role="menuitem" (click)="menuAction('others')" [disabled]="!canCloseOthers()">
+      <i class="bi bi-layers" aria-hidden="true"></i>{{ 'layout.tabs.closeOthers' | translate }}
+    </button>
+    <button type="button" class="menu-item" role="menuitem" (click)="menuAction('after')" [disabled]="!canCloseAfter()">
+      <i class="bi bi-arrow-bar-right flip-rtl" aria-hidden="true"></i>{{ 'layout.tabs.closeAfter' | translate }}
+    </button>
+    <button type="button" class="menu-item" role="menuitem" (click)="menuAction('all')" [disabled]="!canCloseOthers() && menuTab()?.pinned">
+      <i class="bi bi-x-square" aria-hidden="true"></i>{{ 'layout.tabs.closeAll' | translate }}
+    </button>
+    <hr class="menu-divider" role="separator" />
+    <button type="button" class="menu-item" role="menuitem" (click)="menuAction('reopen')" [disabled]="!workspace.closed().length">
+      <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>{{ 'layout.tabs.reopen' | translate }}<kbd>Alt+Shift+T</kbd>
+    </button>
+  </div>
+}
+
+<!-- ===== "+" quick-open: find a request, open a page, reopen a closed tab ===== -->
+@if (addMenu(); as m) {
+  <div class="pop-menu add-menu" role="dialog" [attr.aria-label]="'layout.tabs.add' | translate"
+       [style.top.px]="m.top" [style.left.px]="m.left"
+       (click)="$event.stopPropagation()" (keydown)="onMenuKey($event)">
+    <div class="menu-search">
+      <app-icon name="search" class="search-icon" />
+      <input type="search" [value]="query()" (input)="query.set($any($event.target).value)" (keydown.enter)="openFirstResult()"
+             [placeholder]="'layout.tabs.findRequest' | translate" [attr.aria-label]="'layout.tabs.findRequest' | translate" />
+    </div>
+
+    <div class="menu-scroll">
+      @if (query().trim()) {
+        <p class="menu-heading" id="add-menu-results">{{ 'layout.tabs.requestResults' | translate }}</p>
+        <div role="group" aria-labelledby="add-menu-results">
+          @for (r of results(); track r.id) {
+            <button type="button" class="menu-item result" role="menuitem" (click)="openRequest(r)">
+              <span class="status-dot" [style.background]="badgeOf(r)" aria-hidden="true"></span>
+              <span class="result-text">
+                <span class="result-number" dir="ltr">{{ r.number }}</span>
+                <span class="result-desc">{{ r.description | localize }}</span>
+              </span>
+              @if (openIds().has('request-' + r.id)) {
+                <span class="menu-tag">{{ 'layout.tabs.open' | translate }}</span>
+              }
+            </button>
+          } @empty {
+            <p class="menu-empty" role="status">{{ 'layout.tabs.noResults' | translate }}</p>
+          }
+        </div>
+      } @else {
+        <p class="menu-heading" id="add-menu-pages">{{ 'layout.tabs.pages' | translate }}</p>
+        <div role="group" aria-labelledby="add-menu-pages">
+          @for (mod of modules; track mod.id) {
+            <button type="button" class="menu-item" role="menuitem" (click)="openModule(mod.id)">
+              <i class="bi {{ mod.icon }}" aria-hidden="true"></i>{{ mod.label | translate }}
+              @if (openIds().has(mod.id)) {
+                <span class="menu-tag">{{ 'layout.tabs.open' | translate }}</span>
+              } @else if (!mod.route) {
+                <span class="menu-tag muted">{{ 'layout.tabs.soon' | translate }}</span>
+              }
+            </button>
+          }
+        </div>
+
+        @if (recentlyClosed().length) {
+          <p class="menu-heading" id="add-menu-closed">{{ 'layout.tabs.recentlyClosed' | translate }}</p>
+          <div role="group" aria-labelledby="add-menu-closed">
+            @for (c of recentlyClosed(); track c.tab.id) {
+              <button type="button" class="menu-item" role="menuitem" (click)="reopen(c.tab)">
+                <i class="bi {{ c.icon }}" aria-hidden="true"></i>
+                <span [attr.dir]="c.tab.kind === 'record' ? 'ltr' : null">{{ c.label }}</span>
+                <i class="bi bi-arrow-counterclockwise menu-end" aria-hidden="true"></i>
+              </button>
+            }
+          </div>
+        }
+      }
+    </div>
+
+    <p class="menu-footer">{{ 'layout.tabs.shortcuts' | translate }}</p>
+  </div>
+}

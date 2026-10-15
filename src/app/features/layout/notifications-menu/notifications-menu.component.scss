@@ -1,0 +1,158 @@
+/* Bell from Figma is 20px (the other navbar icons are 18px) */
+.bell-icon {
+  font-size: 1.25rem;
+}
+
+.unread-dot {
+  /* on the circle's edge at about 1–2 o'clock (a square corner would sit outside the circle) */
+  position: absolute;
+  top: 0.4rem;
+  inset-inline-end: 0.5rem;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--fs-down);
+  border: 1.5px solid var(--fs-surface);
+}
+
+/* Panel opens below the bell, aligned to its inline-end edge */
+.notif-panel {
+  position: absolute;
+  top: calc(100% + 0.625rem);
+  inset-inline-end: 0;
+  z-index: 1060;
+  width: min(380px, calc(100vw - 2rem));
+  max-height: min(560px, calc(100vh - 6rem));
+  display: flex;
+  flex-direction: column;
+  background: var(--fs-surface);
+  border: 1px solid var(--fs-border);
+  border-radius: var(--fs-radius);
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.14);
+  animation: drop 0.18s ease-out;
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-0.375rem);
+  }
+}
+
+.notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--fs-border);
+}
+
+.notif-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--fs-text);
+}
+
+.notif-filter {
+  border: 0;
+  background: transparent;
+  color: var(--fs-text-muted);
+  font-size: 0.75rem;
+}
+
+.mark-read {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fs-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &:disabled {
+    opacity: 0.45;
+  }
+}
+
+.notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.notif-item {
+  padding: 0.875rem 1rem;
+
+  & + & {
+    border-top: 1px solid var(--fs-border);
+  }
+
+  &.unread {
+    background: var(--fs-row-selected);
+  }
+}
+
+.notif-message {
+  margin-bottom: 0.5rem;
+  color: var(--fs-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.notif-ref {
+  color: var(--fs-primary);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.notif-file {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.file-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2.25rem;
+  border-radius: 0.25rem;
+  background: #d92d20;
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 700;
+}
+
+.file-name {
+  color: var(--fs-text);
+  font-weight: 500;
+}
+
+.notif-comment {
+  margin: 0 0 0.5rem;
+  padding-inline-start: 0.75rem;
+  border-inline-start: 2px solid var(--fs-border);
+  color: var(--fs-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+
+.notif-time {
+  display: block;
+  color: var(--fs-text-muted);
+  font-size: 0.6875rem;
+}
+
+.notif-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--fs-text-muted);
+  font-size: 0.8125rem;
+}

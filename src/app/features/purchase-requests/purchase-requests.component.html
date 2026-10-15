@@ -1,0 +1,323 @@
+<div class="page-shell">
+
+  <!-- ===================== 1. HEADER CARD ===================== -->
+  <header class="header-card">
+    <div class="header-text">
+      <div class="d-flex align-items-center gap-2">
+        <span class="title-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span>
+        <h1 class="page-title">{{ 'requests.title' | translate }}</h1>
+        <span class="title-sep" aria-hidden="true"></span>
+        <button type="button" class="expand-btn" (click)="setExpanded(!expanded())"
+                [attr.aria-label]="(expanded() ? 'common.collapse' : 'common.expand') | translate" [attr.aria-pressed]="expanded()">
+          <app-icon [name]="expanded() ? 'collapse' : 'expand'" />
+        </button>
+      </div>
+      <p class="page-subtitle">{{ 'requests.subtitle' | translate }}</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <button type="button" class="btn btn-primary btn-create" (click)="notAvailable()">
+        <i class="bi bi-plus-lg" aria-hidden="true"></i> {{ 'requests.create' | translate }}
+      </button>
+      <button type="button" class="btn-fs px-2" (click)="notAvailable()" [attr.aria-label]="'requests.moreActions' | translate">
+        <app-icon name="more-vertical" />
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================== 2. MAIN CARD ===================== -->
+  <section class="main-card" [class.expanded]="expanded()">
+
+    <!-- Tabs + filter + search -->
+    <div class="card-toolbar">
+      <div class="status-tabs" role="tablist" [attr.aria-label]="'requests.tabsLabel' | translate">
+        @for (t of tabs; track t) {
+          <button type="button" role="tab" class="status-tab" [class.active]="tab() === t" [attr.aria-selected]="tab() === t" (click)="setTab(t)">
+            {{ 'requests.tabs.' + t | translate }}
+          </button>
+        }
+      </div>
+      <div class="toolbar-actions d-flex flex-wrap gap-2">
+        <app-filter-menu [options]="statusOptions" [value]="status()" (valueChange)="setStatus($event)" />
+        <div class="search-box search-wide">
+          <app-icon name="search" class="search-icon" />
+          <input type="search" [value]="search()" (input)="onSearch($any($event.target).value)"
+                 [placeholder]="'common.search' | translate" [attr.aria-label]="'common.search' | translate" />
+        </div>
+        <!-- Full-screen covers the header's expand button, so the card brings its own way back -->
+        @if (expanded()) {
+          <button type="button" class="btn-fs collapse-btn" (click)="setExpanded(false)" [attr.aria-label]="'common.collapse' | translate">
+            <app-icon name="collapse" />
+            <span class="d-none d-sm-inline">{{ 'common.collapse' | translate }}</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Summary cards (shared with the dashboard) -->
+    <div class="stats-band">
+      <!-- Each card filters the table to its tab -->
+      <app-stat-carousel [stats]="service.stats()" [selectable]="true" [activeId]="activeStat()" (statSelect)="selectStat($event)" />
+    </div>
+
+    <!-- ===== Table (scrolls sideways on small screens) ===== -->
+    <div class="table-responsive">
+      <table class="table fs-table requests-table">
+        <thead>
+          <tr>
+            <th scope="col" class="col-check">
+              <input type="checkbox" class="form-check-input" [checked]="allOnPageSelected()" (change)="toggleAllOnPage()" [attr.aria-label]="'tasks.selectAll' | translate" />
+            </th>
+            @for (col of columns; track col) {
+              <th scope="col" [attr.aria-sort]="sort.aria(col)" [class.col-optional]="col === 'products' || col === 'notes'">
+                <button type="button" class="sort-header" (click)="sort.toggle(col)">
+                  {{ 'requests.columns.' + col | translate }}
+                  <i [class]="sort.icon(col)" aria-hidden="true"></i>
+                </button>
+              </th>
+            }
+            <th scope="col"><span class="visually-hidden">{{ 'common.actions' | translate }}</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rows(); track r.id) {
+            <tr [class.selected]="selected().has(r.id)">
+              <td class="col-check">
+                <input type="checkbox" class="form-check-input" [checked]="selected().has(r.id)" (change)="toggleRow(r.id)"
+                       [attr.aria-label]="('tasks.selectRow' | translate) + ' ' + r.number" />
+              </td>
+              <td><button type="button" class="ref-link link-btn" (click)="view(r)">{{ r.number }}</button></td>
+              <!-- Budget item: name + code on two lines -->
+              <td class="cell-wrap">
+                <div class="cell-strong">{{ r.budgetItem.name | localize }}</div>
+                <div class="cell-code">{{ r.budgetItem.code }}</div>
+              </td>
+              <td class="cell-wrap">{{ r.description | localize }}</td>
+              <td class="text-nowrap col-optional">{{ 'requests.products' | translate: { count: r.products } }}</td>
+              <td class="text-nowrap col-optional"><app-icon name="notes" class="me-1" />{{ r.notes < 10 ? '0' + r.notes : r.notes }}</td>
+              <td>
+                <span class="task-badge badge-{{ badge[r.status] }}">
+                  {{ 'requests.status.' + r.status | translate }}
+                  <app-icon [name]="statusIcon[r.status]" />
+                </span>
+              </td>
+              <td>
+                <div class="person-cell">
+                  <span class="person-avatar"><app-icon name="person" /></span>
+                  <div>
+                    <div class="person-name">{{ r.creator.name | localize }}</div>
+                    <div class="person-email">{{ r.creator.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="text-nowrap">{{ r.date | localDate: 'long' }}</td>
+              <td>
+                <div class="row-actions">
+                  <button type="button" (click)="openRowMenu(r, $event)" [attr.aria-label]="'common.moreOptions' | translate"
+                          [attr.aria-expanded]="rowMenu()?.request?.id === r.id" aria-haspopup="menu">
+                    <app-icon name="more-vertical" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="10" class="text-center py-5">
+                <i class="bi bi-inbox fs-2 d-block mb-2" aria-hidden="true"></i>
+                {{ 'requests.empty' | translate }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pager">
+      <span>{{ 'common.pageOf' | translate: { page: currentPage(), total: totalPages() } }}</span>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn-fs" (click)="goTo(currentPage() - 1)" [disabled]="currentPage() === 1">{{ 'common.previous' | translate }}</button>
+        <button type="button" class="btn-fs" (click)="goTo(currentPage() + 1)" [disabled]="currentPage() === totalPages()">{{ 'common.next' | translate }}</button>
+      </div>
+    </div>
+  </section>
+
+  @if (expanded()) {
+    <div class="expand-backdrop" (click)="setExpanded(false)" aria-hidden="true"></div>
+  }
+</div>
+
+<!-- ===================== 3. STICKY ACTION BAR ===================== -->
+<footer class="action-bar">
+  <div class="d-flex flex-wrap align-items-center gap-2">
+    <button type="button" class="btn btn-primary btn-create" (click)="notAvailable()">
+      <i class="bi bi-plus-lg" aria-hidden="true"></i> {{ 'requests.createFull' | translate }}
+    </button>
+    <button type="button" class="btn-fs" (click)="sendSelected()">
+      <i class="bi bi-send flip-rtl" aria-hidden="true"></i> {{ 'requests.send' | translate }}
+      @if (selectedCount()) {
+        <span class="count-pill">{{ selectedCount() }}</span>
+      }
+    </button>
+    <!-- Actions dropdown (applies to the selected rows) -->
+    <div class="position-relative">
+      <button type="button" class="btn-fs actions-btn" (click)="toggleActions($event)" [attr.aria-expanded]="actionsOpen()" aria-haspopup="menu">
+        <i class="bi bi-gear" aria-hidden="true"></i> {{ 'requests.actions' | translate }}
+        <span class="actions-caret"><i class="bi bi-chevron-down" aria-hidden="true"></i></span>
+      </button>
+      @if (actionsOpen()) {
+        <ul class="dropdown-menu show bar-menu" role="menu" (click)="$event.stopPropagation()">
+          <li><button type="button" class="dropdown-item" role="menuitem" (click)="approveSelected()"><i class="bi bi-check2-circle me-2" aria-hidden="true"></i>{{ 'requests.approveSelected' | translate }}</button></li>
+          <li><button type="button" class="dropdown-item text-danger" role="menuitem" (click)="deleteSelected()"><i class="bi bi-trash3 me-2" aria-hidden="true"></i>{{ 'requests.deleteSelected' | translate }}</button></li>
+        </ul>
+      }
+    </div>
+  </div>
+
+  <div class="d-flex align-items-center gap-2">
+    <button type="button" class="btn-fs" (click)="print()"><i class="bi bi-printer" aria-hidden="true"></i> {{ 'requests.print' | translate }}</button>
+    <button type="button" class="btn-fs" (click)="back()"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> {{ 'requests.back' | translate }}</button>
+    <button type="button" class="btn-fs px-2" (click)="notAvailable()" [attr.aria-label]="'requests.moreActions' | translate">
+      <app-icon name="more-vertical" />
+    </button>
+  </div>
+</footer>
+
+<!-- ===================== PRINT REPORT (print only) =====================
+  Hidden on screen. When printing, the page above is hidden and this plain
+  report prints instead: every matching row (not just the current page),
+  or only the ticked rows when some are selected. -->
+<section class="print-report" aria-hidden="true">
+  <header class="print-header">
+    <div class="print-org">
+      <strong>{{ 'app.name' | translate }}</strong>
+      <span>{{ 'app.ministry' | translate }} · {{ 'app.department' | translate }}</span>
+    </div>
+    <div class="print-meta">{{ 'requests.printReport.printedOn' | translate: { date: printedAtLabel() } }}</div>
+  </header>
+
+  <h1 class="print-title">{{ 'requests.title' | translate }}</h1>
+  <p class="print-summary">
+    {{ printFilters().join(' · ') }} · {{ 'requests.printReport.count' | translate: { count: printRows().length } }}
+  </p>
+
+  <table class="print-table">
+    <thead>
+      <tr>
+        <th>{{ 'requests.printReport.rowNumber' | translate }}</th>
+        @for (col of columns; track col) {
+          <th>{{ 'requests.columns.' + col | translate }}</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (r of printRows(); track r.id; let i = $index) {
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td class="nowrap">{{ r.number }}</td>
+          <td>
+            {{ r.budgetItem.name | localize }}
+            <div class="sub">{{ r.budgetItem.code }}</div>
+          </td>
+          <td>{{ r.description | localize }}</td>
+          <td class="nowrap">{{ r.products }}</td>
+          <td>{{ r.notes }}</td>
+          <td>{{ 'requests.status.' + r.status | translate }}</td>
+          <td>
+            {{ r.creator.name | localize }}
+            <div class="sub">{{ r.creator.email }}</div>
+          </td>
+          <td class="nowrap">{{ r.date | localDate }}</td>
+        </tr>
+      } @empty {
+        <tr>
+          <td [attr.colspan]="columns.length + 1">{{ 'requests.empty' | translate }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>
+
+<!-- ===================== DETAILS PANEL (?view=<id>) =====================
+  Placed before the dialogs so the delete confirmation opens on top of it. -->
+@if (viewing(); as request) {
+  <app-request-details
+    [request]="request"
+    (closed)="closeDetails()"
+    (approve)="approveFromDetails($event)"
+    (remove)="deleteFromDetails()"
+  />
+}
+
+<!-- ===================== ROW MENU (fixed position) ===================== -->
+@if (rowMenu(); as menu) {
+  <ul class="dropdown-menu show row-menu" role="menu" [style.top.px]="menu.top" [style.left.px]="menu.left" (click)="$event.stopPropagation()">
+    <li>
+      <button type="button" class="dropdown-item" role="menuitem" (click)="view(menu.request)">
+        <i class="bi bi-eye me-2" aria-hidden="true"></i>{{ 'requests.rowActions.view' | translate }}
+      </button>
+    </li>
+    <li>
+      <button type="button" class="dropdown-item" role="menuitem" (click)="approve(menu.request)" [disabled]="!canApprove(menu.request)">
+        <i class="bi bi-check2-circle me-2" aria-hidden="true"></i>{{ 'requests.rowActions.approve' | translate }}
+      </button>
+    </li>
+    <li><hr class="dropdown-divider" /></li>
+    <li>
+      <button type="button" class="dropdown-item text-danger" role="menuitem" (click)="askDelete([menu.request])">
+        <i class="bi bi-trash3 me-2" aria-hidden="true"></i>{{ 'requests.rowActions.delete' | translate }}
+      </button>
+    </li>
+  </ul>
+}
+
+<!-- ===================== DELETE CONFIRMATION ===================== -->
+@if (pendingDelete(); as list) {
+  <div class="modal-backdrop fade show confirm-backdrop"></div>
+  <div class="modal d-block confirm-modal" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" (click)="pendingDelete.set(null)">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-body text-center p-4">
+          <span class="danger-icon mb-3"><i class="bi bi-trash3" aria-hidden="true"></i></span>
+          <h2 id="confirm-title" class="h5 fw-bold">{{ 'requests.confirmDelete.title' | translate }}</h2>
+          <p class="text-muted-fs mb-4">
+            @if (list.length === 1) {
+              {{ 'requests.confirmDelete.message' | translate: { number: list[0].number } }}
+            } @else {
+              {{ 'requests.confirmDelete.messageMany' | translate: { count: list.length } }}
+            }
+          </p>
+          <div class="d-flex gap-2 justify-content-center">
+            <button type="button" class="btn-fs px-4" (click)="pendingDelete.set(null)">{{ 'common.cancel' | translate }}</button>
+            <button type="button" class="btn btn-danger px-4" (click)="confirmDelete()">{{ 'common.delete' | translate }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ===================== BULK APPROVE CONFIRMATION ===================== -->
+@if (pendingApprove(); as pending) {
+  <div class="modal-backdrop fade show confirm-backdrop"></div>
+  <div class="modal d-block confirm-modal" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="approve-title" (click)="pendingApprove.set(null)">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-body text-center p-4">
+          <span class="approve-icon mb-3"><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
+          <h2 id="approve-title" class="h5 fw-bold">{{ 'requests.confirmApprove.title' | translate }}</h2>
+          <p class="text-muted-fs mb-1">{{ 'requests.confirmApprove.message' | translate: { count: pending.requests.length } }}</p>
+          @if (pending.skippedIds.length) {
+            <p class="skip-note mb-0">
+              <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+              {{ 'requests.confirmApprove.skipped' | translate: { skipped: pending.skippedIds.length } }}
+            </p>
+          }
+          <div class="d-flex gap-2 justify-content-center mt-4">
+            <button type="button" class="btn-fs px-4" (click)="pendingApprove.set(null)">{{ 'common.cancel' | translate }}</button>
+            <button type="button" class="btn btn-primary px-4 confirm-approve" (click)="confirmApprove()">{{ 'common.approve' | translate }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

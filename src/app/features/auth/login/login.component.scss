@@ -1,0 +1,436 @@
+/* ==========================================================================
+   Login page, built from the Figma design.
+   Colors are local tokens so the dark theme only redefines variables.
+   All spacing uses logical properties, so RTL / LTR mirror automatically.
+   ========================================================================== */
+
+:host {
+  /* ---- Light theme (from Figma) ---- */
+  --login-bg: #ffffff;
+  --login-navy: #2b3674; /* text color from Figma: system name, headings, labels, links */
+  --login-brand: #7f153b; /* button, "create account" link, checkbox */
+  --login-brand-hover: #67102f;
+  --login-text: #2b3674;
+  --login-subtitle: #313131; /* from Figma */
+  --login-muted: #2b3674; /* forgot password / keep me signed in */
+  --login-footer: #a3aed0; /* from Figma */
+  --login-hint: #5f6b98; /* field hints: 5:1 contrast on white (AA) */
+  --login-border: #e0e5f2;
+  --login-input-bg: #ffffff;
+  --login-placeholder: #a3aed0;
+  --login-required: #e31a1a;
+
+  display: block;
+}
+
+/* ---- Dark theme (derived from the light design) ---- */
+:host-context([data-bs-theme='dark']) {
+  --login-bg: #111c44;
+  --login-navy: #ffffff;
+  --login-brand: #a3214f;
+  --login-brand-hover: #b92a5c;
+  --login-text: #e6e9f2;
+  --login-subtitle: #a3aed0;
+  --login-muted: #a3aed0;
+  --login-footer: #707eae;
+  --login-hint: #a3aed0;
+  --login-border: #2a3566;
+  --login-input-bg: #0b1437;
+  --login-placeholder: #707eae;
+  --login-required: #ff6b6b;
+}
+
+/* ==================== FORM COLUMN ==================== */
+.form-column {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1.25rem 1rem;
+
+  /* Full height only beside the photo; on small screens it follows the banner */
+  @media (min-width: 992px) {
+    min-height: 100vh;
+  }
+  background: var(--login-bg);
+  transition: background-color 0.25s ease;
+
+  @media (min-width: 576px) {
+    padding-inline: 2.5rem;
+  }
+}
+
+/* Language + theme controls in the top inline-end corner */
+.top-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Centered block, ~60% of the column like the design */
+.form-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 370px;
+  margin-inline: auto;
+  padding-block: 2rem;
+}
+
+.system-name {
+  color: var(--login-navy);
+  font-size: clamp(1.875rem, 2.6vw, 2.5rem);
+  font-weight: 700;
+  margin-bottom: clamp(2.5rem, 7vh, 4.5rem);
+}
+
+.form-title {
+  color: var(--login-navy);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.375rem;
+}
+
+.form-subtitle {
+  color: var(--login-subtitle);
+  font-size: 0.875rem;
+  margin-bottom: 2rem;
+}
+
+/* ---- Fields ---- */
+.form-label {
+  color: var(--login-navy);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.required {
+  color: var(--login-required);
+}
+
+/* Warning icon in the sign-in error alert, a little larger than the small text */
+.alert-icon {
+  font-size: 1.25rem;
+}
+
+.form-control {
+  height: 3rem;
+  padding-inline: 1rem;
+  border: 1px solid var(--login-border);
+  border-radius: 0.75rem;
+  background-color: var(--login-input-bg);
+  color: var(--login-text);
+  font-size: 0.875rem;
+
+  &::placeholder {
+    color: var(--login-placeholder);
+  }
+
+  &:focus {
+    border-color: var(--login-brand);
+    box-shadow: 0 0 0 0.2rem rgba(127, 21, 59, 0.12);
+  }
+
+  /* Invalid field: red border (our border color above would otherwise win).
+     Bootstrap's built-in error icon would overlap the eye toggle, so hide it. */
+  &.is-invalid {
+    border-color: var(--bs-form-invalid-border-color);
+    background-image: none;
+    padding-inline-end: 1rem;
+
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba(var(--bs-danger-rgb), 0.15);
+    }
+  }
+}
+
+/* Password input with the eye button at the inline-end (left in RTL, right in LTR) */
+.password-field {
+  position: relative;
+
+  .form-control,
+  .form-control.is-invalid {
+    padding-inline-end: 3rem;
+  }
+}
+
+.password-toggle {
+  position: absolute;
+  inset-inline-end: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--login-placeholder);
+  font-size: 1.05rem;
+
+  &:hover {
+    color: var(--login-navy);
+  }
+
+  /* Figma eye icon: 24 x 20 (the icon is 1em square, the SVG keeps its ratio) */
+  app-icon {
+    font-size: 1.5rem;
+  }
+}
+
+/* ---- Links & checkbox ---- */
+.link-muted {
+  color: var(--login-muted);
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+
+a.link-muted:hover {
+  color: var(--login-brand);
+  text-decoration: underline;
+}
+
+.form-check-label {
+  cursor: pointer;
+}
+
+.form-check-input {
+  border-color: var(--login-border);
+  cursor: pointer;
+
+  &:checked {
+    background-color: var(--login-brand);
+    border-color: var(--login-brand);
+  }
+
+  &:focus {
+    border-color: var(--login-brand);
+    box-shadow: 0 0 0 0.2rem rgba(127, 21, 59, 0.15);
+  }
+}
+
+.register-line {
+  color: var(--login-navy);
+  font-size: 0.8125rem;
+  margin-bottom: 2.75rem;
+}
+
+.link-brand {
+  color: var(--login-brand);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* ---- Submit button (burgundy from Figma) ---- */
+.btn-brand {
+  height: 3rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: var(--login-brand);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--login-brand-hover);
+    color: #fff;
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+
+  &:disabled {
+    background: var(--login-brand);
+    color: #fff;
+    opacity: 0.7;
+  }
+}
+
+
+/* ---- Helper text under a field (password rules) ---- */
+.field-hint {
+  margin-top: 0.375rem;
+  color: var(--login-hint);
+  font-size: 0.8125rem;
+}
+
+/* ---- Caps Lock warning under the password ---- */
+.caps-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
+  color: #b54708;
+  font-size: 0.8125rem;
+}
+
+:host-context([data-bs-theme='dark']) .caps-warning {
+  color: #fdb022;
+}
+
+/* ---- Forgot password: confirmation + back link ---- */
+.reset-sent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--login-border);
+  border-radius: 0.75rem;
+  color: var(--login-subtitle);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.reset-icon {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: rgba(127, 21, 59, 0.08);
+  color: var(--login-brand);
+  font-size: 1.125rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 1.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--login-navy);
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  &:hover {
+    color: var(--login-brand);
+    text-decoration: underline;
+  }
+
+  /* Material icons have built-in padding, so a bit larger than the text */
+  app-icon {
+    font-size: 1.25rem;
+  }
+}
+
+/* ---- Footer ---- */
+.form-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--login-footer);
+  font-size: 0.75rem;
+}
+
+/* ==================== HERO IMAGE COLUMN ==================== */
+/*
+  Photo: public/images/login-bg.webp (30 KB, from the 2 MB Figma PNG; the
+  rounded transparent corners were trimmed). Phones / tablets load the
+  960px version (9 KB). The crop is centered on the building (58% / 54%).
+
+  Layers, top to bottom:
+    1. dark gradient at the bottom, so the white text stays readable
+    2. the photo
+    3. misty lavender, shown while the photo loads
+  The Figma grid pattern is laid over the photo by ::before (see below).
+*/
+.hero-panel {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 15rem;
+  padding: 1.5rem 1.25rem;
+  overflow: hidden;
+  color: #fff;
+  background:
+    linear-gradient(to top, rgba(28, 30, 58, 0.66) 0%, rgba(28, 30, 58, 0.28) 45%, transparent 75%),
+    url('/images/login-bg-sm.webp') 58% 54% / cover no-repeat,
+    linear-gradient(180deg, #d9dbe6 0%, #c9cbdc 45%, #a9a9c4 100%);
+
+  @media (min-width: 576px) {
+    min-height: 18rem;
+    padding: 2rem 2.5rem;
+  }
+
+  @media (min-width: 992px) {
+    min-height: 100vh;
+    padding: 3rem clamp(2rem, 4vw, 4rem);
+    background:
+      linear-gradient(to top, rgba(28, 30, 58, 0.62) 0%, rgba(28, 30, 58, 0.25) 35%, transparent 60%),
+      url('/images/login-bg.webp') 58% 54% / cover no-repeat,
+      linear-gradient(180deg, #d9dbe6 0%, #c9cbdc 45%, #a9a9c4 100%);
+  }
+
+  /* Figma's grid with lighter squares (public/images/login-pattern.webp,
+     28 KB lossless from Background-pattern.png). It's transparent and already
+     fades out toward the bottom, so it's laid over the photo from the top. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('/images/login-pattern.webp') top center / cover no-repeat;
+    pointer-events: none;
+  }
+}
+
+.hero-content {
+  position: relative; /* above the grid */
+  width: 100%;
+  max-width: 46rem;
+}
+
+/* The design puts the sparkle at the far (inline-end) side, above the heading */
+.sparkle {
+  display: block;
+  width: 2.25rem;
+  height: auto;
+  margin-inline-start: auto;
+  margin-bottom: 0.5rem;
+
+  @media (min-width: 992px) {
+    width: 3.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.hero-title {
+  font-size: clamp(1.375rem, 1rem + 1.6vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 1px 12px rgba(28, 30, 58, 0.35);
+
+  @media (min-width: 992px) {
+    margin-bottom: 1rem;
+  }
+}
+
+.hero-text {
+  max-width: 38rem;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  opacity: 0.92;
+  margin: 0;
+
+  /* Phones: the banner is too short for title + 3 lines without covering
+     the building, so only the title shows there. */
+  @media (max-width: 575.98px) {
+    display: none;
+  }
+
+  @media (min-width: 992px) {
+    font-size: 1rem;
+  }
+}

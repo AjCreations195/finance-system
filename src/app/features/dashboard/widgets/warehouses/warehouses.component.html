@@ -1,0 +1,56 @@
+<app-dashboard-card title="warehouses.title" icon="warehouses">
+  <!-- High / Low balances toggle -->
+  <div card-actions class="segmented" role="group" [attr.aria-label]="'warehouses.title' | translate">
+    @for (v of views; track v) {
+      <button type="button" [class.active]="view() === v" [attr.aria-pressed]="view() === v" (click)="view.set(v)">
+        {{ 'warehouses.' + v | translate }}
+      </button>
+    }
+  </div>
+
+  <div class="table-responsive">
+    <table class="table fs-table">
+      <thead>
+        <tr>
+          @for (col of columns; track col) {
+            <th scope="col" [attr.aria-sort]="sort.aria(col)">
+              <button type="button" class="sort-header" (click)="sort.toggle(col)">
+                {{ 'warehouses.columns.' + col | translate }}
+                <i [class]="sort.icon(col)" aria-hidden="true"></i>
+              </button>
+            </th>
+          }
+          <th scope="col"><span class="visually-hidden">{{ 'common.actions' | translate }}</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (w of rows(); track w.id) {
+          <tr>
+            <td><a href="#" class="ref-link" (click)="$event.preventDefault(); notAvailable()">{{ w.number }}</a></td>
+            <td class="text-nowrap person-name-cell">{{ w.product | localize }}</td>
+            <td class="text-nowrap">{{ pad(w.quantity) }} {{ w.unit | localize }}</td>
+            <!-- Min level (red trend) / Max level (green trend), as in the design -->
+            <td class="text-nowrap">
+              {{ pad(w.minLevel) }} <app-icon name="trend-down" class="trend-icon ms-1" style="color: var(--fs-down)" />
+            </td>
+            <td class="text-nowrap">
+              {{ pad(w.maxLevel) }} <app-icon name="trend-up" class="trend-icon ms-1" style="color: var(--fs-up)" />
+            </td>
+            <td>
+              <div class="row-actions">
+                <button type="button" (click)="notAvailable()" [attr.aria-label]="'common.moreOptions' | translate">
+                  <app-icon name="more-vertical" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <button type="button" class="show-more" (click)="notAvailable()">
+    {{ 'warehouses.showMore' | translate: { count: data.warehouseTotal() - rows().length } }}
+    <span class="show-more-arrow"><app-icon name="arrow-left" /></span>
+  </button>
+</app-dashboard-card>

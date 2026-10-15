@@ -1,11 +1,50 @@
 <!doctype html>
-<html lang="en">
+<!--
+  `dir`, `lang` and `data-bs-theme` are initial values only.
+  LanguageService and ThemeService update them at runtime.
+-->
+<html lang="en" dir="ltr" data-bs-theme="light">
 <head>
   <meta charset="utf-8">
-  <title>PurchasePortal</title>
+  <title>Financial System</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+  <!-- Fonts (from the Figma design): DM Sans for Latin text, IBM Plex Sans Arabic for Arabic text -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+
+  <!--
+    Bootstrap stylesheet. LanguageService swaps the href between
+    bootstrap.min.css (LTR) and bootstrap.rtl.min.css (RTL).
+    It sits before the app styles so our overrides take precedence.
+  -->
+  <link id="bootstrap-css" rel="stylesheet" data-beasties-skip href="assets/bootstrap/bootstrap.min.css">
+
+  <!--
+    Pre-boot script: applies the saved theme and language before Angular
+    loads, to avoid a flash of the wrong theme or direction.
+    The storage keys must match ThemeService and LanguageService.
+  -->
+  <script>
+    (function () {
+      try {
+        var root = document.documentElement;
+        var theme = localStorage.getItem('fs-theme') ||
+          (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        var lang = localStorage.getItem('fs-lang') || 'en';
+        root.setAttribute('data-bs-theme', theme);
+        root.setAttribute('lang', lang);
+        root.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+        if (lang === 'ar') {
+          document.getElementById('bootstrap-css').href = 'assets/bootstrap/bootstrap.rtl.min.css';
+        }
+      } catch (e) { /* storage blocked: keep defaults */ }
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

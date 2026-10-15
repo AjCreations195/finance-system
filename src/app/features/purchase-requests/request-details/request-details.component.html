@@ -1,0 +1,237 @@
+@let r = request();
+@let d = details();
+
+<div class="backdrop" (click)="closed.emit()" aria-hidden="true"></div>
+
+<aside class="panel" [class.wide]="wide()" role="dialog" aria-modal="true" aria-labelledby="request-details-title" tabindex="-1">
+  <!-- ===================== HEADER ===================== -->
+  <header class="panel-header">
+    <span class="header-icon"><i class="bi bi-building" aria-hidden="true"></i></span>
+    <div class="header-text">
+      <h2 id="request-details-title">{{ 'requests.details.title' | translate }}</h2>
+      <p>{{ r.number }}</p>
+    </div>
+    <div class="header-tools">
+      <span class="views" [title]="'requests.details.views' | translate: { count: d.views }">
+        <i class="bi bi-eye" aria-hidden="true"></i>
+        <span class="visually-hidden">{{ 'requests.details.views' | translate: { count: d.views } }}</span>
+        <span aria-hidden="true">{{ d.views }}</span>
+      </span>
+      <button type="button" class="tool d-none d-lg-inline-grid" (click)="wide.set(!wide())"
+              [attr.aria-label]="(wide() ? 'common.collapse' : 'common.expand') | translate" [attr.aria-pressed]="wide()">
+        <app-icon [name]="wide() ? 'collapse' : 'expand'" />
+      </button>
+      <button type="button" class="tool" (click)="closed.emit()" [attr.aria-label]="'common.close' | translate">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Everything below the header scrolls together -->
+  <div class="panel-scroll">
+  <!-- ===================== ACTIONS ===================== -->
+  <div class="panel-actions">
+    <button type="button" class="action-btn secondary share-btn" (click)="share()">
+      <i class="bi bi-share" aria-hidden="true"></i> {{ 'requests.details.share' | translate }}
+    </button>
+    <button type="button" class="action-btn primary btn-action" (click)="approve.emit('accepted')" [disabled]="!canApprove()">
+      <i class="bi bi-file-earmark-check" aria-hidden="true"></i> {{ 'requests.details.approve' | translate }}
+    </button>
+    <button type="button" class="action-btn primary btn-action" (click)="approve.emit('sent')" [disabled]="!canApprove()">
+      <i class="bi bi-send flip-rtl" aria-hidden="true"></i> {{ 'requests.details.approveAndSend' | translate }}
+    </button>
+    <div class="position-relative more-menu">
+      <button type="button" class="action-btn icon-only" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()" aria-haspopup="menu"
+              [attr.aria-label]="'requests.moreActions' | translate">
+        <app-icon name="more-vertical" />
+      </button>
+      @if (menuOpen()) {
+        <ul class="dropdown-menu show menu" role="menu">
+          <li>
+            <button type="button" class="dropdown-item" role="menuitem" (click)="copyNumber()">
+              <i class="bi bi-clipboard me-2" aria-hidden="true"></i>{{ 'requests.details.copyNumber' | translate }}
+            </button>
+          </li>
+          <li><hr class="dropdown-divider" /></li>
+          <li>
+            <button type="button" class="dropdown-item text-danger" role="menuitem" (click)="deleteRequest()">
+              <i class="bi bi-trash3 me-2" aria-hidden="true"></i>{{ 'requests.details.delete' | translate }}
+            </button>
+          </li>
+        </ul>
+      }
+    </div>
+    @if (!canApprove()) {
+      <p class="final-note"><i class="bi bi-info-circle" aria-hidden="true"></i> {{ 'requests.details.cannotApprove' | translate }}</p>
+    }
+  </div>
+
+  <!-- ===================== BODY ===================== -->
+  <div class="panel-body">
+    <!-- Summary: directorate + total, then the main request fields -->
+    <section class="summary-card">
+      <div class="org-header">
+        <span class="org-logo">
+          <img src="images/favicon.png" alt="" width="40" height="40" />
+        </span>
+        <div class="org-text">
+          <strong>{{ d.directorate | localize }}</strong>
+          <!-- Department path, e.g. "Warehouses | Purchasing", with a lighter separator -->
+          <span class="org-path">
+            @for (part of (d.department | localize).split('|'); track $index) {
+              @if (!$first) { <span class="sep" aria-hidden="true">|</span> }
+              <span>{{ part.trim() }}</span>
+            }
+          </span>
+        </div>
+        <div class="total">
+          <span>{{ 'requests.details.totalAmount' | translate }}</span>
+          <strong>{{ r.amount | money }}</strong>
+        </div>
+      </div>
+
+      <dl class="fields">
+        <div>
+          <dt>{{ 'requests.details.fields.status' | translate }}</dt>
+          <dd>
+            <span class="task-badge badge-{{ badge[r.status] }}">
+              {{ 'requests.status.' + r.status | translate }}
+              <app-icon [name]="statusIcon[r.status]" />
+            </span>
+          </dd>
+        </div>
+        <div>
+          <dt>{{ 'requests.details.fields.date' | translate }}</dt>
+          <dd>{{ r.date | localDate }} · {{ 'requests.details.fields.fiscalYear' | translate: { year: d.fiscalYear } }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'requests.details.fields.letter' | translate }}</dt>
+          <dd dir="ltr" class="num">{{ d.letterNumber }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'requests.details.fields.budgetItem' | translate }}</dt>
+          <dd><span dir="ltr" class="num">{{ r.budgetItem.code }}</span> · {{ r.budgetItem.name | localize }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'requests.details.fields.supplierType' | translate }}</dt>
+          <dd>{{ 'requests.details.values.' + d.supplierType | translate }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'requests.details.fields.reason' | translate }}</dt>
+          <dd>{{ 'requests.details.values.' + d.reason | translate }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <dl class="fields">
+      <div>
+        <dt>{{ 'requests.details.fields.requestType' | translate }}</dt>
+        <dd>{{ 'requests.details.values.' + d.requestType | translate }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'requests.details.fields.confidentiality' | translate }}</dt>
+        <dd>{{ 'requests.details.values.' + d.confidentiality | translate }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'requests.details.fields.privacy' | translate }}</dt>
+        <dd>{{ 'requests.details.values.' + d.privacy | translate }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'requests.details.fields.urgency' | translate }}</dt>
+        <dd>
+          <span class="dot-badge" [class.urgent]="d.urgency === 'urgent'">{{ 'requests.details.values.' + d.urgency | translate }}</span>
+        </dd>
+      </div>
+    </dl>
+
+    <!-- Approval timeline (stepper) -->
+    <section class="section">
+      <h3>{{ 'requests.details.timeline' | translate }}</h3>
+      <ol class="steps">
+        @for (step of d.workflow; track step.key) {
+          <li class="step step-{{ step.state }}" [attr.aria-current]="step.state === 'current' ? 'step' : null">
+            <span class="step-icon"><i class="bi {{ stepIcons[step.key] }}" aria-hidden="true"></i></span>
+            <div>
+              <div class="step-title">{{ 'requests.details.steps.' + step.key | translate }}</div>
+              <div class="step-person">{{ step.person | localize }}</div>
+              <span class="visually-hidden">{{ 'requests.details.stepState.' + step.state | translate }}</span>
+            </div>
+          </li>
+        }
+      </ol>
+    </section>
+
+    <!-- Activity log -->
+    <section class="section">
+      <h3>{{ 'requests.details.activity' | translate }}</h3>
+      <ol class="activity">
+        @for (entry of d.activity; track entry.id) {
+          <li>
+            <span class="avatar"><app-icon name="person" /></span>
+            <div class="activity-body">
+              <div class="activity-meta">
+                <strong>{{ entry.person | localize }}</strong>
+                <time [attr.datetime]="entry.date">{{ entry.date | localDate: 'dateTime' }}</time>
+              </div>
+              <p>
+                {{ entry.message | localize }}
+                @if (entry.highlight) {
+                  <span class="highlight">{{ entry.highlight | localize }}</span>
+                }
+              </p>
+              @if (entry.attachment; as file) {
+                <button type="button" class="file-chip" (click)="openAttachment()" [attr.aria-label]="'requests.details.openAttachment' | translate: { name: file.name }">
+                  <span class="pdf-tag" aria-hidden="true">PDF</span>
+                  <span dir="ltr">{{ file.name }}</span>
+                  <small>{{ file.size }}</small>
+                </button>
+              }
+              @if (entry.tags?.length) {
+                <div class="tags">
+                  @for (tag of entry.tags; track $index) {
+                    <span class="tag">{{ tag | localize }}</span>
+                  }
+                </div>
+              }
+            </div>
+          </li>
+        }
+      </ol>
+    </section>
+
+    <!-- Created by -->
+    <section class="section">
+      <h3>{{ 'requests.details.createdBy' | translate }}</h3>
+      <div class="creator">
+        <span class="avatar lg"><app-icon name="person" /></span>
+        <div class="creator-name">
+          <strong>{{ r.creator.name | localize }}</strong>
+          <span>{{ d.creatorRole | localize }}</span>
+        </div>
+        <div class="contact">
+          <span>{{ 'requests.details.phone' | translate }}</span>
+          <a [href]="phoneHref()" dir="ltr">{{ d.creatorPhone }}</a>
+        </div>
+        <div class="contact">
+          <span>{{ 'requests.details.email' | translate }}</span>
+          <a class="email-link" [href]="'mailto:' + r.creator.email" dir="ltr">{{ r.creator.email }}</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Attachments -->
+    <section class="section">
+      <h3 class="with-icon"><i class="bi bi-file-earmark-text" aria-hidden="true"></i>{{ 'requests.details.attachments' | translate }}</h3>
+      <div class="attachments">
+        @for (file of d.attachments; track file.id) {
+          <button type="button" class="attachment" (click)="openAttachment()" [title]="file.size"
+                  [attr.aria-label]="('requests.details.openAttachment' | translate: { name: (file.name | localize) }) + ', ' + file.size">
+            <i class="bi" [class.bi-image]="file.kind === 'image'" [class.bi-file-earmark-pdf]="file.kind === 'pdf'" aria-hidden="true"></i>
+            <span>{{ file.name | localize }}</span>
+          </button>
+        }
+      </div>
+    </section>
+  </div>
+  </div>
+</aside>

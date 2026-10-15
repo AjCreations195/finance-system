@@ -1,0 +1,414 @@
+<!-- ===================== LOGIN PAGE ===================== -->
+<!--
+  Two columns on large screens. DOM order = form, then image, so the
+  form is on the right in Arabic (RTL) and on the left in English (LTR).
+-->
+<div class="login-page container-fluid p-0">
+  <div class="row g-0 min-vh-100">
+
+    <!-- ========== FORM COLUMN ========== -->
+    <main class="col-12 col-lg-5 form-column">
+
+      <!-- Language & theme controls, pinned to the top corner of the column -->
+      <div class="top-controls">
+        <app-language-switcher />
+        <app-theme-toggle />
+      </div>
+
+      <!-- Vertically centered form content -->
+      <div class="form-wrapper">
+        <!-- System name -->
+        <h1 class="system-name">{{ 'login.systemName' | translate }}</h1>
+
+        @if (view() === 'login') {
+          <!-- ======================= LOGIN VIEW ======================= -->
+          <h2 class="form-title">{{ 'login.title' | translate }}</h2>
+          <p class="form-subtitle">{{ 'login.subtitle' | translate }}</p>
+
+          <!-- Server-side error (wrong credentials). role="alert" is announced by screen readers. -->
+          @if (loginError(); as error) {
+            <div class="alert alert-danger d-flex align-items-center gap-2 py-2 small" role="alert">
+              <app-icon name="alert-triangle" class="alert-icon" />
+              <span>{{ error | translate }}</span>
+            </div>
+          }
+
+          <!--
+            Reactive form. `novalidate` turns off the browser's validation
+            popups so our own translated messages are shown instead.
+          -->
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+            <!-- ---- Username / email ---- -->
+            <div class="mb-3">
+              <label for="identifier" class="form-label">
+                {{ 'login.identifier' | translate }} <span class="required" aria-hidden="true">*</span>
+              </label>
+              <input
+                id="identifier"
+                type="text"
+                class="form-control"
+                formControlName="identifier"
+                autocomplete="username"
+                autocapitalize="none"
+                spellcheck="false"
+                [placeholder]="'login.identifierPlaceholder' | translate"
+                [class.is-invalid]="showError(f.identifier)"
+                [attr.aria-invalid]="showError(f.identifier)"
+                [attr.aria-describedby]="showError(f.identifier) ? 'identifier-error' : null"
+                aria-required="true"
+              />
+              @if (showError(f.identifier)) {
+                <div id="identifier-error" class="invalid-feedback d-block">
+                  @if (f.identifier.hasError('required')) {
+                    {{ 'login.errors.identifierRequired' | translate }}
+                  } @else if (f.identifier.hasError('identifier')) {
+                    {{ 'login.errors.identifierInvalid' | translate }}
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- ---- Password (eye toggle at the inline-end of the field) ---- -->
+            <div class="mb-2">
+              <label for="password" class="form-label">
+                {{ 'login.password' | translate }} <span class="required" aria-hidden="true">*</span>
+              </label>
+              <div class="password-field">
+                <input
+                  id="password"
+                  class="form-control"
+                  formControlName="password"
+                  autocomplete="current-password"
+                  [type]="showPassword() ? 'text' : 'password'"
+                  [placeholder]="'login.passwordPlaceholder' | translate: { min: passwordMinLength }"
+                  [class.is-invalid]="showError(f.password)"
+                  [attr.aria-invalid]="showError(f.password)"
+                  [attr.aria-describedby]="showError(f.password) ? 'password-error' : capsLock() ? 'caps-warning' : null"
+                  aria-required="true"
+                  (keydown)="onPasswordKey($event)"
+                  (keyup)="onPasswordKey($event)"
+                  (blur)="capsLock.set(false)"
+                />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  (click)="showPassword.set(!showPassword())"
+                  [attr.aria-label]="(showPassword() ? 'login.hidePassword' : 'login.showPassword') | translate"
+                  [attr.aria-pressed]="showPassword()"
+                >
+                  <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" />
+                </button>
+              </div>
+              @if (showError(f.password)) {
+                <div id="password-error" class="invalid-feedback d-block">
+                  @if (f.password.hasError('required')) {
+                    {{ 'login.errors.passwordRequired' | translate }}
+                  } @else if (f.password.hasError('minlength')) {
+                    {{ 'login.errors.passwordMinLength' | translate: { min: passwordMinLength } }}
+                  }
+                </div>
+              } @else if (capsLock()) {
+                <!-- Caps Lock hint (only while typing the password) -->
+                <div id="caps-warning" class="caps-warning" role="status">
+                  <app-icon name="caps-lock" />
+                  {{ 'login.capsLock' | translate }}
+                </div>
+              }
+            </div>
+
+            <!-- ---- Forgot password (start) + Keep me signed in (end) ---- -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+              <a href="#" class="link-muted" (click)="openForgot($event)">{{ 'login.forgot' | translate }}</a>
+              <div class="form-check mb-0">
+                <input id="remember" type="checkbox" class="form-check-input" formControlName="remember" />
+                <label for="remember" class="form-check-label link-muted">{{ 'login.remember' | translate }}</label>
+              </div>
+            </div>
+
+            <!-- ---- Not registered yet? Create an account (optional link) ---- -->
+            <p class="register-line">
+              {{ 'login.noAccount' | translate }}
+              <a href="#" class="link-brand" (click)="openRegister($event)">{{ 'login.createAccount' | translate }}</a>
+            </p>
+
+            <!-- ---- Submit ---- -->
+            <button type="submit" class="btn btn-brand w-100" [disabled]="loading()" [attr.aria-busy]="loading()">
+              @if (loading()) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                {{ 'login.submitting' | translate }}
+              } @else {
+                {{ 'login.submit' | translate }}
+              }
+            </button>
+
+           
+          </form>
+        } @else if (view() === 'forgot') {
+          <!-- ================== FORGOT PASSWORD VIEW ================== -->
+          <h2 class="form-title">{{ (resetSentTo() ? 'login.resetSentTitle' : 'login.forgotTitle') | translate }}</h2>
+
+          @if (resetSentTo(); as email) {
+            <!-- Confirmation: same wording whether or not the account exists (security) -->
+            <div class="reset-sent" role="status">
+              <span class="reset-icon"><app-icon name="mail-check" /></span>
+              <p class="mb-0">{{ 'login.resetSentText' | translate: { email: email } }}</p>
+            </div>
+            <button type="button" class="btn btn-brand w-100 mt-4" (click)="backToLogin()">
+              {{ 'login.backToLogin' | translate }}
+            </button>
+          } @else {
+            <p class="form-subtitle">{{ 'login.forgotSubtitle' | translate }}</p>
+
+            <form [formGroup]="forgotForm" (ngSubmit)="onForgotSubmit()" novalidate>
+              <div class="mb-4">
+                <label for="reset-email" class="form-label">
+                  {{ 'login.email' | translate }} <span class="required" aria-hidden="true">*</span>
+                </label>
+                <input
+                  id="reset-email"
+                  type="email"
+                  class="form-control"
+                  formControlName="email"
+                  autocomplete="email"
+                  autocapitalize="none"
+                  spellcheck="false"
+                  [placeholder]="'login.identifierPlaceholder' | translate"
+                  [class.is-invalid]="showError(forgotForm.controls.email, resetSubmitted())"
+                  [attr.aria-invalid]="showError(forgotForm.controls.email, resetSubmitted())"
+                  [attr.aria-describedby]="showError(forgotForm.controls.email, resetSubmitted()) ? 'reset-email-error' : null"
+                  aria-required="true"
+                />
+                @if (showError(forgotForm.controls.email, resetSubmitted())) {
+                  <div id="reset-email-error" class="invalid-feedback d-block">
+                    @if (forgotForm.controls.email.hasError('required')) {
+                      {{ 'login.errors.emailRequired' | translate }}
+                    } @else {
+                      {{ 'login.errors.emailInvalid' | translate }}
+                    }
+                  </div>
+                }
+              </div>
+
+              <button type="submit" class="btn btn-brand w-100" [disabled]="loading()" [attr.aria-busy]="loading()">
+                @if (loading()) {
+                  <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                  {{ 'login.sending' | translate }}
+                } @else {
+                  {{ 'login.sendLink' | translate }}
+                }
+              </button>
+            </form>
+
+            <button type="button" class="back-link" (click)="backToLogin()">
+              <!-- Points "back": ← in English, → in Arabic -->
+              <app-icon name="arrow-left" class="flip-rtl" />
+              {{ 'login.backToLogin' | translate }}
+            </button>
+          }
+        } @else {
+          <!-- ===================== CREATE ACCOUNT VIEW ===================== -->
+          <h2 class="form-title">{{ 'login.registerTitle' | translate }}</h2>
+          <p class="form-subtitle">{{ 'login.registerSubtitle' | translate }}</p>
+
+          <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" novalidate>
+
+            <!-- ---- Full name ---- -->
+            <div class="mb-3">
+              <label for="reg-name" class="form-label">
+                {{ 'login.fullName' | translate }} <span class="required" aria-hidden="true">*</span>
+              </label>
+              <input
+                id="reg-name"
+                type="text"
+                class="form-control"
+                formControlName="name"
+                autocomplete="name"
+                [placeholder]="'login.fullNamePlaceholder' | translate"
+                [class.is-invalid]="showError(r.name, registerSubmitted())"
+                [attr.aria-invalid]="showError(r.name, registerSubmitted())"
+                [attr.aria-describedby]="showError(r.name, registerSubmitted()) ? 'reg-name-error' : null"
+                aria-required="true"
+              />
+              @if (showError(r.name, registerSubmitted())) {
+                <div id="reg-name-error" class="invalid-feedback d-block">
+                  @if (r.name.hasError('required')) {
+                    {{ 'login.errors.nameRequired' | translate }}
+                  } @else {
+                    {{ 'login.errors.nameMinLength' | translate: { min: nameMinLength } }}
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- ---- Email (also checked against existing accounts) ---- -->
+            <div class="mb-3">
+              <label for="reg-email" class="form-label">
+                {{ 'login.email' | translate }} <span class="required" aria-hidden="true">*</span>
+              </label>
+              <input
+                id="reg-email"
+                type="email"
+                class="form-control"
+                formControlName="email"
+                autocomplete="email"
+                autocapitalize="none"
+                spellcheck="false"
+                [placeholder]="'login.identifierPlaceholder' | translate"
+                [class.is-invalid]="showError(r.email, registerSubmitted()) || !!registerError()"
+                [attr.aria-invalid]="showError(r.email, registerSubmitted()) || !!registerError()"
+                [attr.aria-describedby]="showError(r.email, registerSubmitted()) || registerError() ? 'reg-email-error' : null"
+                aria-required="true"
+              />
+              @if (showError(r.email, registerSubmitted())) {
+                <div id="reg-email-error" class="invalid-feedback d-block">
+                  @if (r.email.hasError('required')) {
+                    {{ 'login.errors.emailRequired' | translate }}
+                  } @else {
+                    {{ 'login.errors.emailInvalid' | translate }}
+                  }
+                </div>
+              } @else if (registerError(); as error) {
+                <div id="reg-email-error" class="invalid-feedback d-block" role="alert">{{ error | translate }}</div>
+              }
+            </div>
+
+            <!-- ---- Password (with strength rule hint) ---- -->
+            <div class="mb-3">
+              <label for="reg-password" class="form-label">
+                {{ 'login.password' | translate }} <span class="required" aria-hidden="true">*</span>
+              </label>
+              <div class="password-field">
+                <input
+                  id="reg-password"
+                  class="form-control"
+                  formControlName="password"
+                  autocomplete="new-password"
+                  [type]="showPassword() ? 'text' : 'password'"
+                  [placeholder]="'login.passwordPlaceholder' | translate: { min: passwordMinLength }"
+                  [class.is-invalid]="showError(r.password, registerSubmitted())"
+                  [attr.aria-invalid]="showError(r.password, registerSubmitted())"
+                  aria-describedby="reg-password-help"
+                  aria-required="true"
+                  (keydown)="onPasswordKey($event)"
+                  (keyup)="onPasswordKey($event)"
+                  (blur)="capsLock.set(false)"
+                />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  (click)="showPassword.set(!showPassword())"
+                  [attr.aria-label]="(showPassword() ? 'login.hidePassword' : 'login.showPassword') | translate"
+                  [attr.aria-pressed]="showPassword()"
+                >
+                  <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" />
+                </button>
+              </div>
+              <!-- One element for hint + error, so aria-describedby always points somewhere valid -->
+              <div id="reg-password-help">
+                @if (showError(r.password, registerSubmitted())) {
+                  <div class="invalid-feedback d-block">
+                    @if (r.password.hasError('required')) {
+                      {{ 'login.errors.passwordRequired' | translate }}
+                    } @else if (r.password.hasError('minlength')) {
+                      {{ 'login.errors.passwordMinLength' | translate: { min: passwordMinLength } }}
+                    } @else {
+                      {{ 'login.errors.passwordWeak' | translate }}
+                    }
+                  </div>
+                } @else if (capsLock()) {
+                  <div class="caps-warning" role="status">
+                    <app-icon name="caps-lock" />
+                    {{ 'login.capsLock' | translate }}
+                  </div>
+                } @else {
+                  <div class="field-hint">{{ 'login.passwordHint' | translate: { min: passwordMinLength } }}</div>
+                }
+              </div>
+            </div>
+
+            <!-- ---- Confirm password (must match, checked by the group validator) ---- -->
+            <div class="mb-3">
+              <label for="reg-confirm" class="form-label">
+                {{ 'login.confirmPassword' | translate }} <span class="required" aria-hidden="true">*</span>
+              </label>
+              <input
+                id="reg-confirm"
+                class="form-control"
+                formControlName="confirmPassword"
+                autocomplete="new-password"
+                [type]="showPassword() ? 'text' : 'password'"
+                [placeholder]="'login.confirmPasswordPlaceholder' | translate"
+                [class.is-invalid]="showError(r.confirmPassword, registerSubmitted()) || showMismatch()"
+                [attr.aria-invalid]="showError(r.confirmPassword, registerSubmitted()) || showMismatch()"
+                [attr.aria-describedby]="showError(r.confirmPassword, registerSubmitted()) || showMismatch() ? 'reg-confirm-error' : null"
+                aria-required="true"
+              />
+              @if (showError(r.confirmPassword, registerSubmitted())) {
+                <div id="reg-confirm-error" class="invalid-feedback d-block">{{ 'login.errors.confirmRequired' | translate }}</div>
+              } @else if (showMismatch()) {
+                <div id="reg-confirm-error" class="invalid-feedback d-block">{{ 'login.errors.passwordMismatch' | translate }}</div>
+              }
+            </div>
+
+            <!-- ---- Accept terms (requiredTrue) ---- -->
+            <div class="mb-4">
+              <div class="form-check">
+                <input
+                  id="reg-terms"
+                  type="checkbox"
+                  class="form-check-input"
+                  formControlName="acceptTerms"
+                  [class.is-invalid]="showError(r.acceptTerms, registerSubmitted())"
+                  [attr.aria-describedby]="showError(r.acceptTerms, registerSubmitted()) ? 'reg-terms-error' : null"
+                />
+                <label for="reg-terms" class="form-check-label link-muted">{{ 'login.acceptTerms' | translate }}</label>
+              </div>
+              @if (showError(r.acceptTerms, registerSubmitted())) {
+                <div id="reg-terms-error" class="invalid-feedback d-block">{{ 'login.errors.termsRequired' | translate }}</div>
+              }
+            </div>
+
+            <!-- ---- Submit ---- -->
+            <button type="submit" class="btn btn-brand w-100" [disabled]="loading()" [attr.aria-busy]="loading()">
+              @if (loading()) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                {{ 'login.registering' | translate }}
+              } @else {
+                {{ 'login.registerSubmit' | translate }}
+              }
+            </button>
+          </form>
+
+          <!-- ---- Already have an account? Sign in ---- -->
+          <p class="register-line mt-4 mb-0">
+            {{ 'login.haveAccount' | translate }}
+            <a href="#" class="link-brand" (click)="$event.preventDefault(); backToLogin()">{{ 'login.signIn' | translate }}</a>
+          </p>
+        }
+      </div>
+
+      <!-- ---- Footer: copyright (start) + version (end) ---- -->
+      <footer class="form-footer">
+        <span>{{ 'login.copyright' | translate: { year: year } }}</span>
+        <span>{{ 'login.version' | translate: { version: version } }}</span>
+      </footer>
+    </main>
+
+    <!-- ========== HERO IMAGE ==========
+      Large screens: the photo column beside the form (as in Figma).
+      Tablets / phones: a banner above the form (order-first), same text. -->
+    <aside class="col-12 col-lg-7 order-first order-lg-last hero-panel">
+      <div class="hero-content">
+        <!-- Sparkle icon from the design -->
+        <svg class="sparkle" viewBox="0 0 64 56" width="56" height="49" aria-hidden="true">
+          <path d="M26 10 C28 24 32 28 46 30 C32 32 28 36 26 50 C24 36 20 32 6 30 C20 28 24 24 26 10 Z" fill="#fff" />
+          <path d="M8 0 C8.6 4 9.5 5 13 5.6 C9.5 6.2 8.6 7 8 11 C7.4 7 6.5 6.2 3 5.6 C6.5 5 7.4 4 8 0 Z" fill="#f5c451" />
+          <path d="M54 12 C54.4 14.6 55 15.2 57.5 15.6 C55 16 54.4 16.6 54 19.2 C53.6 16.6 53 16 50.5 15.6 C53 15.2 53.6 14.6 54 12 Z" fill="#f5c451" />
+        </svg>
+        <h2 class="hero-title">{{ 'login.heroTitle' | translate }}</h2>
+        <p class="hero-text">{{ 'login.heroText' | translate }}</p>
+      </div>
+    </aside>
+  </div>
+</div>

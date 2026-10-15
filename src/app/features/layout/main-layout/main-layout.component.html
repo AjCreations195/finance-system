@@ -1,0 +1,16 @@
+<!-- Top navbar (fixed) -->
+<app-navbar (menuToggle)="sidebarOpen.set(!sidebarOpen())" />
+
+<!-- Sidebar (fixed, inline-start side) -->
+<app-sidebar [collapsed]="sidebarCollapsed()" [open]="sidebarOpen()" (toggleCollapse)="toggleCollapsed()" />
+
+<!-- Backdrop behind the mobile sidebar -->
+@if (sidebarOpen()) {
+  <div class="sidebar-backdrop d-lg-none" (click)="sidebarOpen.set(false)" aria-hidden="true"></div>
+}
+
+<!-- Page area: offset by navbar height and sidebar width -->
+<main class="content">
+  <app-workspace-tabs />
+  <router-outlet />
+</main>

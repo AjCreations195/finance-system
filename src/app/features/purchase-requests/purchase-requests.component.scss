@@ -1,0 +1,430 @@
+/* ======================================================================
+   Purchase requests page (Figma: light grey shell with white cards)
+   ====================================================================== */
+
+.page-shell {
+  padding: 0.75rem;
+  border-radius: var(--fs-radius);
+  background: var(--fs-surface-2);
+
+  @media (min-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+/* ---------------- 1. Header card ---------------- */
+.header-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--fs-border);
+  border-radius: var(--fs-radius);
+  background: var(--fs-surface);
+  box-shadow: var(--fs-shadow);
+}
+
+.header-text {
+  flex: 1;
+  min-width: 16rem;
+}
+
+.title-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--fs-border);
+  border-radius: 0.5rem;
+  color: var(--fs-text-muted);
+}
+
+.page-title {
+  margin: 0;
+  color: var(--fs-text);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.title-sep {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--fs-border);
+}
+
+.expand-btn {
+  padding: 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--fs-text-muted);
+
+  &:hover {
+    color: var(--fs-primary);
+  }
+}
+
+.page-subtitle {
+  margin: 0.375rem 0 0;
+  color: var(--fs-text-muted);
+  font-size: 0.8125rem;
+}
+
+.btn-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2.5rem;
+  padding-inline: 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* ---------------- 2. Main card ---------------- */
+.main-card {
+  overflow: hidden;
+  border: 1px solid var(--fs-border);
+  border-radius: var(--fs-radius);
+  background: var(--fs-surface);
+  box-shadow: var(--fs-shadow);
+
+  /* Full-screen mode (expand button in the header card) */
+  &.expanded {
+    position: fixed;
+    inset: 1rem;
+    z-index: 1070;
+    overflow: auto;
+  }
+}
+
+.expand-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1065;
+  background: rgba(11, 20, 55, 0.45);
+}
+
+.card-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem 0;
+  border-bottom: 1px solid var(--fs-border);
+}
+
+/* Underlined tabs (active = burgundy) */
+.status-tabs {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.status-tab {
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--fs-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  margin-bottom: -1px;
+
+  &:hover {
+    color: var(--fs-text);
+  }
+
+  &.active {
+    color: var(--fs-primary);
+    border-bottom-color: var(--fs-primary);
+    font-weight: 600;
+  }
+}
+
+.status-tabs {
+  align-self: flex-end;
+}
+
+.toolbar-actions {
+  padding-bottom: 0.75rem;
+}
+
+.search-wide {
+  width: 16rem;
+}
+
+/* "Exit full screen" (only in full-screen mode) */
+.collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--fs-primary);
+  }
+}
+
+/* Grey band holding the summary cards */
+.stats-band {
+  padding: 1rem 1.25rem 0.25rem;
+  background: var(--fs-surface-2);
+  border-bottom: 1px solid var(--fs-border);
+}
+
+/* ---------------- Table ---------------- */
+.requests-table {
+  .col-check {
+    width: 2.5rem;
+  }
+
+  .cell-strong {
+    color: var(--fs-text);
+  }
+
+  /* 8 data columns: slightly tighter cells than the shared .fs-table */
+  th,
+  td {
+    padding-inline: 0.5rem;
+  }
+
+  /* Long text columns wrap onto two lines (as in the design) instead of widening the table */
+  .cell-wrap {
+    min-width: 8rem;
+    max-width: 10.5rem;
+  }
+
+  .cell-code {
+    font-size: 0.75rem;
+    white-space: nowrap;
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
+  /* Actions column stays pinned to the inline-end edge while the table
+     scrolls sideways, so the ⋮ menu is always reachable. */
+  th:last-child,
+  td:last-child {
+    position: sticky;
+    inset-inline-end: 0;
+    z-index: 1;
+    background: var(--fs-surface);
+    box-shadow: inset 1px 0 0 var(--fs-border);
+  }
+
+  tbody tr:nth-child(odd) td:last-child {
+    background: var(--fs-row-alt);
+  }
+
+  tbody tr.selected td:last-child {
+    background: var(--fs-row-selected);
+  }
+}
+
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* Row menu: fixed so the scrolling table can't clip it */
+.row-menu {
+  position: fixed;
+  z-index: 1080;
+  width: 11rem;
+  font-size: 0.8125rem;
+}
+
+/* ---------------- 3. Sticky action bar ---------------- */
+.action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 1010;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 1rem -1rem -2rem;
+  padding: 0.875rem 1.25rem;
+  border-top: 1px solid var(--fs-border);
+  background: var(--fs-surface);
+
+  @media (min-width: 768px) {
+    margin-inline: -1.5rem;
+  }
+}
+
+.actions-btn {
+  padding-inline-end: 0;
+  overflow: hidden;
+}
+
+.actions-caret {
+  display: inline-grid;
+  place-items: center;
+  align-self: stretch;
+  width: 2rem;
+  margin-inline-start: 1.5rem;
+  border-inline-start: 1px solid var(--fs-border);
+  background: var(--fs-surface-2);
+}
+
+.bar-menu {
+  position: absolute;
+  bottom: calc(100% + 0.375rem);
+  inset-inline-start: 0;
+  min-width: 12rem;
+  font-size: 0.8125rem;
+}
+
+.count-pill {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding-inline: 0.3rem;
+  border-radius: 999px;
+  background: var(--fs-primary);
+  color: #fff;
+  font-size: 0.6875rem;
+}
+
+/* ---------------- Delete confirmation ---------------- */
+.confirm-backdrop {
+  z-index: 1085;
+}
+
+.confirm-modal {
+  z-index: 1090;
+}
+
+.danger-icon,
+.approve-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  color: var(--fs-badge-rejected);
+  background: var(--fs-badge-rejected-bg);
+}
+
+.approve-icon {
+  color: var(--fs-badge-completed);
+  background: var(--fs-badge-completed-bg);
+}
+
+/* "N already finalised requests will be skipped" in the approve dialog */
+.skip-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--fs-badge-inProgress);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+/* ---------------- Print report ----------------
+   Screen: hidden. Print: replaces the interactive page (see the template). */
+.print-report {
+  display: none;
+}
+
+@media print {
+  .page-shell,
+  .action-bar,
+  .row-menu,
+  .confirm-modal,
+  .confirm-backdrop {
+    display: none !important;
+  }
+
+  .print-report {
+    display: block;
+    color: #000;
+    font-size: 9pt;
+  }
+
+  .print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    padding-bottom: 6pt;
+    border-bottom: 1.5pt solid #000;
+
+    .print-org {
+      display: flex;
+      flex-direction: column;
+
+      strong {
+        font-size: 12pt;
+      }
+    }
+  }
+
+  .print-meta,
+  .print-summary,
+  .sub {
+    color: #444;
+  }
+
+  .print-title {
+    margin: 10pt 0 2pt;
+    font-size: 15pt;
+    font-weight: 700;
+  }
+
+  .print-summary {
+    margin: 0 0 8pt;
+  }
+
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    /* Repeat the column headers on every printed page */
+    thead {
+      display: table-header-group;
+    }
+
+    tr {
+      break-inside: avoid;
+    }
+
+    th,
+    td {
+      padding: 4pt 5pt;
+      border: 0.75pt solid #999;
+      text-align: start;
+      vertical-align: top;
+    }
+
+    th {
+      background: #eee;
+      font-weight: 700;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .nowrap {
+      white-space: nowrap;
+    }
+
+    .sub {
+      font-size: 8pt;
+    }
+  }
+}
