@@ -1,7 +1,8 @@
-import { Component, ElementRef, Injector, afterNextRender, inject, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, Injector, afterNextRender, computed, inject, output, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { LanguageService } from '../../../core/services/language.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { LanguageSwitcherComponent } from '../../../shared/components/language-switcher/language-switcher.component';
 import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/theme-toggle.component';
@@ -39,6 +40,10 @@ export class NavbarComponent {
   private readonly toast = inject(ToastService);
   private readonly language = inject(LanguageService);
   private readonly injector = inject(Injector);
+  private readonly theme = inject(ThemeService);
+
+  /** The logo's text is black; the dark theme uses a copy with light text. */
+  protected readonly logoSrc = computed(() => (this.theme.isDark() ? 'images/moi-logo-dark.svg' : 'images/moi-logo.svg'));
 
   /** Asks the layout to open the mobile sidebar. */
   readonly menuToggle = output<void>();

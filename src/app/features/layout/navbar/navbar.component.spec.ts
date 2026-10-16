@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { NavbarComponent } from './navbar.component';
 
@@ -29,6 +30,19 @@ describe('NavbarComponent', () => {
 
   it('shows the signed-in user name', () => {
     expect(userButton().textContent).toContain('Test User');
+  });
+
+  it('uses the light-text logo in the dark theme', async () => {
+    const logo = () => el.querySelector<HTMLImageElement>('.brand-logo')!.getAttribute('src');
+    const theme = TestBed.inject(ThemeService);
+
+    theme.setTheme('light');
+    await fixture.whenStable();
+    expect(logo()).toBe('images/moi-logo.svg');
+
+    theme.setTheme('dark');
+    await fixture.whenStable();
+    expect(logo()).toBe('images/moi-logo-dark.svg');
   });
 
   it('opens the user menu, and closes it on an outside click', async () => {
