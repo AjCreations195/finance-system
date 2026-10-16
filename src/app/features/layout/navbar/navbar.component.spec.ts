@@ -3,6 +3,8 @@ import { Router, provideRouter } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { PurchaseRequestService } from '../../../core/services/purchase-request.service';
+import { WorkspaceTabsService } from '../../../core/services/workspace-tabs.service';
 import { NavbarComponent } from './navbar.component';
 
 describe('NavbarComponent', () => {
@@ -123,6 +125,77 @@ describe('NavbarComponent', () => {
       focusOut(el.querySelector<HTMLElement>('button[aria-label="Messages"]')!);
       await fixture.whenStable();
       expect(menuOpen()).toBe(false);
+    });
+  });
+
+  describe('global search', () => {
+    const input = () => el.querySelector<HTMLInputElement>('.global-search input')!;
+    const options = () => [...el.querySelectorAll<HTMLElement>('.search-results [role="option"]')];
+    const type = async (text: string) => {
+      input().dispatchEvent(new FocusEvent('focus'));
+      input().value = text;
+      input().dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+    };
+    const key = async (k: string) => {
+      input().dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true }));
+      await fixture.whenStable();
+    };
+
+    it('stays closed until something is typed', async () => {
+      await type('');
+      expect(el.querySelector('.search-results')).toBeNull();
+      expect(input().getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('finds sidebar pages by their label', async () => {
+      await type('procure');
+      expect(options()[0].textContent).toContain('Procurement');
+    });
+
+    it('opens a matching page with Enter', async () => {
+      const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+      await type('procure');
+      await key('Enter');
+      expect(navigate).toHaveBeenCalledWith('/procurement/purchase-requests');
+      expect(input().value).toBe('');
+    });
+
+    it('finds purchase requests by number and opens one in its tab', async () => {
+      const request = TestBed.inject(PurchaseRequestService).requests()[0];
+      const openRequest = vi.spyOn(TestBed.inject(WorkspaceTabsService), 'openRequest').mockImplementation(() => {});
+      await type(request.number);
+
+      options()[0].click();
+      expect(openRequest).toHaveBeenCalledWith(request.id);
+    });
+
+    it('arrow keys move the highlight, and "View all" opens the filtered list', async () => {
+      const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+      const request = TestBed.inject(PurchaseRequestService).requests()[0];
+      await type(request.number);
+      expect(options()[0].getAttribute('aria-selected')).toBe('true');
+
+      await key('ArrowUp'); // wraps to the last option: "View all"
+      const last = options().at(-1)!;
+      expect(last.classList).toContain('view-all');
+      expect(input().getAttribute('aria-activedescendant')).toBe(last.id);
+
+      await key('Enter');
+      expect(navigate).toHaveBeenCalledWith(['/procurement/purchase-requests'], { queryParams: { q: request.number } });
+    });
+
+    it('says so when nothing matches', async () => {
+      await type('zzzz-no-match');
+      expect(options().length).toBe(0);
+      expect(el.querySelector('.results-empty')?.textContent).toContain('zzzz-no-match');
+    });
+
+    it('Escape clears the box', async () => {
+      await type('procure');
+      await key('Escape');
+      expect(input().value).toBe('');
+      expect(el.querySelector('.search-results')).toBeNull();
     });
   });
 

@@ -231,6 +231,17 @@ export class PurchaseOrdersComponent {
       pageState.save(STATE_KEY, state);
     });
 
+    // "View all" in the navbar search arrives as ?q=term: show every request matching
+    // it (clearing tab / status filters that could hide some), then drop q from the URL.
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      const q = params.get('q');
+      if (q === null) return;
+      this.tab.set('all');
+      this.status.set('all');
+      this.onSearch(q);
+      this.router.navigate([], { relativeTo: this.route, queryParams: { q: null }, queryParamsHandling: 'merge', replaceUrl: true });
+    });
+
     // Lock page scrolling while the table card is in full-screen mode.
     const doc = inject(DOCUMENT);
     // (also while the details panel is open)

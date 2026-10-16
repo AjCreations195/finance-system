@@ -21,11 +21,57 @@
 
   <!-- ===== Global search (centered, xl+ only, where it doesn't crowd the navbar;
        icon on the end side as in Figma) ===== -->
-  <form class="global-search search-box d-none d-xl-flex" role="search"
-    (submit)="$event.preventDefault(); notAvailable()">
-    <input type="search" [placeholder]="'layout.searchPlaceholder' | translate"
-      [attr.aria-label]="'common.search' | translate" />
+  <form class="global-search search-box d-none d-xl-flex" role="search" (submit)="$event.preventDefault()">
+    <input #searchInput type="search" role="combobox" autocomplete="off" aria-autocomplete="list"
+      aria-controls="global-search-results" [attr.aria-expanded]="searchOpen()"
+      [attr.aria-activedescendant]="activeId()" [value]="query()" (input)="onQuery($any($event.target).value)"
+      (focus)="onSearchFocus(true)" (blur)="onSearchFocus(false)" (keydown)="onSearchKey($event)"
+      [placeholder]="'layout.searchPlaceholder' | translate" [attr.aria-label]="'common.search' | translate" />
     <app-icon name="search" class="search-icon" />
+    <kbd class="kbd-hint" aria-hidden="true">/</kbd>
+
+    @if (searchOpen()) {
+    <!-- mousedown is cancelled so clicking a result doesn't blur (and close) the box first -->
+    <div id="global-search-results" class="search-results" role="listbox"
+      [attr.aria-label]="'common.search' | translate" (mousedown)="$event.preventDefault()">
+      @if (pageResults().length) {
+      <div class="results-heading" role="presentation">{{ 'layout.search.pages' | translate }}</div>
+      @for (node of pageResults(); track node.label; let i = $index) {
+      <div class="result" role="option" [id]="'gs-opt-' + i" [class.active]="active() === i"
+        [attr.aria-selected]="active() === i" (click)="choose(i)" (mousemove)="active.set(i)">
+        <span class="result-icon"><app-icon [name]="node.icon" /></span>
+        <span class="result-title">{{ node.label | translate }}</span>
+      </div>
+      }
+      }
+
+      @if (requestResults().length) {
+      <div class="results-heading" role="presentation">{{ 'layout.search.requests' | translate }}</div>
+      @for (r of requestResults(); track r.id; let j = $index) {
+      @let i = pageResults().length + j;
+      <div class="result" role="option" [id]="'gs-opt-' + i" [class.active]="active() === i"
+        [attr.aria-selected]="active() === i" (click)="choose(i)" (mousemove)="active.set(i)">
+        <span class="status-dot" [style.background]="'var(--fs-badge-' + statusBadge[r.status] + ')'" aria-hidden="true"></span>
+        <span class="result-text">
+          <span class="result-title" dir="ltr">{{ r.number }}</span>
+          <span class="result-sub">{{ r.description | localize }}</span>
+        </span>
+        <span class="result-meta">{{ 'requests.status.' + r.status | translate }}</span>
+      </div>
+      }
+      @let all = options().length - 1;
+      <div class="result view-all" role="option" [id]="'gs-opt-' + all" [class.active]="active() === all"
+        [attr.aria-selected]="active() === all" (click)="choose(all)" (mousemove)="active.set(all)">
+        {{ 'layout.search.viewAll' | translate: { count: requestCount() } }}
+        <app-icon name="arrow-left" class="view-all-arrow" />
+      </div>
+      }
+
+      @if (!options().length) {
+      <div class="results-empty" role="status">{{ 'layout.search.noResults' | translate: { query: query().trim() } }}</div>
+      }
+    </div>
+    }
   </form>
 
   <!-- ===== End side: user + icon buttons ===== -->

@@ -140,7 +140,13 @@ export const AR: TranslationDictionary = {
     expand: 'توسيع القائمة الجانبية',
   },
   layout: {
-    searchPlaceholder: 'بحث',
+    searchPlaceholder: 'ابحث في الطلبات والصفحات',
+    search: {
+      pages: 'الصفحات',
+      requests: 'طلبات الشراء',
+      viewAll: 'عرض كل الطلبات المطابقة ({{count}})',
+      noResults: 'لا توجد نتائج لـ "{{query}}"',
+    },
     messages: 'الرسائل',
     notifications: 'الإشعارات',
     breadcrumb: 'مسار التنقل',

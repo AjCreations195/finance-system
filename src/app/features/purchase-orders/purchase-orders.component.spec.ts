@@ -92,6 +92,55 @@ describe('PurchaseOrdersComponent', () => {
       expect(rows().length).toBe(0);
       expect(component['totalPages']()).toBe(1);
     });
+
+    describe('?q= from the navbar search ("View all")', () => {
+      const searchBox = () => el.querySelector<HTMLInputElement>('input[type="search"]')!;
+
+      it('fills the search, clears tab / status / page, and drops q from the URL', async () => {
+        component['setTab']('rejected');
+        component['setStatus']('rejected');
+        component['goTo'](2);
+
+        await TestBed.inject(Router).navigateByUrl('/?q=BDRS%2F2016%2F019%2F0008');
+        await fixture.whenStable();
+
+        expect(component['tab']()).toBe('all');
+        expect(component['status']()).toBe('all');
+        expect(component['currentPage']()).toBe(1);
+        expect(searchBox().value).toBe('BDRS/2016/019/0008');
+        expect(rows().map((r) => r.id)).toEqual([1]);
+        expect(TestBed.inject(Router).url).not.toContain('q=');
+      });
+
+      it('keeps other query params (an open request) while dropping q', async () => {
+        await TestBed.inject(Router).navigateByUrl('/?view=5&q=cables');
+        await fixture.whenStable();
+
+        expect(component['search']()).toBe('cables');
+        expect(TestBed.inject(Router).url).toBe('/?view=5');
+      });
+
+      it('wins over the list state restored from an earlier visit', async () => {
+        component['onSearch']('old search');
+        await fixture.whenStable();
+        fixture.destroy();
+
+        await TestBed.inject(Router).navigateByUrl('/?q=fares');
+        fixture = TestBed.createComponent(PurchaseOrdersComponent);
+        component = fixture.componentInstance;
+        await fixture.whenStable();
+
+        expect(component['search']()).toBe('fares');
+      });
+
+      it('leaves the list alone when there is no q', async () => {
+        component['onSearch']('kept');
+        await TestBed.inject(Router).navigateByUrl('/?view=5');
+        await fixture.whenStable();
+
+        expect(component['search']()).toBe('kept');
+      });
+    });
   });
 
   it('sorting by notes orders the rows numerically', () => {

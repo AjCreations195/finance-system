@@ -140,7 +140,13 @@ export const EN = {
     expand: 'Expand sidebar',
   },
   layout: {
-    searchPlaceholder: 'Search',
+    searchPlaceholder: 'Search requests and pages',
+    search: {
+      pages: 'Pages',
+      requests: 'Purchase requests',
+      viewAll: 'View all {{count}} matching requests',
+      noResults: 'No results for "{{query}}"',
+    },
     messages: 'Messages',
     notifications: 'Notifications',
     breadcrumb: 'Breadcrumb',
