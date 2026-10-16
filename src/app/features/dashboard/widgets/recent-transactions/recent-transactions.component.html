@@ -19,7 +19,7 @@
               </button>
             </th>
           }
-          <th scope="col"><span class="visually-hidden">{{ 'common.actions' | translate }}</span></th>
+          <th scope="col" class="actions-col"><span class="visually-hidden">{{ 'common.actions' | translate }}</span></th>
         </tr>
       </thead>
       <tbody>
@@ -37,9 +37,11 @@
               </div>
             </td>
             <td class="text-nowrap">{{ duration(t) }}</td>
-            <td>
+            <!-- ⋮ column: pinned to the visible edge on phones (styles.scss .actions-col) -->
+            <td class="actions-col">
               <div class="row-actions">
-                <button type="button" (click)="notAvailable()" [attr.aria-label]="'common.moreOptions' | translate">
+                <button type="button" (click)="openRowMenu(t, $event)" [attr.aria-label]="'common.moreOptions' | translate"
+                        [attr.aria-expanded]="rowMenu()?.item?.id === t.id" aria-haspopup="menu">
                   <app-icon name="more-vertical" />
                 </button>
               </div>
@@ -57,3 +59,45 @@
     <span class="show-more-arrow"><app-icon name="arrow-left" /></span>
   </button>
 </app-dashboard-card>
+
+<!-- ===================== ROW MENU (⋮) ===================== -->
+@if (rowMenu(); as menu) {
+  <ul class="dropdown-menu show row-menu row-menu-wide" role="menu" [style.top.px]="menu.top" [style.left.px]="menu.left" [attr.aria-label]="menu.item.number">
+    <li>
+      <button type="button" class="dropdown-item" role="menuitem" (click)="copyNumber(menu.item)">
+        <app-icon name="copy" class="me-2" />{{ 'transactions.actions.copyNumber' | translate }}
+      </button>
+    </li>
+    <li>
+      <a class="dropdown-item" role="menuitem" [href]="'mailto:' + menu.item.employee.email" (click)="emailEmployee()">
+        <app-icon name="bi-envelope" class="me-2" />{{ 'transactions.actions.emailEmployee' | translate }}
+      </a>
+    </li>
+    <li><hr class="dropdown-divider" /></li>
+    <li>
+      <button type="button" class="dropdown-item text-danger" role="menuitem" (click)="askHide(menu.item)">
+        <app-icon name="delete" class="me-2" />{{ 'transactions.actions.hide' | translate }}
+      </button>
+    </li>
+  </ul>
+}
+
+<!-- ===================== HIDE CONFIRMATION ===================== -->
+@if (pendingHide(); as item) {
+  <div class="modal-backdrop fade show confirm-backdrop"></div>
+  <div class="modal d-block confirm-modal" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="hide-title" (click)="pendingHide.set(null)">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-body text-center p-4">
+          <span class="danger-icon mb-3"><app-icon name="delete" /></span>
+          <h2 id="hide-title" class="h5 fw-bold">{{ 'transactions.confirmHide.title' | translate }}</h2>
+          <p class="text-muted-fs mb-4">{{ 'transactions.confirmHide.message' | translate: { number: item.number } }}</p>
+          <div class="d-flex gap-2 justify-content-center">
+            <button type="button" class="btn-fs px-4" (click)="pendingHide.set(null)">{{ 'common.cancel' | translate }}</button>
+            <button type="button" class="btn btn-danger px-4" (click)="confirmHide()">{{ 'transactions.confirmHide.confirm' | translate }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

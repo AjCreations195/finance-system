@@ -41,7 +41,7 @@ describe('LanguageSwitcherComponent', () => {
     await fixture.whenStable();
     const [en, ar] = options(fixture.nativeElement);
     expect(en.textContent!.trim()).toBe('EN');
-    expect(ar.textContent!.trim()).toBe('Ar');
+    expect(ar.textContent!.trim()).toBe('AR');
     expect(en.getAttribute('aria-pressed')).toBe('true');
     expect(ar.getAttribute('aria-pressed')).toBe('false');
     expect(ar.getAttribute('aria-label')).toBe('العربية');
@@ -332,6 +332,38 @@ describe('SelectMenuComponent', () => {
     expect(trigger.textContent).toContain('All');
     expect(trigger.querySelector('.bi-grid')).not.toBeNull();
     expect(trigger.getAttribute('aria-label')).toBe('Filter: All');
+  });
+
+  it('Esc closes only the list, without reaching a panel around it', async () => {
+    const { fixture, el, trigger } = await setup();
+    const outerEsc = vi.fn();
+    document.addEventListener('keydown', outerEsc);
+    trigger.click();
+    await fixture.whenStable();
+
+    el.querySelector('[role="listbox"]')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
+    document.removeEventListener('keydown', outerEsc);
+
+    expect(el.querySelector('[role="listbox"]')).toBeNull();
+    expect(outerEsc).not.toHaveBeenCalled();
+  });
+
+  it('has a borderless text look and can open toward the inline end', async () => {
+    const fixture = TestBed.createComponent(SelectMenuComponent);
+    fixture.componentRef.setInput('options', [{ value: 'all', label: 'common.all' }]);
+    fixture.componentRef.setInput('value', 'all');
+    fixture.componentRef.setInput('appearance', 'text');
+    fixture.componentRef.setInput('align', 'start');
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+    const trigger = el.querySelector<HTMLButtonElement>('.trigger')!;
+    expect(trigger.classList).toContain('text-trigger');
+    expect(trigger.classList).not.toContain('btn-fs');
+
+    trigger.click();
+    await fixture.whenStable();
+    expect(el.querySelector('.menu')!.classList).toContain('align-start');
   });
 
   it('selects an option (two-way bound), closes and returns focus to the button', async () => {

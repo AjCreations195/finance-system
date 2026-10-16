@@ -195,7 +195,7 @@
   /* Active page (design: burgundy text on light pink) */
   &.active {
     background: var(--fs-primary-soft);
-    color: var(--fs-primary);
+    color: var(--fs-primary-text);
   }
 
   &.disabled {
@@ -211,7 +211,7 @@
   color: var(--fs-text-muted);
 
   .active > & {
-    color: var(--fs-primary);
+    color: var(--fs-primary-text);
   }
 }
 

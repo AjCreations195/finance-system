@@ -1,7 +1,7 @@
 import { LocalizedText, Person } from './dashboard.models';
 
 /**
- * Purchase request statuses, exactly as in the Figma table.
+ * Purchase request statuses: the Figma table's, plus 'delivered' from the task brief.
  * Each value is a translation key (`requests.status.<value>`).
  */
 export type RequestStatus =
@@ -17,11 +17,12 @@ export type RequestStatus =
   | 'suspended'
   | 'verified'
   | 'notExecutable'
-  | 'closed';
+  | 'closed'
+  | 'delivered';
 
 export const REQUEST_STATUSES: readonly RequestStatus[] = [
   'accepted', 'inProgress', 'finished', 'forReview', 'sent', 'rejected', 'pending',
-  'completed', 'inCorrection', 'suspended', 'verified', 'notExecutable', 'closed',
+  'completed', 'inCorrection', 'suspended', 'verified', 'notExecutable', 'closed', 'delivered',
 ];
 
 /**
@@ -32,6 +33,7 @@ export const STATUS_BADGE: Record<RequestStatus, string> = {
   accepted: 'completed',
   completed: 'completed',
   closed: 'completed',
+  delivered: 'completed',
   inProgress: 'inProgress',
   inCorrection: 'inProgress',
   finished: 'executed',
@@ -52,6 +54,7 @@ export const STATUS_ICON: Record<RequestStatus, string> = {
   accepted: 'done',
   completed: 'done',
   closed: 'done',
+  delivered: 'done',
   inProgress: 'in-progress',
   inCorrection: 'in-progress',
   finished: 'done',
@@ -68,14 +71,14 @@ export const STATUS_ICON: Record<RequestStatus, string> = {
 export type RequestTab = 'all' | 'fullyCompleted' | 'partiallyCompleted' | 'inProgress' | 'rejected';
 
 export const TAB_STATUSES: Record<Exclude<RequestTab, 'all'>, readonly RequestStatus[]> = {
-  fullyCompleted: ['accepted', 'completed', 'finished', 'closed'],
+  fullyCompleted: ['accepted', 'completed', 'finished', 'closed', 'delivered'],
   partiallyCompleted: ['verified', 'suspended'],
   inProgress: ['inProgress', 'forReview', 'sent', 'pending', 'inCorrection'],
   rejected: ['rejected', 'notExecutable'],
 };
 
 /** Final statuses: the request can't be approved any more. */
-export const FINAL_STATUSES: readonly RequestStatus[] = ['accepted', 'completed', 'finished', 'closed', 'rejected', 'notExecutable'];
+export const FINAL_STATUSES: readonly RequestStatus[] = ['accepted', 'completed', 'finished', 'closed', 'delivered', 'rejected', 'notExecutable'];
 
 /** Budget line the request is charged to (name + budget code). */
 export interface BudgetItem {
@@ -126,8 +129,8 @@ export interface ActivityEntry {
   /** Highlighted part of the message (a person or a step), shown in the brand color. */
   highlight?: LocalizedText;
   attachment?: { name: string; size: string };
-  /** Small chips listing the individual actions taken. */
-  tags?: LocalizedText[];
+  /** Small chips listing the individual actions taken; `danger` (e.g. a removal) shows in red. */
+  tags?: { label: LocalizedText; tone?: 'danger' }[];
 }
 
 export interface RequestAttachment {

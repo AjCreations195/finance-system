@@ -44,7 +44,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
       height: 2.75rem;
       padding: 0.25rem;
       border: 1px solid var(--fs-border);
-      border-radius: 999px;
+      border-radius: 0.75rem; /* same as the theme button next to it */
       background: var(--fs-surface-2);
 
       &.compact {
@@ -57,7 +57,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
       min-width: 2.75rem;
       padding: 0 0.875rem;
       border: 0;
-      border-radius: 999px;
+      border-radius: 0.5rem; /* outer 12px minus the 4px padding: parallel curves */
       background: transparent;
       color: var(--fs-text-muted);
       font-size: 0.9375rem;
@@ -111,6 +111,6 @@ export class LanguageSwitcherComponent {
 
   protected readonly options: { code: LanguageCode; short: string; name: string }[] = [
     { code: 'en', short: 'EN', name: 'English' },
-    { code: 'ar', short: 'Ar', name: 'العربية' },
+    { code: 'ar', short: 'AR', name: 'العربية' },
   ];
 }

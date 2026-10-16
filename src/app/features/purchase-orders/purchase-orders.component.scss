@@ -62,7 +62,7 @@
   color: var(--fs-text-muted);
 
   &:hover {
-    color: var(--fs-primary);
+    color: var(--fs-primary-text);
   }
 }
 
@@ -145,8 +145,8 @@
   }
 
   &.active {
-    color: var(--fs-primary);
-    border-bottom-color: var(--fs-primary);
+    color: var(--fs-primary-text);
+    border-bottom-color: var(--fs-primary-text);
     font-weight: 600;
   }
 }
@@ -171,7 +171,7 @@
   white-space: nowrap;
 
   &:hover {
-    color: var(--fs-primary);
+    color: var(--fs-primary-text);
   }
 }
 
@@ -237,14 +237,6 @@
   background: none;
 }
 
-/* Row menu: fixed so the scrolling table can't clip it */
-.row-menu {
-  position: fixed;
-  z-index: 1080;
-  width: 11rem;
-  font-size: 0.8125rem;
-}
-
 /* ---------------- 3. Sticky action bar ---------------- */
 .action-bar {
   position: sticky;
@@ -300,31 +292,7 @@
   font-size: 0.6875rem;
 }
 
-/* ---------------- Delete confirmation ---------------- */
-.confirm-backdrop {
-  z-index: 1085;
-}
-
-.confirm-modal {
-  z-index: 1090;
-}
-
-.danger-icon,
-.approve-icon {
-  display: inline-grid;
-  place-items: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 50%;
-  font-size: 1.4rem;
-  color: var(--fs-badge-rejected);
-  background: var(--fs-badge-rejected-bg);
-}
-
-.approve-icon {
-  color: var(--fs-badge-completed);
-  background: var(--fs-badge-completed-bg);
-}
+/* Row menu and confirmation dialogs: shared styles in styles.scss */
 
 /* "N already finalised requests will be skipped" in the approve dialog */
 .skip-note {

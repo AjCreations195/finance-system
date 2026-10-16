@@ -68,7 +68,8 @@ export const AR: TranslationDictionary = {
     invalidCredentials: 'اسم المستخدم أو كلمة المرور غير صحيحة.',
     featureNotAvailable: 'هذه الميزة غير متاحة.',
     heroTitle: 'ابدأ بتحويل أفكارك إلى حقيقة.',
-    heroText: 'أنشئ حساباً مجانياً واحصل على وصول كامل لجميع الميزات لمدة 30 يوماً. لا حاجة لبطاقة ائتمان. ابدأ خلال دقيقتين.',
+    // Proposed wording (the design had template text); awaiting client confirmation.
+    heroText: 'إدارة الموازنات وطلبات الشراء والاعتمادات المالية في مكان واحد آمن.',
     copyright: 'وزارة الداخلية {{year}} © جميع الحقوق محفوظة',
     version: 'النظام المالي، الإصدار {{version}}',
     capsLock: 'مفتاح الأحرف الكبيرة (Caps Lock) مفعّل',
@@ -180,9 +181,15 @@ export const AR: TranslationDictionary = {
     awaitingApproval: 'في انتظار اعتماد طلب مشتريات',
     approved: 'تم اعتماد طلب مشتريات',
     commentAdded: 'تم إضافة تعليق على طلب مشتريات',
-    review: 'مراجعة',
+    approve: 'موافقة',
     reject: 'رفض',
+    approvedToast: 'تم اعتماد طلب المشتريات.',
     rejected: 'تم رفض طلب المشتريات.',
+    todayAt: 'اليوم في الساعة {{time}}',
+    yesterdayAt: 'أمس في الساعة {{time}}',
+    dateAt: '{{date}} في الساعة {{time}}',
+    am: 'صباحاً',
+    pm: 'مساءً',
     empty: 'لا توجد إشعارات.',
   },
   dashboard: {
@@ -225,16 +232,32 @@ export const AR: TranslationDictionary = {
       executed: 'تم التنفيذ',
       review: 'المراجعة',
       sent: 'تم الإرسال',
+      rejected: 'مرفوض',
     },
     actions: {
       approve: 'اعتماد',
       return: 'إرجاع',
       reject: 'رفض',
       view: 'عرض',
+      copyNumber: 'نسخ رقم المعاملة',
+      markInProgress: 'تحويل إلى تحت الإجراء',
+      delete: 'حذف المعاملة',
     },
     toast: {
       approved: 'تم اعتماد المعاملة {{number}}.',
       returned: 'تم إرجاع المعاملة {{number}} للمراجعة.',
+      rejected: 'تم رفض المعاملة {{number}}.',
+      inProgress: 'تم تحويل المعاملة {{number}} إلى تحت الإجراء.',
+      deleted: 'تم حذف المعاملة {{number}}.',
+      numberCopied: 'تم نسخ رقم المعاملة.',
+    },
+    confirmReject: {
+      title: 'رفض هذه المعاملة؟',
+      message: 'سيتم تحديد المعاملة {{number}} كمرفوضة.',
+    },
+    confirmDelete: {
+      title: 'حذف هذه المعاملة؟',
+      message: 'ستتم إزالة المعاملة {{number}} من قائمتك. لا يمكن التراجع عن ذلك.',
     },
   },
   activities: {
@@ -291,6 +314,20 @@ export const AR: TranslationDictionary = {
       month: 'أشهر',
       year: 'سنوات',
     },
+    actions: {
+      copyNumber: 'نسخ رقم المعاملة',
+      emailEmployee: 'مراسلة الموظف',
+      hide: 'إخفاء من المعاملات الأخيرة',
+    },
+    toast: {
+      numberCopied: 'تم نسخ رقم المعاملة.',
+      hidden: 'تم إخفاء المعاملة {{number}} من المعاملات الأخيرة.',
+    },
+    confirmHide: {
+      title: 'إخفاء هذه المعاملة؟',
+      message: 'سيتم إخفاء المعاملة {{number}} من قائمة المعاملات الأخيرة.',
+      confirm: 'إخفاء',
+    },
   },
   warehouses: {
     title: 'المستودعات',
@@ -304,6 +341,25 @@ export const AR: TranslationDictionary = {
       min: 'أقل حد للطلب',
       max: 'أعلى حد للطلب',
     },
+    actions: {
+      copyNumber: 'نسخ رقم المنتج',
+      restock: 'تعبئة حتى الحد الأعلى',
+      delete: 'حذف المادة',
+    },
+    toast: {
+      numberCopied: 'تم نسخ رقم المنتج.',
+      restocked: 'تمت تعبئة {{product}} إلى {{quantity}}.',
+      deleted: 'تم حذف {{product}}.',
+    },
+    confirmRestock: {
+      title: 'تعبئة هذه المادة؟',
+      message: 'ستتغير كمية {{product}} من {{from}} إلى أعلى حد للطلب ({{to}}).',
+      confirm: 'تعبئة',
+    },
+    confirmDelete: {
+      title: 'حذف هذه المادة؟',
+      message: 'سيتم حذف {{product}} نهائياً من المستودع. لا يمكن التراجع عن ذلك.',
+    },
   },
   contracts: {
     title: 'العقود',
@@ -313,6 +369,25 @@ export const AR: TranslationDictionary = {
       supplier: 'المورد',
       date: 'تاريخ',
       progress: 'حالة العقد',
+    },
+    actions: {
+      copyNumber: 'نسخ رقم العقد',
+      complete: 'تحديد كمكتمل',
+      delete: 'حذف العقد',
+    },
+    toast: {
+      numberCopied: 'تم نسخ رقم العقد.',
+      completed: 'تم تحديد العقد {{number}} كمكتمل.',
+      deleted: 'تم حذف العقد {{number}}.',
+    },
+    confirmComplete: {
+      title: 'تحديد هذا العقد كمكتمل؟',
+      message: 'سيتغير إنجاز العقد {{number}} مع {{supplier}} من {{from}}% إلى 100%.',
+      confirm: 'تحديد كمكتمل',
+    },
+    confirmDelete: {
+      title: 'حذف هذا العقد؟',
+      message: 'سيتم حذف العقد {{number}} مع {{supplier}} نهائياً. لا يمكن التراجع عن ذلك.',
     },
   },
   budget: {
@@ -380,6 +455,7 @@ export const AR: TranslationDictionary = {
       verified: 'تم التحقق',
       notExecutable: 'غير قابل للتنفيذ',
       closed: 'مغلقة',
+      delivered: 'تم التسليم',
     },
     rowActions: {
       view: 'عرض',

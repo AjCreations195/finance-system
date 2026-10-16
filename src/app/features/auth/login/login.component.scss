@@ -25,18 +25,18 @@
 
 /* ---- Dark theme (derived from the light design) ---- */
 :host-context([data-bs-theme='dark']) {
-  --login-bg: #111c44;
+  --login-bg: #1e1d1d;
   --login-navy: #ffffff;
   --login-brand: #a3214f;
   --login-brand-hover: #b92a5c;
-  --login-text: #e6e9f2;
-  --login-subtitle: #a3aed0;
-  --login-muted: #a3aed0;
-  --login-footer: #8f9bc4; /* 5.9:1 on --login-bg (AA) */
-  --login-hint: #a3aed0;
-  --login-border: #2a3566;
-  --login-input-bg: #0b1437;
-  --login-placeholder: #707eae;
+  --login-text: #f2f0f0;
+  --login-subtitle: #a8a3a3;
+  --login-muted: #a8a3a3;
+  --login-footer: #a8a3a3; /* 6.7:1 on --login-bg (AA) */
+  --login-hint: #a8a3a3;
+  --login-border: #403d3d;
+  --login-input-bg: #151414;
+  --login-placeholder: #8a8585;
   --login-required: #ff6b6b;
 }
 

@@ -75,7 +75,8 @@ function safeReturnUrl(url: string | null): string {
  *  - lg and up: form column (col-lg-5) + hero image column (col-lg-7).
  *    The form comes first in the DOM, so it's on the RIGHT in Arabic (RTL)
  *    and on the LEFT in English (LTR), with no extra CSS.
- *  - below lg: the hero image is hidden and the form takes full width.
+ *  - below lg: the form takes full width and the hero becomes a banner
+ *    above it (order-first); on phones (< 576px) it shows the title only.
  *
  * Three views share the same card (same design styles):
  *  - 'login'    → username + password form
@@ -83,8 +84,10 @@ function safeReturnUrl(url: string | null): string {
  *  - 'register' → create-account form; the new account can sign in right away
  *
  * Behaviour:
- *  - Field errors appear after the field is touched or the form is submitted;
- *    on a failed submit the first invalid field gets focus.
+ *  - Field errors appear once the user has typed in a field and left it, or
+ *    after a submit. Just focusing a field and clicking away (e.g. the
+ *    auto-focused username on page load) shows nothing yet.
+ *    On a failed submit the first invalid field gets focus.
  *  - The submit button shows a spinner and is disabled while the request runs.
  *  - Wrong credentials show an alert, cleared as soon as the user edits.
  *  - A Caps Lock warning appears while typing the password.
@@ -187,9 +190,13 @@ export class LoginComponent {
     });
   }
 
-  /** Whether a control's error should be shown (touched or submitted). */
+  /**
+   * Whether a control's error should be shown: after the user typed in it and
+   * left it (dirty + touched), or after a submit. "Touched" alone isn't enough,
+   * since the username is focused automatically on page load.
+   */
   protected showError(control: AbstractControl, submitted = this.submitted()): boolean {
-    return control.invalid && (control.touched || submitted);
+    return control.invalid && ((control.dirty && control.touched) || submitted);
   }
 
 

@@ -4,11 +4,11 @@ import { Router, provideRouter } from '@angular/router';
 import { TAB_STATUSES } from '../../core/models/purchase-request.model';
 import { PurchaseRequestService } from '../../core/services/purchase-request.service';
 import { ToastService } from '../../core/services/toast.service';
-import { PurchaseRequestsComponent } from './purchase-requests.component';
+import { PurchaseOrdersComponent } from './purchase-orders.component';
 
-describe('PurchaseRequestsComponent', () => {
-  let fixture: ComponentFixture<PurchaseRequestsComponent>;
-  let component: PurchaseRequestsComponent;
+describe('PurchaseOrdersComponent', () => {
+  let fixture: ComponentFixture<PurchaseOrdersComponent>;
+  let component: PurchaseOrdersComponent;
   let el: HTMLElement;
   let service: PurchaseRequestService;
   let toast: ToastService;
@@ -16,8 +16,8 @@ describe('PurchaseRequestsComponent', () => {
   beforeEach(async () => {
     localStorage.clear();
     sessionStorage.clear(); // list state saved by PageStateService
-    await TestBed.configureTestingModule({ imports: [PurchaseRequestsComponent], providers: [provideRouter([])] }).compileComponents();
-    fixture = TestBed.createComponent(PurchaseRequestsComponent);
+    await TestBed.configureTestingModule({ imports: [PurchaseOrdersComponent], providers: [provideRouter([])] }).compileComponents();
+    fixture = TestBed.createComponent(PurchaseOrdersComponent);
     component = fixture.componentInstance;
     el = fixture.nativeElement;
     service = TestBed.inject(PurchaseRequestService);
@@ -124,6 +124,16 @@ describe('PurchaseRequestsComponent', () => {
       const inProgress = service.getById(2)!; // seeded as 'inProgress'
       expect(component['canApprove'](accepted)).toBe(false);
       expect(component['canApprove'](inProgress)).toBe(true);
+    });
+
+    it('treats delivered requests as final and lists them under "Fully completed"', () => {
+      const delivered = service.requests().find((r) => r.status === 'delivered')!;
+      expect(component['canApprove'](delivered)).toBe(false);
+
+      component['setTab']('fullyCompleted');
+      component['setStatus']('delivered');
+      expect(component['rows']().length).toBeGreaterThan(0);
+      expect(component['rows']().every((r) => r.status === 'delivered')).toBe(true);
     });
 
     it('approve sets the status to accepted and shows a toast', () => {
@@ -453,7 +463,7 @@ describe('PurchaseRequestsComponent', () => {
       fixture.destroy();
 
       // The page is created again when its tab is selected.
-      const again = TestBed.createComponent(PurchaseRequestsComponent).componentInstance;
+      const again = TestBed.createComponent(PurchaseOrdersComponent).componentInstance;
       expect(again['tab']()).toBe('inProgress');
       expect(again['status']()).toBe('pending');
       expect(again['search']()).toBe('BDRS');
@@ -469,7 +479,7 @@ describe('PurchaseRequestsComponent', () => {
       fixture.destroy();
       service.delete([2]);
 
-      const again = TestBed.createComponent(PurchaseRequestsComponent).componentInstance;
+      const again = TestBed.createComponent(PurchaseOrdersComponent).componentInstance;
       expect([...again['selected']()]).toEqual([1]);
     });
   });

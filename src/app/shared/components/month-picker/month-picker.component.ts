@@ -153,7 +153,7 @@ export function monthsBetween(from: YearMonth, to: YearMonth): number {
       border: 0;
       border-top: 1px solid var(--fs-border);
       background: none;
-      color: var(--fs-primary);
+      color: var(--fs-primary-text);
       font-size: 0.75rem;
       font-weight: 600;
     }

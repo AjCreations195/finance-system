@@ -24,7 +24,7 @@
               </button>
             </th>
           }
-          <th scope="col"><span class="visually-hidden">{{ 'common.actions' | translate }}</span></th>
+          <th scope="col" class="actions-col"><span class="visually-hidden">{{ 'common.actions' | translate }}</span></th>
         </tr>
       </thead>
       <tbody>
@@ -55,22 +55,24 @@
               </div>
             </td>
             <td class="text-nowrap">{{ task.date | localDate: 'long' }}</td>
-            <!-- Row actions (design: approve, return, reject, view, more) -->
-            <td>
+            <!-- Row actions (design: approve, return, reject, view, more).
+                 Phones: only ⋮ (the others move into its menu), in a column pinned to the visible edge. -->
+            <td class="actions-col">
               <div class="row-actions">
-                <button type="button" (click)="approve(task)" [disabled]="task.status === 'completed'" [title]="'tasks.actions.approve' | translate" [attr.aria-label]="'tasks.actions.approve' | translate">
+                <button type="button" class="d-none d-md-inline-grid" (click)="approve(task)" [disabled]="task.status === 'completed'" [title]="'tasks.actions.approve' | translate" [attr.aria-label]="'tasks.actions.approve' | translate">
                   <app-icon name="approve" />
                 </button>
-                <button type="button" (click)="returnTask(task)" [disabled]="task.status === 'review'" [title]="'tasks.actions.return' | translate" [attr.aria-label]="'tasks.actions.return' | translate">
+                <button type="button" class="d-none d-md-inline-grid" (click)="returnTask(task)" [disabled]="task.status === 'review'" [title]="'tasks.actions.return' | translate" [attr.aria-label]="'tasks.actions.return' | translate">
                   <app-icon name="return" />
                 </button>
-                <button type="button" (click)="notAvailable()" [title]="'tasks.actions.reject' | translate" [attr.aria-label]="'tasks.actions.reject' | translate">
+                <button type="button" class="d-none d-md-inline-grid" (click)="askReject(task)" [disabled]="task.status === 'rejected'" [title]="'tasks.actions.reject' | translate" [attr.aria-label]="'tasks.actions.reject' | translate">
                   <app-icon name="reject" />
                 </button>
-                <button type="button" (click)="notAvailable()" [title]="'tasks.actions.view' | translate" [attr.aria-label]="'tasks.actions.view' | translate">
+                <button type="button" class="d-none d-md-inline-grid" (click)="notAvailable()" [title]="'tasks.actions.view' | translate" [attr.aria-label]="'tasks.actions.view' | translate">
                   <app-icon name="eye" />
                 </button>
-                <button type="button" (click)="notAvailable()" [attr.aria-label]="'common.moreOptions' | translate">
+                <button type="button" (click)="openRowMenu(task, $event)" [attr.aria-label]="'common.moreOptions' | translate"
+                        [attr.aria-expanded]="rowMenu()?.task?.id === task.id" aria-haspopup="menu">
                   <app-icon name="more-vertical" />
                 </button>
               </div>
@@ -94,3 +96,87 @@
     </div>
   </div>
 </app-dashboard-card>
+
+<!-- ===================== ROW MENU (⋮) ===================== -->
+@if (rowMenu(); as menu) {
+  <ul class="dropdown-menu show row-menu" role="menu" [style.top.px]="menu.top" [style.left.px]="menu.left" [attr.aria-label]="menu.task.number">
+    <!-- Phones only: the row buttons, which are hidden there -->
+    <li class="d-md-none">
+      <button type="button" class="dropdown-item" role="menuitem" (click)="closeRowMenu(); approve(menu.task)" [disabled]="menu.task.status === 'completed'">
+        <app-icon name="approve" class="me-2" />{{ 'tasks.actions.approve' | translate }}
+      </button>
+    </li>
+    <li class="d-md-none">
+      <button type="button" class="dropdown-item" role="menuitem" (click)="closeRowMenu(); returnTask(menu.task)" [disabled]="menu.task.status === 'review'">
+        <app-icon name="return" class="me-2" />{{ 'tasks.actions.return' | translate }}
+      </button>
+    </li>
+    <li class="d-md-none">
+      <button type="button" class="dropdown-item" role="menuitem" (click)="closeRowMenu(); askReject(menu.task)" [disabled]="menu.task.status === 'rejected'">
+        <app-icon name="reject" class="me-2" />{{ 'tasks.actions.reject' | translate }}
+      </button>
+    </li>
+    <li class="d-md-none">
+      <button type="button" class="dropdown-item" role="menuitem" (click)="closeRowMenu(); notAvailable()">
+        <app-icon name="eye" class="me-2" />{{ 'tasks.actions.view' | translate }}
+      </button>
+    </li>
+    <li class="d-md-none"><hr class="dropdown-divider" /></li>
+    <li>
+      <button type="button" class="dropdown-item" role="menuitem" (click)="copyNumber(menu.task)">
+        <app-icon name="copy" class="me-2" />{{ 'tasks.actions.copyNumber' | translate }}
+      </button>
+    </li>
+    <li>
+      <button type="button" class="dropdown-item" role="menuitem" (click)="markInProgress(menu.task)" [disabled]="menu.task.status === 'inProgress'">
+        <app-icon name="in-progress" class="me-2" />{{ 'tasks.actions.markInProgress' | translate }}
+      </button>
+    </li>
+    <li><hr class="dropdown-divider" /></li>
+    <li>
+      <button type="button" class="dropdown-item text-danger" role="menuitem" (click)="askDelete(menu.task)">
+        <app-icon name="delete" class="me-2" />{{ 'tasks.actions.delete' | translate }}
+      </button>
+    </li>
+  </ul>
+}
+
+<!-- ===================== REJECT CONFIRMATION ===================== -->
+@if (pendingReject(); as task) {
+  <div class="modal-backdrop fade show confirm-backdrop"></div>
+  <div class="modal d-block confirm-modal" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="reject-title" (click)="pendingReject.set(null)">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-body text-center p-4">
+          <span class="danger-icon mb-3"><app-icon name="reject" /></span>
+          <h2 id="reject-title" class="h5 fw-bold">{{ 'tasks.confirmReject.title' | translate }}</h2>
+          <p class="text-muted-fs mb-4">{{ 'tasks.confirmReject.message' | translate: { number: task.number } }}</p>
+          <div class="d-flex gap-2 justify-content-center">
+            <button type="button" class="btn-fs px-4" (click)="pendingReject.set(null)">{{ 'common.cancel' | translate }}</button>
+            <button type="button" class="btn btn-danger px-4" (click)="confirmReject()">{{ 'tasks.actions.reject' | translate }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ===================== DELETE CONFIRMATION ===================== -->
+@if (pendingDelete(); as task) {
+  <div class="modal-backdrop fade show confirm-backdrop"></div>
+  <div class="modal d-block confirm-modal" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="delete-task-title" (click)="pendingDelete.set(null)">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-body text-center p-4">
+          <span class="danger-icon mb-3"><app-icon name="delete" /></span>
+          <h2 id="delete-task-title" class="h5 fw-bold">{{ 'tasks.confirmDelete.title' | translate }}</h2>
+          <p class="text-muted-fs mb-4">{{ 'tasks.confirmDelete.message' | translate: { number: task.number } }}</p>
+          <div class="d-flex gap-2 justify-content-center">
+            <button type="button" class="btn-fs px-4" (click)="pendingDelete.set(null)">{{ 'common.cancel' | translate }}</button>
+            <button type="button" class="btn btn-danger px-4" (click)="confirmDelete()">{{ 'common.delete' | translate }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

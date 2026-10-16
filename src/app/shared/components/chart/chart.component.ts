@@ -6,7 +6,7 @@ import { ThemeService } from '../../../core/services/theme.service';
 /** Chart colors for each theme. Kept in sync with the tokens in styles.scss. */
 const CHART_THEME = {
   light: { text: '#6b7385', grid: '#e5e8f0' },
-  dark: { text: '#98a1b6', grid: '#262f45' },
+  dark: { text: '#a8a3a3', grid: '#353333' },
 } as const;
 
 /**

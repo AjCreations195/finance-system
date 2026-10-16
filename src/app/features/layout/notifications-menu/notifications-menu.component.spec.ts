@@ -62,7 +62,7 @@ describe('NotificationsMenuComponent', () => {
     expect(el.querySelector<HTMLButtonElement>('.mark-read')!.disabled).toBe(true);
   });
 
-  it('Review / Reject remove the notification and show a toast', () => {
+  it('Approve / Reject remove the notification and show a success toast', () => {
     const toast = TestBed.inject(ToastService);
 
     component['act'](1, 'reject');
@@ -70,7 +70,17 @@ describe('NotificationsMenuComponent', () => {
     expect(toast.toasts().at(-1)?.type).toBe('success');
     expect(toast.toasts().at(-1)?.message).toBe('The purchase request was rejected.');
 
-    component['act'](2, 'review');
-    expect(toast.toasts().at(-1)?.type).toBe('info');
+    component['act'](2, 'approve');
+    expect(data.notifications().some((n) => n.id === 2)).toBe(false);
+    expect(toast.toasts().at(-1)?.type).toBe('success');
+    expect(toast.toasts().at(-1)?.message).toBe('The purchase request was approved.');
+  });
+
+  it('shows times the way the design does: Today / Yesterday / date, with AM or PM', () => {
+    const now = new Date();
+    const at = (daysAgo: number, h: number, m: number) => new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysAgo, h, m).toISOString();
+    expect(component['timeLabel'](at(0, 9, 42))).toBe('Today at 9:42 AM');
+    expect(component['timeLabel'](at(1, 17, 42))).toBe('Yesterday at 5:42 PM');
+    expect(component['timeLabel'](at(3, 0, 5))).toMatch(/ at 12:05 AM$/);
   });
 });

@@ -99,6 +99,11 @@
   border-radius: 999px;
   color: var(--fs-text-muted);
   font-size: 0.75rem;
+
+  /* eye a little larger than the 12px count */
+  app-icon {
+    font-size: 1rem;
+  }
 }
 
 .tool {
@@ -136,11 +141,39 @@
   position: relative;
   z-index: 1;
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  container-type: inline-size; /* lets the row react to the panel's width, not the window's */
+}
+
+/* Share, Approve, Approve & send, ⋮ on one line. It only wraps on very
+   narrow panels (phones), where nothing else would fit. */
+.action-row {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: 0.5rem;
-  padding: 1rem 1.25rem;
+}
+
+/* Too narrow for all four with labels: Share becomes a 44px icon button
+   (its label stays for screen readers, and shows as a tooltip). */
+@container (max-width: 580px) {
+  .share-btn {
+    width: 44px;
+    padding: 0;
+  }
+
+  .share-btn .btn-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 
 .menu {
@@ -152,7 +185,6 @@
 }
 
 .final-note {
-  flex-basis: 100%;
   display: flex;
   align-items: center;
   gap: 0.375rem;
@@ -321,31 +353,58 @@
   }
 }
 
-/* ---------------- Timeline (stepper) ---------------- */
+/* ---------------- Timeline (stepper) ----------------
+   Measured from the Figma frame: 28px white tiles; finished steps are faint
+   grey, the next step a darker grey, the current one solid burgundy with a
+   near-black title and a larger name. Short 2px connectors with gaps at both ends. */
 .steps {
+  --step-tile: 1.75rem;
+  --step-title: #70747d;
+  --step-person: #a4acb8;
+  --step-icon-done: #d1d3d5;
+  --step-icon-pending: #8d9097;
+  --step-current-title: #111827;
+  --step-current-person: #687588;
+  --step-line: #f0f1f3;
+
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+:host-context([data-bs-theme='dark']) .steps {
+  --step-title: var(--fs-text-muted);
+  --step-person: rgba(255, 255, 255, 0.45);
+  --step-icon-done: rgba(255, 255, 255, 0.3);
+  --step-icon-pending: var(--fs-text-muted);
+  --step-current-title: var(--fs-text);
+  --step-current-person: var(--fs-text-muted);
+  --step-line: var(--fs-border);
 }
 
 .step {
   position: relative;
   display: flex;
   gap: 0.75rem;
-  padding-bottom: 1rem;
+  padding-bottom: 1.375rem; /* ≈62px from one tile to the next */
 
-  /* connector line to the next step */
+  /* connector: starts 4px under this tile, stops 8px above the next */
   &:not(:last-child)::after {
     content: '';
     position: absolute;
-    inset-block: 2rem 0;
-    inset-inline-start: 0.9375rem;
-    width: 1px;
-    background: var(--fs-border);
+    inset-block: calc(var(--step-tile) + 0.25rem) 0.5rem;
+    inset-inline-start: calc(var(--step-tile) / 2 - 1px);
+    width: 2px;
+    border-radius: 1px;
+    background: var(--step-line);
   }
 
   &:last-child {
     padding-bottom: 0;
+  }
+
+  > div {
+    padding-top: 0.3125rem; /* title sits a little below the tile's top, as in Figma */
   }
 }
 
@@ -353,48 +412,51 @@
   display: inline-grid;
   place-items: center;
   flex-shrink: 0;
-  width: 1.875rem;
-  height: 1.875rem;
-  border: 1px solid var(--fs-border);
-  border-radius: 0.5rem;
+  width: var(--step-tile);
+  height: var(--step-tile);
+  border: 1px solid var(--fs-control-border);
+  border-radius: 0.375rem;
   background: var(--fs-surface);
-  color: var(--fs-text-muted);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  color: var(--step-icon-pending);
   font-size: 0.875rem;
 }
 
 .step-title {
-  font-size: 0.8125rem;
+  color: var(--step-title);
+  font-size: 0.875rem;
   font-weight: 600;
+  line-height: 1.4;
 }
 
 .step-person {
-  color: var(--fs-text-muted);
+  margin-top: 0.125rem;
+  color: var(--step-person);
   font-size: 0.75rem;
 }
 
 .step-done .step-icon {
-  color: var(--fs-badge-completed);
-  border-color: var(--fs-badge-completed-border);
-  background: var(--fs-badge-completed-bg);
+  color: var(--step-icon-done);
 }
 
-.step-current .step-icon {
-  color: #fff;
-  border-color: var(--fs-primary);
-  background: var(--fs-primary);
-}
-
-.step-current .step-title {
-  color: var(--fs-primary);
-}
-
-.step-pending {
-  .step-title,
+.step-current {
   .step-icon {
-    opacity: 0.6;
+    border-color: #8a1538;
+    background: #8a1538;
+    color: #fff;
+  }
+
+  .step-title {
+    color: var(--step-current-title);
+  }
+
+  .step-person {
+    color: var(--step-current-person);
+    font-size: 0.875rem;
   }
 }
 
+/* Not in this Figma frame: kept red so a rejection stands out */
 .step-rejected .step-icon {
   color: var(--fs-badge-rejected);
   border-color: var(--fs-badge-rejected-border);
@@ -407,13 +469,30 @@
   padding: 0;
   list-style: none;
 
+  /* Figma: each entry has its own 2px grey line, from just under its avatar
+     to the end of the entry, then a gap before the next avatar (the last one too). */
   li {
+    position: relative;
     display: flex;
     gap: 0.75rem;
-    padding-bottom: 1rem;
+    padding-bottom: 2.75rem;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset-block: calc(2rem + 0.25rem) 1.5rem; /* avatar + 4px … 24px gap */
+      inset-inline-start: calc(1rem - 1px); /* centered under the 32px avatar */
+      width: 2px;
+      border-radius: 1px;
+      background: var(--fs-border);
+    }
 
     &:last-child {
-      padding-bottom: 0;
+      padding-bottom: 1.75rem;
+
+      &::after {
+        inset-block-end: 0;
+      }
     }
   }
 }
@@ -424,6 +503,7 @@
   flex-shrink: 0;
   width: 2rem;
   height: 2rem;
+  border: 1px solid var(--fs-border); /* Figma's thin ring */
   border-radius: 50%;
   background: var(--fs-surface-2);
   color: var(--fs-text-muted);
@@ -471,55 +551,79 @@
 }
 
 .highlight {
-  color: var(--fs-primary);
+  color: var(--fs-primary-text);
   font-weight: 600;
 }
 
+/* Figma: large PDF icon, bold file name with the size under it, no border.
+   Still a button (opens the file), so it gets a soft hover and a focus ring. */
 .file-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  padding: 0.375rem 0.625rem;
-  border: 1px solid var(--fs-border);
+  gap: 0.625rem;
+  margin-top: 0.625rem;
+  margin-inline-start: -0.375rem; /* hover background without shifting the icon */
+  padding: 0.25rem 0.375rem;
+  border: 0;
   border-radius: 0.5rem;
-  background: var(--fs-surface);
+  background: transparent;
   color: var(--fs-text);
-  font-size: 0.75rem;
-
-  small {
-    color: var(--fs-text-muted);
-  }
+  text-align: start;
+  transition: background-color 0.15s ease;
 
   &:hover {
     background: var(--fs-surface-2);
   }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(var(--fs-primary-text-rgb), 0.15);
+  }
 }
 
-.pdf-tag {
-  padding: 0.0625rem 0.3125rem;
-  border-radius: 0.25rem;
-  background: var(--fs-badge-rejected);
-  color: #fff;
-  font-size: 0.5625rem;
-  font-weight: 700;
+/* Figma PDF icon (public/images/file-pdf.svg) */
+.file-icon {
+  flex-shrink: 0;
+}
+
+.file-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+
+.file-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.file-size {
+  color: var(--fs-text-muted);
+  font-size: 0.6875rem;
 }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.375rem;
-  margin-top: 0.5rem;
+  margin-top: 0.625rem;
 }
 
+/* Figma: pills; blue for additions, red for removals */
 .tag {
-  padding: 0.125rem 0.5rem;
+  padding: 0.125rem 0.625rem;
   border: 1px solid var(--fs-badge-executed-border);
-  border-radius: 0.375rem;
+  border-radius: 999px;
   background: var(--fs-badge-executed-bg);
   color: var(--fs-badge-executed);
   font-size: 0.6875rem;
   font-weight: 500;
+
+  &.danger {
+    border-color: var(--fs-badge-rejected-border);
+    background: var(--fs-badge-rejected-bg);
+    color: var(--fs-badge-rejected);
+  }
 }
 
 /* ---------------- Created by ---------------- */
@@ -601,7 +705,12 @@
   font-size: 0.8125rem;
   font-weight: 500;
 
-  .bi {
+  .attachment-pdf {
+    width: auto;
+    height: 2rem;
+  }
+
+  app-icon {
     font-size: 1.75rem;
     color: var(--fs-text-muted);
   }
@@ -622,7 +731,7 @@
   align-items: center;
   gap: 0.5rem;
 
-  .bi {
+  app-icon {
     color: var(--fs-text-muted);
     font-size: 1rem;
   }

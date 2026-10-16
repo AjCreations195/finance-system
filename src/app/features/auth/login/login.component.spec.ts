@@ -97,6 +97,22 @@ describe('LoginComponent', () => {
       expect(auth.login).not.toHaveBeenCalled();
     });
 
+    it('does not show an error when a field is just focused and left (nothing typed yet)', async () => {
+      const input = el.querySelector<HTMLInputElement>('#identifier')!;
+      input.dispatchEvent(new Event('focus'));
+      input.dispatchEvent(new Event('blur'));
+      await fixture.whenStable();
+      expect(el.querySelector('#identifier-error')).toBeNull();
+    });
+
+    it('shows the error once the user typed, cleared the field and left it', async () => {
+      type('#identifier', 'a');
+      type('#identifier', '');
+      el.querySelector<HTMLInputElement>('#identifier')!.dispatchEvent(new Event('blur'));
+      await fixture.whenStable();
+      expect(el.querySelector('#identifier-error')).not.toBeNull();
+    });
+
     it('signs in with valid input and goes to the dashboard', async () => {
       type('#identifier', 'admin');
       type('#password', 'Admin@123');

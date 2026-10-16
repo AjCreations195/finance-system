@@ -32,7 +32,7 @@ export const routes: Routes = [
         // The page lists purchase requests, so the last crumb matches its title ("Purchase request").
         data: { breadcrumb: ['nav.procurement', 'requests.title'] },
         loadComponent: () =>
-          import('./features/purchase-requests/purchase-requests.component').then((m) => m.PurchaseRequestsComponent),
+          import('./features/purchase-orders/purchase-orders.component').then((m) => m.PurchaseOrdersComponent),
       },
       // Old URL, kept so existing links and bookmarks still work
       { path: 'purchase-orders', redirectTo: 'procurement/purchase-requests' },

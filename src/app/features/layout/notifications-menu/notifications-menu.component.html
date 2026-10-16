@@ -20,15 +20,19 @@
       <header class="notif-header">
         <div class="d-flex align-items-center gap-2">
           <h2 class="notif-title">{{ 'notifications.title' | translate }}</h2>
-          <!-- All / Unread filter -->
-          <select class="notif-filter" [value]="filter()" (change)="filter.set($any($event.target).value)" [attr.aria-label]="'common.filter' | translate">
-            <option value="all">{{ 'notifications.all' | translate }}</option>
-            <option value="unread">{{ 'notifications.unread' | translate }}</option>
-          </select>
+          <!-- All / Unread filter: the app's select menu, as a light "الكل ⌄" trigger -->
+          <app-select-menu
+            [options]="filterOptions"
+            [value]="filter()"
+            (valueChange)="filter.set($any($event))"
+            appearance="text"
+            align="start"
+            ariaLabel="common.filter"
+          />
         </div>
         <button type="button" class="mark-read" (click)="data.markAllRead()" [disabled]="data.unreadCount() === 0">
-          <i class="bi bi-check2-all" aria-hidden="true"></i>
           {{ 'notifications.markAllRead' | translate }}
+          <app-icon name="approve" />
         </button>
       </header>
 
@@ -40,21 +44,21 @@
               <span class="notif-ref">{{ n.reference }}</span>
             </p>
 
-            <!-- Optional: action buttons -->
+            <!-- Optional: action buttons (design: Reject, then Approve in burgundy) -->
             @if (n.actions) {
-              <div class="d-flex gap-2 mb-2">
-                <button type="button" class="btn btn-sm btn-primary px-3" (click)="act(n.id, 'review')">{{ 'notifications.review' | translate }}</button>
-                <button type="button" class="btn-fs btn-sm" (click)="act(n.id, 'reject')">{{ 'notifications.reject' | translate }}</button>
+              <div class="notif-actions">
+                <button type="button" class="notif-btn" (click)="act(n.id, 'reject')">{{ 'notifications.reject' | translate }}</button>
+                <button type="button" class="notif-btn primary" (click)="act(n.id, 'approve')">{{ 'notifications.approve' | translate }}</button>
               </div>
             }
 
-            <!-- Optional: attachment -->
+            <!-- Optional: attachment (Figma PDF icon; multi-color, so an <img>) -->
             @if (n.attachment; as file) {
               <div class="notif-file">
-                <span class="file-icon">PDF</span>
+                <img src="images/file-pdf.svg" alt="" class="file-icon" width="37" height="36" />
                 <div>
-                  <div class="file-name">{{ file.name }}</div>
-                  <small class="text-muted-fs">{{ file.size }}</small>
+                  <div class="file-name" dir="ltr">{{ file.name }}</div>
+                  <small class="file-size" dir="ltr">{{ file.size }}</small>
                 </div>
               </div>
             }
@@ -64,7 +68,7 @@
               <blockquote class="notif-comment">{{ n.comment | localize }}</blockquote>
             }
 
-            <time class="notif-time">{{ n.date | localDate: 'dateTime' }}</time>
+            <time class="notif-time" [attr.datetime]="n.date">{{ timeLabel(n.date) }}</time>
           </li>
         } @empty {
           <li class="notif-empty">{{ 'notifications.empty' | translate }}</li>

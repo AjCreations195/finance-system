@@ -33,6 +33,25 @@ describe('RequestDetailsComponent', () => {
     expect(el.querySelectorAll('.attachment').length).toBe(4);
   });
 
+  it('attachment cards show the image icon, or the PDF icon for PDF files', async () => {
+    localStorage.clear();
+    TestBed.configureTestingModule({ imports: [RequestDetailsComponent] });
+    service = TestBed.inject(PurchaseRequestService);
+    const real = service.getDetails.bind(service);
+    vi.spyOn(service, 'getDetails').mockImplementation((r) => {
+      const d = real(r);
+      return { ...d, attachments: d.attachments.map((a, i) => (i === 1 ? { ...a, kind: 'pdf' as const } : a)) };
+    });
+    fixture = TestBed.createComponent(RequestDetailsComponent);
+    fixture.componentRef.setInput('request', service.getById(1)!);
+    el = fixture.nativeElement;
+    await fixture.whenStable();
+
+    const cards = el.querySelectorAll('.attachment');
+    expect(cards[0].querySelector('app-icon')!.getAttribute('data-icon')).toBe('attachment-image');
+    expect(cards[1].querySelector<HTMLImageElement>('img.attachment-pdf')!.getAttribute('src')).toBe('images/file-pdf.svg');
+  });
+
   it('moves focus into the panel when it opens', async () => {
     await setup();
     expect(document.activeElement).toBe(el.querySelector('.panel'));

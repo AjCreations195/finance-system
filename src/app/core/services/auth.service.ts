@@ -2,7 +2,7 @@ import { Injectable, computed, signal } from '@angular/core';
 import { Observable, delay, of, throwError } from 'rxjs';
 import { User } from '../models/user.model';
 
-/** Demo credentials (shown as a hint on the login page). */
+/** Demo credentials (listed in the README). Sign in with either the email or the username. */
 export const DEMO_CREDENTIALS = { email: 'admin@demo.com', username: 'admin', password: 'Admin@123' } as const;
 
 /** Error codes returned by the mock backend (translated in the UI). */

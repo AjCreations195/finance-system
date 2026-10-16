@@ -8,13 +8,13 @@ import { LocalizePipe } from '../../../shared/pipes/localize.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 
-/** Icon per workflow step. */
+/** Figma icon per workflow step (public/icons/<name>.svg). */
 const STEP_ICONS: Record<WorkflowStep['key'], string> = {
-  created: 'bi-pencil-square',
-  approval: 'bi-check2-square',
-  returned: 'bi-arrow-return-left',
-  accepted: 'bi-file-earmark-check',
-  rejected: 'bi-x-octagon',
+  created: 'timelinestep-created',
+  approval: 'done',
+  returned: 'return',
+  accepted: 'approval',
+  rejected: 'reject',
 };
 
 /**

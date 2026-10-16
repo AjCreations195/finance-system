@@ -75,7 +75,7 @@
 :host-context([data-bs-theme='dark']) .stat-icon {
   border-color: var(--fs-border);
   background: var(--fs-surface);
-  color: var(--fs-primary);
+  color: var(--fs-primary-text);
 }
 
 .min-w-0 {
@@ -111,13 +111,13 @@
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 
   &:hover {
-    border-color: color-mix(in srgb, var(--fs-primary) 35%, var(--fs-border));
+    border-color: color-mix(in srgb, var(--fs-primary-text) 35%, var(--fs-border));
     transform: translateY(-1px);
   }
 
   /* Rings are drawn inside the card: the scrolling track would clip anything outside */
   &:has(.stat-hit:focus-visible) {
-    outline: 2px solid var(--fs-primary);
+    outline: 2px solid var(--fs-primary-text);
     outline-offset: -2px;
   }
 }
@@ -201,7 +201,7 @@
   transform: translateY(-50%);
 
   &:hover {
-    color: var(--fs-primary);
+    color: var(--fs-primary-text);
   }
 
   &.prev {

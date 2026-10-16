@@ -14,23 +14,26 @@ import { IconComponent } from '../icon/icon.component';
  * Esc or Tab closes; focus returns to the button after a choice.
  *
  * @example <app-select-menu [options]="categoryOptions" [(value)]="category" ariaLabel="procurement.category" />
+ * @example <app-select-menu [options]="filters" [(value)]="filter" appearance="text" align="start" />
+ *   appearance="text": borderless "Label ⌄" trigger (e.g. inside a panel header)
+ *   align="start": the list opens under the trigger toward the inline end
  */
 @Component({
   selector: 'app-select-menu',
   imports: [IconComponent, TranslatePipe],
   template: `
     <div class="position-relative">
-      <button #trigger type="button" class="btn-fs trigger" (click)="toggle()" (keydown.arrowDown)="openAndFocus($event)" (keydown.arrowUp)="openAndFocus($event)"
+      <button #trigger type="button" class="trigger" [class.btn-fs]="appearance() === 'button'" [class.text-trigger]="appearance() === 'text'" (click)="toggle()" (keydown.arrowDown)="openAndFocus($event)" (keydown.arrowUp)="openAndFocus($event)"
               [attr.aria-expanded]="open()" aria-haspopup="listbox" [attr.aria-label]="ariaLabel() ? (ariaLabel() | translate) + ': ' + (selected().label | translate) : null">
         @if (selected().icon) {
           <app-icon [name]="selected().icon!" />
         }
         <span class="trigger-label">{{ selected().label | translate }}</span>
-        <i class="bi bi-chevron-down chevron" [class.flipped]="open()" aria-hidden="true"></i>
+        <app-icon name="chevron-down" class="chevron" [class.flipped]="open()" />
       </button>
 
       @if (open()) {
-        <ul #list class="dropdown-menu show menu" role="listbox" [attr.aria-label]="ariaLabel() | translate" (keydown)="onListKeydown($event, trigger)">
+        <ul #list class="dropdown-menu show menu" [class.align-start]="align() === 'start'" role="listbox" [attr.aria-label]="ariaLabel() | translate" (keydown)="onListKeydown($event, trigger)">
           @for (opt of options(); track opt.value) {
             <li>
               <button type="button" class="dropdown-item option" role="option" [class.selected]="opt.value === value()" [attr.aria-selected]="opt.value === value()"
@@ -59,9 +62,25 @@ import { IconComponent } from '../icon/icon.component';
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    /* Borderless "Label ⌄" trigger */
+    .text-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.125rem 0;
+      border: 0;
+      background: none;
+      color: var(--fs-text-muted);
+      font-size: 0.8125rem;
+
+      &:hover,
+      &[aria-expanded='true'] {
+        color: var(--fs-text);
+      }
+    }
     .chevron {
       margin-inline-start: 0.125rem;
-      font-size: 0.625rem;
+      font-size: 0.75rem;
       color: var(--fs-text-muted);
       transition: transform 0.2s ease;
 
@@ -79,6 +98,11 @@ import { IconComponent } from '../icon/icon.component';
       overflow-y: auto;
       padding: 0.375rem;
       z-index: 1050;
+
+      &.align-start {
+        inset-inline-end: auto;
+        inset-inline-start: 0;
+      }
     }
     .option {
       display: flex;
@@ -90,7 +114,7 @@ import { IconComponent } from '../icon/icon.component';
 
       &.selected {
         background: var(--fs-primary-soft);
-        color: var(--fs-primary);
+        color: var(--fs-primary-text);
         font-weight: 600;
       }
     }
@@ -99,7 +123,7 @@ import { IconComponent } from '../icon/icon.component';
     }
     .option.selected .option-icon,
     .check {
-      color: var(--fs-primary);
+      color: var(--fs-primary-text);
     }
   `,
   host: {
@@ -115,6 +139,10 @@ export class SelectMenuComponent {
   readonly value = model.required<string>();
   /** Translation key naming the control, for screen readers. */
   readonly ariaLabel = input('');
+  /** 'button' = bordered toolbar button; 'text' = borderless "Label ⌄". */
+  readonly appearance = input<'button' | 'text'>('button');
+  /** Which edge of the trigger the list lines up with. */
+  readonly align = input<'start' | 'end'>('end');
 
   protected readonly open = signal(false);
   protected readonly selected = computed(() => this.options().find((o) => o.value === this.value()) ?? this.options()[0]);
@@ -143,6 +171,7 @@ export class SelectMenuComponent {
       this.focusOption(moves[event.key]);
     } else if (event.key === 'Escape') {
       event.preventDefault();
+      event.stopPropagation(); // close only this list, not a panel around it
       this.close(trigger);
     } else if (event.key === 'Tab') {
       this.open.set(false);

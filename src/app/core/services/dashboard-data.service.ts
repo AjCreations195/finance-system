@@ -43,9 +43,14 @@ export class DashboardDataService {
   private readonly _tasks = signal<TaskItem[]>(generateTasks(50));
   readonly tasks = this._tasks.asReadonly();
 
-  /** Change a task's status (Approve / Return actions). */
+  /** Change a task's status (Approve / Return / Reject / Mark as in progress). */
   setTaskStatus(id: number, status: TaskStatus): void {
     this._tasks.update((list) => list.map((t) => (t.id === id ? { ...t, status } : t)));
+  }
+
+  /** Remove a task from the list (row menu → Delete). */
+  deleteTask(id: number): void {
+    this._tasks.update((list) => list.filter((t) => t.id !== id));
   }
 
   // ------------------------------------------------------------------
@@ -86,6 +91,11 @@ export class DashboardDataService {
   /** Total count on the server (for the "show N more" link). */
   readonly transactionsTotal = signal(261);
 
+  /** Row menu → Hide from recent: drops it from this list only (still counted in the total). */
+  hideTransaction(id: number): void {
+    this.transactions.update((list) => list.filter((t) => t.id !== id));
+  }
+
   // ------------------------------------------------------------------
   // Warehouses
   // ------------------------------------------------------------------
@@ -100,6 +110,18 @@ export class DashboardDataService {
   ]);
   readonly warehouseTotal = signal(263);
 
+  /** Row menu → Restock to max level: fills the item up to its max order level. */
+  restockWarehouseItem(id: number): void {
+    this.warehouseItems.update((list) => list.map((w) => (w.id === id ? { ...w, quantity: w.maxLevel } : w)));
+  }
+
+  /** Row menu → Delete item: removes it from the warehouse (and from the total). */
+  deleteWarehouseItem(id: number): void {
+    if (!this.warehouseItems().some((w) => w.id === id)) return;
+    this.warehouseItems.update((list) => list.filter((w) => w.id !== id));
+    this.warehouseTotal.update((n) => n - 1);
+  }
+
   // ------------------------------------------------------------------
   // Contracts
   // ------------------------------------------------------------------
@@ -111,6 +133,18 @@ export class DashboardDataService {
     { id: 5, number: 'BDRS/2026/BR/8012', supplier: t('Vodafone Qatar', 'فودافون قطر'), logoUrl: 'images/suppliers/vodafone-logo.png', logoColor: '#e60000', date: daysAgo(23), progress: 70 },
   ]);
   readonly contractsTotal = signal(260);
+
+  /** Row menu → Mark as completed: sets the contract's progress to 100%. */
+  completeContract(id: number): void {
+    this.contracts.update((list) => list.map((c) => (c.id === id ? { ...c, progress: 100 } : c)));
+  }
+
+  /** Row menu → Delete contract: removes it (and from the total). */
+  deleteContract(id: number): void {
+    if (!this.contracts().some((c) => c.id === id)) return;
+    this.contracts.update((list) => list.filter((c) => c.id !== id));
+    this.contractsTotal.update((n) => n - 1);
+  }
 
   // ------------------------------------------------------------------
   // Budget items: stacked bars per month, per year

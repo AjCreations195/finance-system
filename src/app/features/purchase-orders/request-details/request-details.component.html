@@ -6,14 +6,14 @@
 <aside class="panel" [class.wide]="wide()" role="dialog" aria-modal="true" aria-labelledby="request-details-title" tabindex="-1">
   <!-- ===================== HEADER ===================== -->
   <header class="panel-header">
-    <span class="header-icon"><i class="bi bi-building" aria-hidden="true"></i></span>
+    <span class="header-icon"><app-icon name="building" /></span>
     <div class="header-text">
       <h2 id="request-details-title">{{ 'requests.details.title' | translate }}</h2>
       <p>{{ r.number }}</p>
     </div>
     <div class="header-tools">
       <span class="views" [title]="'requests.details.views' | translate: { count: d.views }">
-        <i class="bi bi-eye" aria-hidden="true"></i>
+        <app-icon name="eye" />
         <span class="visually-hidden">{{ 'requests.details.views' | translate: { count: d.views } }}</span>
         <span aria-hidden="true">{{ d.views }}</span>
       </span>
@@ -22,7 +22,7 @@
         <app-icon [name]="wide() ? 'collapse' : 'expand'" />
       </button>
       <button type="button" class="tool" (click)="closed.emit()" [attr.aria-label]="'common.close' | translate">
-        <i class="bi bi-x-lg" aria-hidden="true"></i>
+        <app-icon name="close" />
       </button>
     </div>
   </header>
@@ -31,14 +31,18 @@
   <div class="panel-scroll">
   <!-- ===================== ACTIONS ===================== -->
   <div class="panel-actions">
-    <button type="button" class="action-btn secondary share-btn" (click)="share()">
-      <i class="bi bi-share" aria-hidden="true"></i> {{ 'requests.details.share' | translate }}
+    <!-- One row of buttons; the note (if any) goes on its own line below -->
+    <div class="action-row">
+    <button type="button" class="action-btn secondary share-btn" (click)="share()" [title]="'requests.details.share' | translate">
+      <app-icon name="share" />
+      <!-- Hidden visually (not from screen readers) when the panel is narrow -->
+      <span class="btn-label">{{ 'requests.details.share' | translate }}</span>
     </button>
     <button type="button" class="action-btn primary btn-action" (click)="approve.emit('accepted')" [disabled]="!canApprove()">
-      <i class="bi bi-file-earmark-check" aria-hidden="true"></i> {{ 'requests.details.approve' | translate }}
+      <app-icon name="approval" /> {{ 'requests.details.approve' | translate }}
     </button>
     <button type="button" class="action-btn primary btn-action" (click)="approve.emit('sent')" [disabled]="!canApprove()">
-      <i class="bi bi-send flip-rtl" aria-hidden="true"></i> {{ 'requests.details.approveAndSend' | translate }}
+      <app-icon name="approve_send" /> {{ 'requests.details.approveAndSend' | translate }}
     </button>
     <div class="position-relative more-menu">
       <button type="button" class="action-btn icon-only" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()" aria-haspopup="menu"
@@ -49,20 +53,21 @@
         <ul class="dropdown-menu show menu" role="menu">
           <li>
             <button type="button" class="dropdown-item" role="menuitem" (click)="copyNumber()">
-              <i class="bi bi-clipboard me-2" aria-hidden="true"></i>{{ 'requests.details.copyNumber' | translate }}
+              <app-icon name="copy" class="me-2" />{{ 'requests.details.copyNumber' | translate }}
             </button>
           </li>
           <li><hr class="dropdown-divider" /></li>
           <li>
             <button type="button" class="dropdown-item text-danger" role="menuitem" (click)="deleteRequest()">
-              <i class="bi bi-trash3 me-2" aria-hidden="true"></i>{{ 'requests.details.delete' | translate }}
+              <app-icon name="delete" class="me-2" />{{ 'requests.details.delete' | translate }}
             </button>
           </li>
         </ul>
       }
     </div>
+    </div>
     @if (!canApprove()) {
-      <p class="final-note"><i class="bi bi-info-circle" aria-hidden="true"></i> {{ 'requests.details.cannotApprove' | translate }}</p>
+      <p class="final-note"><app-icon name="cannot-approve" /> {{ 'requests.details.cannotApprove' | translate }}</p>
     }
   </div>
 
@@ -150,7 +155,7 @@
       <ol class="steps">
         @for (step of d.workflow; track step.key) {
           <li class="step step-{{ step.state }}" [attr.aria-current]="step.state === 'current' ? 'step' : null">
-            <span class="step-icon"><i class="bi {{ stepIcons[step.key] }}" aria-hidden="true"></i></span>
+            <span class="step-icon"><app-icon [name]="stepIcons[step.key]" /></span>
             <div>
               <div class="step-title">{{ 'requests.details.steps.' + step.key | translate }}</div>
               <div class="step-person">{{ step.person | localize }}</div>
@@ -180,16 +185,19 @@
                 }
               </p>
               @if (entry.attachment; as file) {
+                <!-- Figma: large PDF icon, bold name with the size under it, no border -->
                 <button type="button" class="file-chip" (click)="openAttachment()" [attr.aria-label]="'requests.details.openAttachment' | translate: { name: file.name }">
-                  <span class="pdf-tag" aria-hidden="true">PDF</span>
-                  <span dir="ltr">{{ file.name }}</span>
-                  <small>{{ file.size }}</small>
+                  <img src="images/file-pdf.svg" alt="" class="file-icon" width="37" height="36" />
+                  <span class="file-text">
+                    <span class="file-name" dir="ltr">{{ file.name }}</span>
+                    <small class="file-size" dir="ltr">{{ file.size }}</small>
+                  </span>
                 </button>
               }
               @if (entry.tags?.length) {
                 <div class="tags">
                   @for (tag of entry.tags; track $index) {
-                    <span class="tag">{{ tag | localize }}</span>
+                    <span class="tag" [class.danger]="tag.tone === 'danger'">{{ tag.label | localize }}</span>
                   }
                 </div>
               }
@@ -221,12 +229,17 @@
 
     <!-- Attachments -->
     <section class="section">
-      <h3 class="with-icon"><i class="bi bi-file-earmark-text" aria-hidden="true"></i>{{ 'requests.details.attachments' | translate }}</h3>
+      <h3 class="with-icon"><app-icon name="attachements-heading" />{{ 'requests.details.attachments' | translate }}</h3>
       <div class="attachments">
         @for (file of d.attachments; track file.id) {
           <button type="button" class="attachment" (click)="openAttachment()" [title]="file.size"
                   [attr.aria-label]="('requests.details.openAttachment' | translate: { name: (file.name | localize) }) + ', ' + file.size">
-            <i class="bi" [class.bi-image]="file.kind === 'image'" [class.bi-file-earmark-pdf]="file.kind === 'pdf'" aria-hidden="true"></i>
+            @if (file.kind === 'pdf') {
+              <!-- Figma PDF icon (multi-color, so an <img>, as in the activity log) -->
+              <img src="images/file-pdf.svg" alt="" class="attachment-pdf" width="37" height="36" />
+            } @else {
+              <app-icon name="attachment-image" />
+            }
             <span>{{ file.name | localize }}</span>
           </button>
         }

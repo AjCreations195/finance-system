@@ -51,9 +51,11 @@ interface MenuState {
 }
 
 /**
- * PurchaseRequestsComponent ("طلب مشتريات")
- * --------------------------------------
- * Purchase requests list, built from the Figma design:
+ * PurchaseOrdersComponent ("طلب مشتريات")
+ * ------------------------------------
+ * The task's Purchase Orders page. The Figma design titles it "Purchase
+ * requests", so the UI text, data model and service use that name.
+ * Built from the design:
  *
  *  1. Header card: title, description, "Create request"
  *  2. Main card:
@@ -68,10 +70,10 @@ interface MenuState {
  * Data flow (all `computed`): requests → tab → filter → search → sort → page.
  */
 @Component({
-  selector: 'app-purchase-requests',
+  selector: 'app-purchase-orders',
   imports: [IconComponent, StatCarouselComponent, FilterMenuComponent, RequestDetailsComponent, TranslatePipe, LocalizePipe, LocalDatePipe],
-  templateUrl: './purchase-requests.component.html',
-  styleUrl: './purchase-requests.component.scss',
+  templateUrl: './purchase-orders.component.html',
+  styleUrl: './purchase-orders.component.scss',
   host: {
     '(document:click)': 'closeMenus()',
     '(document:keydown.escape)': 'onEscape()',
@@ -79,7 +81,7 @@ interface MenuState {
     '(window:beforeprint)': 'stampPrintTime()',
   },
 })
-export class PurchaseRequestsComponent {
+export class PurchaseOrdersComponent {
   protected readonly service = inject(PurchaseRequestService);
   private readonly language = inject(LanguageService);
   private readonly toast = inject(ToastService);
@@ -347,7 +349,6 @@ export class PurchaseRequestsComponent {
     return !FINAL_STATUSES.includes(request.status);
   }
 
-  /** View: the details slide panel is added once its design is ready. */
   // ------------------------------------------------------------------
   // Details panel
   // ------------------------------------------------------------------
@@ -390,7 +391,14 @@ export class PurchaseRequestsComponent {
   protected askDelete(requests: PurchaseRequest[]): void {
     this.rowMenu.set(null);
     this.actionsOpen.set(false);
-    if (requests.length) this.pendingDelete.set(requests);
+    if (!requests.length) return;
+    this.pendingDelete.set(requests);
+    this.focusDialog('.btn-danger');
+  }
+
+  /** Confirmation dialogs open with focus on their confirm button (as in the dashboard widgets). */
+  private focusDialog(button: string): void {
+    afterNextRender(() => this.host.querySelector<HTMLElement>(`.confirm-modal ${button}`)?.focus(), { injector: this.injector });
   }
 
   protected confirmDelete(): void {
@@ -453,6 +461,7 @@ export class PurchaseRequestsComponent {
       }
       const skippedIds = list.filter((r) => !this.canApprove(r)).map((r) => r.id);
       this.pendingApprove.set({ requests: approvable, skippedIds });
+      this.focusDialog('.confirm-approve');
     });
   }
 

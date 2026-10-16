@@ -68,7 +68,8 @@ export const EN = {
     invalidCredentials: 'Incorrect username or password.',
     featureNotAvailable: 'This feature is not available.',
     heroTitle: 'Start turning your ideas into reality.',
-    heroText: 'Create a free account and get full access to all features for 30 days. No credit card needed. Get started in 2 minutes.',
+    // Proposed wording (the design had template text); awaiting client confirmation.
+    heroText: 'Manage budgets, purchase requests and financial approvals in one secure place.',
     copyright: 'Ministry of Interior {{year}} © All rights reserved',
     version: 'Financial System, version {{version}}',
     capsLock: 'Caps Lock is on',
@@ -180,9 +181,15 @@ export const EN = {
     awaitingApproval: 'Awaiting approval of purchase request',
     approved: 'Purchase request approved',
     commentAdded: 'A comment was added to purchase request',
-    review: 'Review',
+    approve: 'Approve',
     reject: 'Reject',
+    approvedToast: 'The purchase request was approved.',
     rejected: 'The purchase request was rejected.',
+    todayAt: 'Today at {{time}}',
+    yesterdayAt: 'Yesterday at {{time}}',
+    dateAt: '{{date}} at {{time}}',
+    am: 'AM',
+    pm: 'PM',
     empty: 'You have no notifications.',
   },
   dashboard: {
@@ -225,16 +232,32 @@ export const EN = {
       executed: 'Executed',
       review: 'Under review',
       sent: 'Sent',
+      rejected: 'Rejected',
     },
     actions: {
       approve: 'Approve',
       return: 'Return',
       reject: 'Reject',
       view: 'View',
+      copyNumber: 'Copy task number',
+      markInProgress: 'Mark as in progress',
+      delete: 'Delete task',
     },
     toast: {
       approved: 'Task {{number}} marked as completed.',
       returned: 'Task {{number}} returned for review.',
+      rejected: 'Task {{number}} rejected.',
+      inProgress: 'Task {{number}} marked as in progress.',
+      deleted: 'Task {{number}} deleted.',
+      numberCopied: 'Task number copied.',
+    },
+    confirmReject: {
+      title: 'Reject this task?',
+      message: 'Task {{number}} will be marked as rejected.',
+    },
+    confirmDelete: {
+      title: 'Delete this task?',
+      message: 'Task {{number}} will be removed from your list. This can’t be undone.',
     },
   },
   activities: {
@@ -291,6 +314,20 @@ export const EN = {
       month: 'months',
       year: 'years',
     },
+    actions: {
+      copyNumber: 'Copy transaction number',
+      emailEmployee: 'Email employee',
+      hide: 'Hide from recent',
+    },
+    toast: {
+      numberCopied: 'Transaction number copied.',
+      hidden: 'Transaction {{number}} hidden from recent transactions.',
+    },
+    confirmHide: {
+      title: 'Hide this transaction?',
+      message: 'Transaction {{number}} will be removed from your recent transactions list.',
+      confirm: 'Hide',
+    },
   },
   warehouses: {
     title: 'Warehouses',
@@ -304,6 +341,25 @@ export const EN = {
       min: 'Min. order level',
       max: 'Max. order level',
     },
+    actions: {
+      copyNumber: 'Copy product number',
+      restock: 'Restock to max level',
+      delete: 'Delete item',
+    },
+    toast: {
+      numberCopied: 'Product number copied.',
+      restocked: '{{product}} restocked to {{quantity}}.',
+      deleted: '{{product}} deleted.',
+    },
+    confirmRestock: {
+      title: 'Restock this item?',
+      message: '{{product}} will go from {{from}} to its max order level ({{to}}).',
+      confirm: 'Restock',
+    },
+    confirmDelete: {
+      title: 'Delete this item?',
+      message: '{{product}} will be permanently deleted from the warehouse. This can’t be undone.',
+    },
   },
   contracts: {
     title: 'Contracts',
@@ -313,6 +369,25 @@ export const EN = {
       supplier: 'Supplier',
       date: 'Date',
       progress: 'Contract status',
+    },
+    actions: {
+      copyNumber: 'Copy contract number',
+      complete: 'Mark as completed',
+      delete: 'Delete contract',
+    },
+    toast: {
+      numberCopied: 'Contract number copied.',
+      completed: 'Contract {{number}} marked as completed.',
+      deleted: 'Contract {{number}} deleted.',
+    },
+    confirmComplete: {
+      title: 'Mark this contract as completed?',
+      message: 'Contract {{number}} with {{supplier}} will go from {{from}}% to 100%.',
+      confirm: 'Mark as completed',
+    },
+    confirmDelete: {
+      title: 'Delete this contract?',
+      message: 'Contract {{number}} with {{supplier}} will be permanently deleted. This can’t be undone.',
     },
   },
   budget: {
@@ -367,10 +442,10 @@ export const EN = {
       date: 'Date',
     },
     status: {
-      accepted: 'Accepted',
+      accepted: 'Approved',
       inProgress: 'In progress',
       finished: 'Finished',
-      forReview: 'For review',
+      forReview: 'Under review',
       sent: 'Sent',
       rejected: 'Rejected',
       pending: 'Pending',
@@ -380,6 +455,7 @@ export const EN = {
       verified: 'Verified',
       notExecutable: 'Not executable',
       closed: 'Closed',
+      delivered: 'Delivered',
     },
     rowActions: {
       view: 'View',

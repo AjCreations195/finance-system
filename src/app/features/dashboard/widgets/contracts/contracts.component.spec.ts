@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DashboardDataService } from '../../../../core/services/dashboard-data.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { ContractsComponent } from './contracts.component';
 
 describe('ContractsComponent', () => {
@@ -41,5 +43,78 @@ describe('ContractsComponent', () => {
 
   it('uses the first letter of the supplier as the logo', () => {
     expect(component['initial']('  Qatar Bank')).toBe('Q');
+  });
+
+  // ---- Row menu (⋮) ----
+  describe('row menu', () => {
+    const el = () => fixture.nativeElement as HTMLElement;
+    const data = () => TestBed.inject(DashboardDataService);
+    const contract = (id: number) => data().contracts().find((c) => c.id === id);
+    const click = async (target: HTMLElement) => {
+      target.click();
+      await fixture.whenStable();
+    };
+    const openMenu = (row: number) => click(el().querySelector<HTMLButtonElement>(`tbody tr:nth-child(${row}) .row-actions button`)!);
+    const menuItem = (label: string) =>
+      Array.from(el().querySelectorAll<HTMLButtonElement>('.row-menu [role="menuitem"]')).find((b) => b.textContent!.includes(label))!;
+
+    it('the ⋮ column is pinned on phones and opens a menu with three actions', async () => {
+      expect(el().querySelector('thead th.actions-col')).not.toBeNull();
+      await openMenu(1);
+      expect(el().querySelector('tbody tr:nth-child(1) .row-actions button')!.getAttribute('aria-expanded')).toBe('true');
+      expect(el().querySelectorAll('.row-menu [role="menuitem"]').length).toBe(3);
+
+      await click(document.body);
+      expect(el().querySelector('.row-menu')).toBeNull();
+    });
+
+    it('Copy contract number copies it', async () => {
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+      await openMenu(1);
+      await click(menuItem('Copy contract number'));
+      await Promise.resolve();
+      expect(writeText).toHaveBeenCalledWith('BDRS/2026/BR/8008');
+    });
+
+    it('Mark as completed asks first (from → 100%), then sets progress to 100', async () => {
+      await openMenu(1); // QNB, 25%
+      await click(menuItem('Mark as completed'));
+      expect(el().querySelector('.confirm-modal')!.textContent).toContain('25%');
+      expect(contract(1)!.progress).toBe(25);
+
+      await click(el().querySelector<HTMLButtonElement>('.confirm-modal .confirm-btn')!);
+      expect(contract(1)!.progress).toBe(100);
+      expect(TestBed.inject(ToastService).toasts().at(-1)?.type).toBe('success');
+
+      await openMenu(1);
+      expect(menuItem('Mark as completed').disabled).toBe(true);
+    });
+
+    it('Delete asks first, then removes the contract (and lowers the total)', async () => {
+      const total = data().contractsTotal();
+      await openMenu(2);
+      await click(menuItem('Delete contract'));
+      expect(el().querySelector('.confirm-modal')!.textContent).toContain('Ooredoo');
+
+      await click(el().querySelector<HTMLButtonElement>('.confirm-modal .confirm-btn')!);
+      expect(contract(2)).toBeUndefined();
+      expect(data().contractsTotal()).toBe(total - 1);
+      expect(el().querySelectorAll('tbody tr').length).toBe(4);
+    });
+
+    it('Esc closes the dialog first, then the menu', async () => {
+      await openMenu(1);
+      await click(menuItem('Delete contract'));
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      await fixture.whenStable();
+      expect(el().querySelector('.confirm-modal')).toBeNull();
+      expect(contract(1)).toBeDefined();
+
+      await openMenu(1);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      await fixture.whenStable();
+      expect(el().querySelector('.row-menu')).toBeNull();
+    });
   });
 });

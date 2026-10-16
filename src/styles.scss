@@ -51,6 +51,11 @@
   --fs-primary-hover: #67102f;
   --fs-primary-rgb: 127, 21, 59;
   --fs-primary-soft: #f9eef2; /* active sidebar item background */
+  /* Text, icons, links, focus rings and active underlines. Same as the brand
+     color here; the dark theme uses a lighter shade that passes AA on black. */
+  --fs-primary-text: var(--fs-primary);
+  --fs-primary-text-hover: var(--fs-primary-hover);
+  --fs-primary-text-rgb: var(--fs-primary-rgb);
   --fs-navy: #2b3674; /* links, transaction numbers */
 
   /* Surfaces & text */
@@ -109,21 +114,26 @@
    Applied when ThemeService sets <html data-bs-theme="dark">.
    -------------------------------------------------------------------------- */
 [data-bs-theme='dark'] {
-  /* Derived from the light design: navy surfaces, lighter burgundy for contrast */
-  --fs-primary: #e0708f;
-  --fs-primary-hover: #ea8ca6;
-  --fs-primary-rgb: 224, 112, 143;
+  /* Neutral warm near-black surfaces (base #151414). Burgundy fills with white
+     text (7.6:1); a lighter pink for text and icons, since #9b2645 is only
+     2.2:1 on these surfaces. */
+  --fs-primary: #9b2645;
+  --fs-primary-hover: #ad2b4e; /* lighter on hover: white text 6.5:1 */
+  --fs-primary-rgb: 155, 38, 69;
+  --fs-primary-text: #e0708f;
+  --fs-primary-text-hover: #ea8ca6;
+  --fs-primary-text-rgb: 224, 112, 143;
   --fs-primary-soft: rgba(224, 112, 143, 0.14);
   --fs-navy: #c3cbf5;
 
-  --fs-body-bg: #0b1437;
-  --fs-surface: #111c44;
-  --fs-surface-2: #1b2559;
-  --fs-row-alt: #16234f; /* light enough for the zebra stripes to show */
-  --fs-row-selected: #1d2a63;
-  --fs-border: #2e3b7d; /* separates cards from the page background */
-  --fs-text: #eef1fb;
-  --fs-text-muted: #a3aed0;
+  --fs-body-bg: #151414;
+  --fs-surface: #1e1d1d;
+  --fs-surface-2: #282727;
+  --fs-row-alt: #242323; /* light enough for the zebra stripes to show */
+  --fs-row-selected: #2e2226; /* faint burgundy tint */
+  --fs-border: #403d3d; /* separates cards from the page background */
+  --fs-text: #f2f0f0;
+  --fs-text-muted: #a8a3a3;
 
   --fs-badge-completed: #47cd89;
   --fs-badge-completed-bg: rgba(71, 205, 137, 0.12);
@@ -169,9 +179,9 @@
   --bs-border-color: var(--fs-border);
   --bs-primary: var(--fs-primary);
   --bs-primary-rgb: var(--fs-primary-rgb);
-  --bs-link-color: var(--fs-primary);
-  --bs-link-color-rgb: var(--fs-primary-rgb);
-  --bs-link-hover-color: var(--fs-primary-hover);
+  --bs-link-color: var(--fs-primary-text);
+  --bs-link-color-rgb: var(--fs-primary-text-rgb);
+  --bs-link-hover-color: var(--fs-primary-text-hover);
   --bs-border-radius: 0.625rem;
   --bs-font-sans-serif: 'Lusail', 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
@@ -211,13 +221,6 @@ body {
   --bs-btn-disabled-color: #fff;
 }
 
-[data-bs-theme='dark'] .btn-primary {
-  --bs-btn-color: #0b1437;
-  --bs-btn-hover-color: #0b1437;
-  --bs-btn-active-color: #0b1437;
-  --bs-btn-disabled-color: #0b1437;
-}
-
 /* Form controls: themed background and brand-colored focus ring. */
 .form-control,
 .form-select {
@@ -226,8 +229,8 @@ body {
   color: var(--fs-text);
 
   &:focus {
-    border-color: var(--fs-primary);
-    box-shadow: 0 0 0 0.2rem rgba(var(--fs-primary-rgb), 0.18);
+    border-color: var(--fs-primary-text);
+    box-shadow: 0 0 0 0.2rem rgba(var(--fs-primary-text-rgb), 0.18);
   }
 }
 
@@ -261,7 +264,7 @@ body {
 
 /* Visible keyboard focus everywhere (accessibility). */
 :focus-visible {
-  outline: 2px solid var(--fs-primary);
+  outline: 2px solid var(--fs-primary-text);
   outline-offset: 2px;
 }
 
@@ -304,8 +307,8 @@ body {
   &:focus-visible,
   &[aria-expanded='true'] {
     outline: none;
-    border-color: rgba(var(--fs-primary-rgb), 0.4);
-    box-shadow: 0 0 0 0.2rem rgba(var(--fs-primary-rgb), 0.12);
+    border-color: rgba(var(--fs-primary-text-rgb), 0.4);
+    box-shadow: 0 0 0 0.2rem rgba(var(--fs-primary-text-rgb), 0.12);
   }
 }
 
@@ -337,7 +340,7 @@ body {
 
   &:hover {
     background: var(--fs-primary-soft);
-    color: var(--fs-primary);
+    color: var(--fs-primary-text);
     border-color: transparent;
   }
 
@@ -412,6 +415,24 @@ body {
     }
   }
 
+  /* Phones: the actions column (just ⋮ there) stays pinned to the visible
+     end of the scrolling table, so it's reachable without scrolling sideways.
+     Odd / selected rows keep their own background via the rules above. */
+  @media (max-width: 767.98px) {
+    .actions-col {
+      position: sticky;
+      inset-inline-end: 0;
+      z-index: 1;
+      background: var(--fs-surface);
+      padding-inline: 0.375rem;
+      box-shadow: inset 1px 0 0 var(--fs-border);
+    }
+
+    [dir='rtl'] & .actions-col {
+      box-shadow: inset -1px 0 0 var(--fs-border);
+    }
+  }
+
   /* Long text that may wrap onto two lines instead of widening the table */
   .cell-wrap {
     min-width: 8rem;
@@ -442,6 +463,50 @@ body {
   }
 }
 
+/* Table row "⋮" menu: fixed so a scrolling table can't clip it
+   (purchase requests, my tasks) */
+.row-menu {
+  position: fixed;
+  z-index: 1080;
+  width: 11rem;
+  font-size: 0.8125rem;
+
+  .dropdown-item app-icon {
+    vertical-align: -0.15em;
+  }
+
+  /* Longer labels (recent transactions, warehouses, contracts: "Copy transaction number") */
+  &.row-menu-wide {
+    width: 14rem;
+  }
+}
+
+/* Confirmation dialogs (delete / approve / reject): above the details panel */
+.confirm-backdrop {
+  z-index: 1085;
+}
+
+.confirm-modal {
+  z-index: 1090;
+}
+
+.danger-icon,
+.approve-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  color: var(--fs-badge-rejected);
+  background: var(--fs-badge-rejected-bg);
+}
+
+.approve-icon {
+  color: var(--fs-badge-completed);
+  background: var(--fs-badge-completed-bg);
+}
+
 /* Icon-only row action buttons (approve, return, view, more…) */
 .row-actions {
   display: flex;
@@ -461,12 +526,17 @@ body {
 
     &:hover:not(:disabled) {
       background: var(--fs-surface-2);
-      color: var(--fs-primary);
+      color: var(--fs-primary-text);
     }
 
     &:disabled {
       opacity: 0.35;
     }
+  }
+
+  /* eye.svg has more built-in padding than the other row icons: scale it to match */
+  app-icon[data-icon='eye'] {
+    font-size: 1.2em;
   }
 }
 
@@ -500,7 +570,7 @@ body {
   width: 100%;
 
   &:hover {
-    color: var(--fs-primary);
+    color: var(--fs-primary-text);
   }
 
   /* Design: a white arrow in a filled grey circle, pointing toward the end of
@@ -519,7 +589,7 @@ body {
   }
 
   &:hover .show-more-arrow {
-    background: var(--fs-primary);
+    background: var(--fs-primary-text);
   }
 }
 
@@ -622,8 +692,8 @@ body {
   }
 
   &.active {
-    border-color: var(--fs-primary);
-    color: var(--fs-primary);
+    border-color: var(--fs-primary-text);
+    color: var(--fs-primary-text);
   }
 }
 
@@ -687,17 +757,25 @@ body {
     inset 0 -2px 0 0 rgba(10, 13, 18, 0.05);
   transition: background-color 0.15s ease, filter 0.15s ease;
 
-  .bi {
+  .bi,
+  app-icon {
     font-size: 1.25rem;
   }
 
   &:focus-visible {
-    outline: 2px solid var(--fs-primary);
+    outline: 2px solid var(--fs-primary-text);
     outline-offset: 2px;
   }
 
-  &:disabled {
-    opacity: 0.5;
+  /* Disabled (Untitled UI): neutral grey instead of a faded brand color, so it
+     reads as "unavailable" rather than washed-out pink. Same for every variant
+     (the doubled class outranks .primary / .secondary declared below). */
+  &#{&}:disabled {
+    --btn-bg: #f5f5f5;
+    --btn-fg: #a4a7ae;
+    --btn-edge: transparent;
+    box-shadow: inset 0 0 0 1px #e9eaeb;
+    filter: none;
     cursor: not-allowed;
   }
 
@@ -715,13 +793,19 @@ body {
     }
   }
 
-  /* Share: white with a grey border (the inner-border shadow draws it) */
+  /* Share (Figma / Untitled UI secondary): white, radius-md (8px), grey-700
+     text, a real 1px button-secondary-border, plus
+       shadow-xs                0 1px 2px     rgba(10,13,18,.05)
+       shadow-skeumorphic-inner 0 -2px inset  rgba(10,13,18,.05) */
   &.secondary {
-    --btn-edge: transparent;
+    --btn-fg: #414651;
+    --btn-border: #d5d7da;
+    padding: 0 17px; /* 1px border instead of the base 2px: same overall size */
+    border: 1px solid var(--btn-border);
+    background: var(--btn-bg);
     box-shadow:
       0 1px 2px 0 rgba(10, 13, 18, 0.05),
-      inset 0 -2px 0 0 rgba(10, 13, 18, 0.05),
-      inset 0 0 0 1px var(--fs-border);
+      inset 0 -2px 0 0 rgba(10, 13, 18, 0.05);
 
     &:hover:not(:disabled) {
       --btn-bg: var(--fs-surface-2);
@@ -744,11 +828,23 @@ body {
   }
 }
 
-/* Dark mode: same lighter brand color and navy text as .btn-primary, since
-   the Figma burgundy barely stands out from the navy cards (1.8:1) */
+/* Dark mode disabled: a flat navy step with muted text */
+[data-bs-theme='dark'] .action-btn.action-btn:disabled {
+  --btn-bg: var(--fs-surface-2);
+  --btn-fg: rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 0 0 1px var(--fs-border);
+}
+
+/* Dark mode: the Figma grey border and text disappear on navy */
+[data-bs-theme='dark'] .action-btn.secondary {
+  --btn-fg: var(--fs-text);
+  --btn-border: var(--fs-border);
+}
+
+/* Dark mode: the theme's burgundy and hover shade, same as .btn-primary */
 [data-bs-theme='dark'] .action-btn.primary {
   --btn-bg: var(--fs-primary);
-  --btn-fg: var(--fs-body-bg);
+  --btn-fg: #fff;
   --btn-edge: rgba(255, 255, 255, 0.16);
 
   &:hover:not(:disabled),
@@ -791,8 +887,8 @@ body {
 
     &:focus {
       outline: none;
-      border-color: var(--fs-primary);
-      box-shadow: 0 0 0 0.2rem rgba(var(--fs-primary-rgb), 0.12);
+      border-color: var(--fs-primary-text);
+      box-shadow: 0 0 0 0.2rem rgba(var(--fs-primary-text-rgb), 0.12);
     }
 
     &::placeholder {

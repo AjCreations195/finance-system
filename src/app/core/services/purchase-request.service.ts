@@ -170,10 +170,10 @@ const CREATORS: Person[] = [
   { name: t('Hassan Latif Al-Ali', 'حسن لطيف العلي'), email: 'hassanalali@moi.gov.qa' },
 ];
 
-/** Status of each design row, in order. */
+/** Status of each design row, in order. 'delivered' is extra (task brief), so it first appears on page 2. */
 const STATUSES: RequestStatus[] = [
   'accepted', 'inProgress', 'finished', 'forReview', 'sent', 'rejected', 'pending',
-  'completed', 'inCorrection', 'suspended', 'verified', 'notExecutable', 'closed',
+  'completed', 'inCorrection', 'suspended', 'verified', 'notExecutable', 'closed', 'delivered',
 ];
 
 /** Notes count and day of January from the design rows. */
@@ -216,7 +216,7 @@ const REVIEWER = t('Jassim Mohammed Hamed', 'جاسم محمد حامد');
 const PURCHASING = t('Purchasing department', 'إدارة المشتريات');
 
 const IN_APPROVAL: RequestStatus[] = ['pending', 'forReview', 'sent', 'inProgress', 'suspended'];
-const APPROVED: RequestStatus[] = ['accepted', 'completed', 'finished', 'closed'];
+const APPROVED: RequestStatus[] = ['accepted', 'completed', 'finished', 'closed', 'delivered'];
 const REJECTED: RequestStatus[] = ['rejected', 'notExecutable'];
 
 function buildWorkflow(request: PurchaseRequest): WorkflowStep[] {
@@ -243,7 +243,11 @@ function buildActivity(request: PurchaseRequest): ActivityEntry[] {
       person: REVIEWER,
       date: at(48 + 13.5),
       message: t('Took 3 actions on the request', 'تم العمل على 3 إجراءات على الطلب'),
-      tags: [t('Add appendix', 'إضافة ملحق'), t('Add attachment', 'إضافة مرفق'), t('Remove appendix', 'حذف ملحق')],
+      tags: [
+        { label: t('Add appendix', 'إضافة ملحق') },
+        { label: t('Add attachment', 'إضافة مرفق') },
+        { label: t('Remove appendix', 'حذف ملحق'), tone: 'danger' },
+      ],
     },
     {
       id: 2,

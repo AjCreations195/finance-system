@@ -45,8 +45,8 @@ export interface FinancialStat {
 // ---------------------------------------------------------------------------
 // "My tasks" table
 // ---------------------------------------------------------------------------
-export type TaskStatus = 'completed' | 'inProgress' | 'executed' | 'review' | 'sent';
-export const TASK_STATUSES: readonly TaskStatus[] = ['completed', 'inProgress', 'executed', 'review', 'sent'];
+export type TaskStatus = 'completed' | 'inProgress' | 'executed' | 'review' | 'sent' | 'rejected';
+export const TASK_STATUSES: readonly TaskStatus[] = ['completed', 'inProgress', 'executed', 'review', 'sent', 'rejected'];
 
 export interface TaskItem {
   id: number;

@@ -20,7 +20,7 @@
               </button>
             </th>
           }
-          <th scope="col"><span class="visually-hidden">{{ 'common.actions' | translate }}</span></th>
+          <th scope="col" class="actions-col"><span class="visually-hidden">{{ 'common.actions' | translate }}</span></th>
         </tr>
       </thead>
       <tbody>
@@ -36,9 +36,11 @@
             <td class="text-nowrap">
               {{ pad(w.maxLevel) }} <app-icon name="trend-up" class="trend-icon ms-1" style="color: var(--fs-up)" />
             </td>
-            <td>
+            <!-- ⋮ column: pinned to the visible edge on phones (styles.scss .actions-col) -->
+            <td class="actions-col">
               <div class="row-actions">
-                <button type="button" (click)="notAvailable()" [attr.aria-label]="'common.moreOptions' | translate">
+                <button type="button" (click)="openRowMenu(w, $event)" [attr.aria-label]="'common.moreOptions' | translate"
+                        [attr.aria-expanded]="rowMenu()?.item?.id === w.id" aria-haspopup="menu">
                   <app-icon name="more-vertical" />
                 </button>
               </div>
@@ -54,3 +56,68 @@
     <span class="show-more-arrow"><app-icon name="arrow-left" /></span>
   </button>
 </app-dashboard-card>
+
+<!-- ===================== ROW MENU (⋮) ===================== -->
+@if (rowMenu(); as menu) {
+  <ul class="dropdown-menu show row-menu row-menu-wide" role="menu" [style.top.px]="menu.top" [style.left.px]="menu.left" [attr.aria-label]="menu.item.product | localize">
+    <li>
+      <button type="button" class="dropdown-item" role="menuitem" (click)="copyNumber(menu.item)">
+        <app-icon name="copy" class="me-2" />{{ 'warehouses.actions.copyNumber' | translate }}
+      </button>
+    </li>
+    <li>
+      <!-- Already full: nothing to restock -->
+      <button type="button" class="dropdown-item" role="menuitem" (click)="askRestock(menu.item)" [disabled]="menu.item.quantity >= menu.item.maxLevel">
+        <app-icon name="bi-box-arrow-in-down" class="me-2" />{{ 'warehouses.actions.restock' | translate }}
+      </button>
+    </li>
+    <li><hr class="dropdown-divider" /></li>
+    <li>
+      <button type="button" class="dropdown-item text-danger" role="menuitem" (click)="askDelete(menu.item)">
+        <app-icon name="delete" class="me-2" />{{ 'warehouses.actions.delete' | translate }}
+      </button>
+    </li>
+  </ul>
+}
+
+<!-- ===================== RESTOCK CONFIRMATION ===================== -->
+@if (pendingRestock(); as item) {
+  <div class="modal-backdrop fade show confirm-backdrop"></div>
+  <div class="modal d-block confirm-modal" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="restock-title" (click)="pendingRestock.set(null)">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-body text-center p-4">
+          <span class="approve-icon mb-3"><app-icon name="bi-box-arrow-in-down" /></span>
+          <h2 id="restock-title" class="h5 fw-bold">{{ 'warehouses.confirmRestock.title' | translate }}</h2>
+          <p class="text-muted-fs mb-4">
+            {{ 'warehouses.confirmRestock.message' | translate: { product: (item.product | localize), from: amount(item.quantity, item), to: amount(item.maxLevel, item) } }}
+          </p>
+          <div class="d-flex gap-2 justify-content-center">
+            <button type="button" class="btn-fs px-4" (click)="pendingRestock.set(null)">{{ 'common.cancel' | translate }}</button>
+            <button type="button" class="btn btn-primary px-4 confirm-btn" (click)="confirmRestock()">{{ 'warehouses.confirmRestock.confirm' | translate }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ===================== DELETE CONFIRMATION ===================== -->
+@if (pendingDelete(); as item) {
+  <div class="modal-backdrop fade show confirm-backdrop"></div>
+  <div class="modal d-block confirm-modal" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="delete-item-title" (click)="pendingDelete.set(null)">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-body text-center p-4">
+          <span class="danger-icon mb-3"><app-icon name="delete" /></span>
+          <h2 id="delete-item-title" class="h5 fw-bold">{{ 'warehouses.confirmDelete.title' | translate }}</h2>
+          <p class="text-muted-fs mb-4">{{ 'warehouses.confirmDelete.message' | translate: { product: (item.product | localize) } }}</p>
+          <div class="d-flex gap-2 justify-content-center">
+            <button type="button" class="btn-fs px-4" (click)="pendingDelete.set(null)">{{ 'common.cancel' | translate }}</button>
+            <button type="button" class="btn btn-danger px-4 confirm-btn" (click)="confirmDelete()">{{ 'common.delete' | translate }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
