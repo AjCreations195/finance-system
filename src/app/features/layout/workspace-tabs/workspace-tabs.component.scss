@@ -343,7 +343,7 @@
   font: inherit;
   text-align: start;
 
-  > .bi {
+  > app-icon {
     color: var(--fs-text-muted);
   }
 
@@ -353,7 +353,7 @@
     background: var(--fs-surface-2);
     color: var(--fs-primary-text);
 
-    > .bi {
+    > app-icon {
       color: inherit;
     }
   }

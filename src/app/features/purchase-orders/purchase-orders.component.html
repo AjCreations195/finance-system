@@ -4,7 +4,7 @@
   <header class="header-card">
     <div class="header-text">
       <div class="d-flex align-items-center gap-2">
-        <span class="title-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span>
+        <span class="title-icon"><app-icon name="receipt" /></span>
         <h1 class="page-title">{{ 'requests.title' | translate }}</h1>
         <span class="title-sep" aria-hidden="true"></span>
         <button type="button" class="expand-btn" (click)="setExpanded(!expanded())"
@@ -16,7 +16,7 @@
     </div>
     <div class="d-flex align-items-center gap-2">
       <button type="button" class="btn btn-primary btn-create" (click)="notAvailable()">
-        <i class="bi bi-plus-lg" aria-hidden="true"></i> {{ 'requests.create' | translate }}
+        <app-icon name="add" /> {{ 'requests.create' | translate }}
       </button>
       <button type="button" class="btn-fs px-2" (click)="notAvailable()" [attr.aria-label]="'requests.moreActions' | translate">
         <app-icon name="more-vertical" />
@@ -71,7 +71,7 @@
               <th scope="col" [attr.aria-sort]="sort.aria(col)" [class.col-optional]="col === 'products' || col === 'notes'">
                 <button type="button" class="sort-header" (click)="sort.toggle(col)">
                   {{ 'requests.columns.' + col | translate }}
-                  <i [class]="sort.icon(col)" aria-hidden="true"></i>
+                  <app-icon [name]="sort.icon(col)" class="sort-icon" />
                 </button>
               </th>
             }
@@ -122,7 +122,7 @@
           } @empty {
             <tr>
               <td colspan="10" class="text-center py-5">
-                <i class="bi bi-inbox fs-2 d-block mb-2" aria-hidden="true"></i>
+                <app-icon name="inbox" class="fs-2 d-block mx-auto mb-2" />
                 {{ 'requests.empty' | translate }}
               </td>
             </tr>
@@ -150,10 +150,10 @@
 <footer class="action-bar">
   <div class="d-flex flex-wrap align-items-center gap-2">
     <button type="button" class="btn btn-primary btn-create" (click)="notAvailable()">
-      <i class="bi bi-plus-lg" aria-hidden="true"></i> {{ 'requests.createFull' | translate }}
+      <app-icon name="add" /> {{ 'requests.createFull' | translate }}
     </button>
     <button type="button" class="btn-fs" (click)="sendSelected()">
-      <i class="bi bi-send flip-rtl" aria-hidden="true"></i> {{ 'requests.send' | translate }}
+      <app-icon name="send" class="flip-rtl" /> {{ 'requests.send' | translate }}
       @if (selectedCount()) {
         <span class="count-pill">{{ selectedCount() }}</span>
       }
@@ -161,21 +161,21 @@
     <!-- Actions dropdown (applies to the selected rows) -->
     <div class="position-relative">
       <button type="button" class="btn-fs actions-btn" (click)="toggleActions($event)" [attr.aria-expanded]="actionsOpen()" aria-haspopup="menu">
-        <i class="bi bi-gear" aria-hidden="true"></i> {{ 'requests.actions' | translate }}
-        <span class="actions-caret"><i class="bi bi-chevron-down" aria-hidden="true"></i></span>
+        <app-icon name="settings" /> {{ 'requests.actions' | translate }}
+        <span class="actions-caret"><app-icon name="chevron-down" /></span>
       </button>
       @if (actionsOpen()) {
         <ul class="dropdown-menu show bar-menu" role="menu" (click)="$event.stopPropagation()">
-          <li><button type="button" class="dropdown-item" role="menuitem" (click)="approveSelected()"><i class="bi bi-check2-circle me-2" aria-hidden="true"></i>{{ 'requests.approveSelected' | translate }}</button></li>
-          <li><button type="button" class="dropdown-item text-danger" role="menuitem" (click)="deleteSelected()"><i class="bi bi-trash3 me-2" aria-hidden="true"></i>{{ 'requests.deleteSelected' | translate }}</button></li>
+          <li><button type="button" class="dropdown-item" role="menuitem" (click)="approveSelected()"><app-icon name="approve" class="me-2" />{{ 'requests.approveSelected' | translate }}</button></li>
+          <li><button type="button" class="dropdown-item text-danger" role="menuitem" (click)="deleteSelected()"><app-icon name="delete" class="me-2" />{{ 'requests.deleteSelected' | translate }}</button></li>
         </ul>
       }
     </div>
   </div>
 
   <div class="d-flex align-items-center gap-2">
-    <button type="button" class="btn-fs" (click)="print()"><i class="bi bi-printer" aria-hidden="true"></i> {{ 'requests.print' | translate }}</button>
-    <button type="button" class="btn-fs" (click)="back()"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> {{ 'requests.back' | translate }}</button>
+    <button type="button" class="btn-fs" (click)="print()"><app-icon name="print" /> {{ 'requests.print' | translate }}</button>
+    <button type="button" class="btn-fs" (click)="back()"><app-icon name="return" /> {{ 'requests.back' | translate }}</button>
     <button type="button" class="btn-fs px-2" (click)="notAvailable()" [attr.aria-label]="'requests.moreActions' | translate">
       <app-icon name="more-vertical" />
     </button>
@@ -253,18 +253,18 @@
   <ul class="dropdown-menu show row-menu" role="menu" [style.top.px]="menu.top" [style.left.px]="menu.left" (click)="$event.stopPropagation()">
     <li>
       <button type="button" class="dropdown-item" role="menuitem" (click)="view(menu.request)">
-        <i class="bi bi-eye me-2" aria-hidden="true"></i>{{ 'requests.rowActions.view' | translate }}
+        <app-icon name="eye" class="me-2" />{{ 'requests.rowActions.view' | translate }}
       </button>
     </li>
     <li>
       <button type="button" class="dropdown-item" role="menuitem" (click)="approve(menu.request)" [disabled]="!canApprove(menu.request)">
-        <i class="bi bi-check2-circle me-2" aria-hidden="true"></i>{{ 'requests.rowActions.approve' | translate }}
+        <app-icon name="approve" class="me-2" />{{ 'requests.rowActions.approve' | translate }}
       </button>
     </li>
     <li><hr class="dropdown-divider" /></li>
     <li>
       <button type="button" class="dropdown-item text-danger" role="menuitem" (click)="askDelete([menu.request])">
-        <i class="bi bi-trash3 me-2" aria-hidden="true"></i>{{ 'requests.rowActions.delete' | translate }}
+        <app-icon name="delete" class="me-2" />{{ 'requests.rowActions.delete' | translate }}
       </button>
     </li>
   </ul>
@@ -277,7 +277,7 @@
     <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-body text-center p-4">
-          <span class="danger-icon mb-3"><i class="bi bi-trash3" aria-hidden="true"></i></span>
+          <span class="danger-icon mb-3"><app-icon name="delete" /></span>
           <h2 id="confirm-title" class="h5 fw-bold">{{ 'requests.confirmDelete.title' | translate }}</h2>
           <p class="text-muted-fs mb-4">
             @if (list.length === 1) {
@@ -303,12 +303,12 @@
     <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-body text-center p-4">
-          <span class="approve-icon mb-3"><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
+          <span class="approve-icon mb-3"><app-icon name="approve" /></span>
           <h2 id="approve-title" class="h5 fw-bold">{{ 'requests.confirmApprove.title' | translate }}</h2>
           <p class="text-muted-fs mb-1">{{ 'requests.confirmApprove.message' | translate: { count: pending.requests.length } }}</p>
           @if (pending.skippedIds.length) {
             <p class="skip-note mb-0">
-              <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+              <app-icon name="warning-fill" />
               {{ 'requests.confirmApprove.skipped' | translate: { skipped: pending.skippedIds.length } }}
             </p>
           }

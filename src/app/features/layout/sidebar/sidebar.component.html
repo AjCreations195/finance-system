@@ -24,7 +24,6 @@
 
   <!-- ===================== MENU SEARCH ===================== -->
   <div class="search-section">
-    <label for="menu-search" class="search-title">{{ 'nav.search' | translate }}</label>
     <div class="search-box">
       <app-icon name="search" class="search-icon" />
       <input
@@ -96,12 +95,7 @@
         [attr.aria-expanded]="isExpanded(node)"
         [title]="node.label | translate"
       >
-        <!-- Figma SVG (public/icons) once exported; Bootstrap icon ("bi-…") until then -->
-        @if (node.icon.startsWith('bi-')) {
-          <i class="bi {{ node.icon }} menu-icon" aria-hidden="true"></i>
-        } @else {
-          <app-icon [name]="node.icon" class="menu-icon" />
-        }
+        <app-icon [name]="node.icon" class="menu-icon" />
         <span class="menu-text">{{ node.label | translate }}</span>
         <app-icon name="chevron-down" class="chevron" [class.open]="isExpanded(node)" />
       </button>
@@ -122,12 +116,7 @@
         ariaCurrentWhenActive="page"
         [title]="node.label | translate"
       >
-        <!-- Figma SVG (public/icons) once exported; Bootstrap icon ("bi-…") until then -->
-        @if (node.icon.startsWith('bi-')) {
-          <i class="bi {{ node.icon }} menu-icon" aria-hidden="true"></i>
-        } @else {
-          <app-icon [name]="node.icon" class="menu-icon" />
-        }
+        <app-icon [name]="node.icon" class="menu-icon" />
         <span class="menu-text">{{ node.label | translate }}</span>
       </a>
     } @else {
@@ -140,12 +129,7 @@
         (click)="notAvailable(node)"
         [title]="node.label | translate"
       >
-        <!-- Figma SVG (public/icons) once exported; Bootstrap icon ("bi-…") until then -->
-        @if (node.icon.startsWith('bi-')) {
-          <i class="bi {{ node.icon }} menu-icon" aria-hidden="true"></i>
-        } @else {
-          <app-icon [name]="node.icon" class="menu-icon" />
-        }
+        <app-icon [name]="node.icon" class="menu-icon" />
         <span class="menu-text">{{ node.label | translate }}</span>
         @if (node.badge) {
           <span class="menu-badge">{{ node.badge }}</span>

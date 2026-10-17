@@ -1,7 +1,7 @@
 /**
  * Sidebar navigation tree, matching the menu in the Figma design.
- * `label` is a translation key; `icon` is a Figma SVG in public/icons
- * (a "bi-…" Bootstrap icon class still works too). Items without `route` belong to modules
+ * `label` is a translation key; `icon` is an SVG in public/icons.
+ * Items without `route` belong to modules
  * outside this task, so clicking them shows a "not in demo" notice.
  */
 export interface NavNode {

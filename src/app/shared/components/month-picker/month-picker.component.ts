@@ -1,6 +1,7 @@
 import { Component, ElementRef, computed, inject, input, model, signal } from '@angular/core';
 import { LanguageService } from '../../../core/services/language.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { IconComponent } from '../icon/icon.component';
 
 /** A calendar month: `month` is 0-based (0 = January), like Date#getMonth. */
 export interface YearMonth {
@@ -30,24 +31,24 @@ export function monthsBetween(from: YearMonth, to: YearMonth): number {
  */
 @Component({
   selector: 'app-month-picker',
-  imports: [TranslatePipe],
+  imports: [IconComponent, TranslatePipe],
   template: `
     <div class="position-relative">
       <button type="button" class="btn-fs trigger" (click)="toggle()" [attr.aria-expanded]="open()" aria-haspopup="dialog" [attr.aria-label]="ariaLabel() ? (ariaLabel() | translate) + ': ' + label() : null">
-        <i class="bi bi-calendar3" aria-hidden="true"></i>
+        <app-icon name="calendar" />
         {{ label() }}
-        <i class="bi bi-chevron-down chevron" aria-hidden="true"></i>
+        <app-icon name="chevron-down" class="chevron" />
       </button>
 
       @if (open()) {
         <div class="dropdown-menu show picker" role="dialog" [attr.aria-label]="ariaLabel() | translate">
           <div class="year-nav">
             <button type="button" class="nav-btn" (click)="viewYear.set(viewYear() - 1)" [disabled]="viewYear() <= minYear()" [attr.aria-label]="'common.previousYear' | translate">
-              <i class="bi bi-chevron-left" aria-hidden="true"></i>
+              <app-icon name="chevron-left" />
             </button>
             <span class="year" aria-live="polite">{{ viewYear() }}</span>
             <button type="button" class="nav-btn" (click)="viewYear.set(viewYear() + 1)" [disabled]="viewYear() >= max().year" [attr.aria-label]="'common.nextYear' | translate">
-              <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              <app-icon name="chevron-right" />
             </button>
           </div>
 
@@ -111,7 +112,7 @@ export function monthsBetween(from: YearMonth, to: YearMonth): number {
       }
     }
     /* Arrows point the reading direction in RTL */
-    :host-context([dir='rtl']) .nav-btn .bi {
+    :host-context([dir='rtl']) .nav-btn app-icon {
       display: inline-block;
       transform: scaleX(-1);
     }

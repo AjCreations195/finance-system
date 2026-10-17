@@ -14,11 +14,11 @@ import { IconComponent } from '../../../../shared/components/icon/icon.component
 
 /** Icon per category, shown in the category dropdown. */
 const CATEGORY_ICONS: Record<string, string> = {
-  all: 'bi-grid',
-  itEquipment: 'bi-pc-display',
-  furniture: 'bi-lamp',
-  vehicles: 'bi-truck-front',
-  services: 'bi-tools',
+  all: 'grid',
+  itEquipment: 'computer',
+  furniture: 'lamp',
+  vehicles: 'truck',
+  services: 'tools',
 };
 
 /** Donut segment colors, sampled from the design. */

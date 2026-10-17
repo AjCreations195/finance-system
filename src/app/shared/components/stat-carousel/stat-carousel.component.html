@@ -1,7 +1,7 @@
 <section class="carousel" [attr.aria-label]="'dashboard.stats.label' | translate">
   <!-- Previous (start side) -->
   <button type="button" class="nav-arrow prev" (click)="scroll(-1)" [attr.aria-label]="'dashboard.stats.previous' | translate">
-    <i class="bi bi-chevron-left flip-rtl" aria-hidden="true"></i>
+    <app-icon name="chevron-left" class="flip-rtl" />
   </button>
 
   <!-- Scrollable track -->
@@ -16,12 +16,8 @@
         <!-- Top: icon + label + amount (light grey area) -->
         <div class="stat-top">
           <span class="stat-icon">
-            @if (stat.icon.startsWith('bi-')) {
-              <i class="bi {{ stat.icon }}" aria-hidden="true"></i>
-            } @else {
-              <!-- Figma badge symbol on the full 56px canvas, so it keeps the design's size and position -->
-              <app-icon [name]="stat.icon" class="stat-glyph" />
-            }
+            <!-- Figma badge symbol on the full 56px canvas, so it keeps the design's size and position -->
+            <app-icon [name]="stat.icon" class="stat-glyph" />
           </span>
           <div class="min-w-0">
             <p class="stat-label">{{ stat.label | translate }}</p>
@@ -51,6 +47,6 @@
 
   <!-- Next (end side) -->
   <button type="button" class="nav-arrow next" (click)="scroll(1)" [attr.aria-label]="'dashboard.stats.next' | translate">
-    <i class="bi bi-chevron-right flip-rtl" aria-hidden="true"></i>
+    <app-icon name="chevron-right" class="flip-rtl" />
   </button>
 </section>

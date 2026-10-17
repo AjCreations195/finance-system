@@ -65,16 +65,16 @@ describe('TableSort', () => {
   });
 
   it('exposes the right icon and aria-sort value for each state', () => {
-    expect(sort.icon('name')).toContain('bi-chevron-expand');
+    expect(sort.icon('name')).toBe('chevron-expand');
     expect(sort.aria('name')).toBe('none');
 
     sort.toggle('name');
-    expect(sort.icon('name')).toContain('bi-chevron-up');
+    expect(sort.icon('name')).toBe('chevron-up');
     expect(sort.aria('name')).toBe('ascending');
     expect(sort.aria('amount')).toBe('none');
 
     sort.toggle('name');
-    expect(sort.icon('name')).toContain('bi-chevron-down');
+    expect(sort.icon('name')).toBe('chevron-down');
     expect(sort.aria('name')).toBe('descending');
   });
 });

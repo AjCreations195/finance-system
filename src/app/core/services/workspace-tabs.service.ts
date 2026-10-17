@@ -17,13 +17,13 @@ export interface ModuleDef {
 }
 
 export const MODULES: readonly ModuleDef[] = [
-  { id: 'dashboard', label: 'layout.tabs.dashboard', icon: 'bi-grid-1x2', route: '/dashboard', pinned: true },
-  { id: 'procurement', label: 'layout.tabs.procurement', icon: 'bi-bag-check', route: '/procurement/purchase-requests' },
-  { id: 'custody', label: 'layout.tabs.custody', icon: 'bi-clipboard-check', route: null },
-  { id: 'requests', label: 'layout.tabs.requests', icon: 'bi-inboxes', route: null },
-  { id: 'invoices', label: 'layout.tabs.invoices', icon: 'bi-receipt', route: null },
-  { id: 'contracts', label: 'layout.tabs.contracts', icon: 'bi-file-earmark-text', route: null },
-  { id: 'budget', label: 'layout.tabs.budget', icon: 'bi-wallet2', route: null },
+  { id: 'dashboard', label: 'layout.tabs.dashboard', icon: 'dashboard', route: '/dashboard', pinned: true },
+  { id: 'procurement', label: 'layout.tabs.procurement', icon: 'procurement', route: '/procurement/purchase-requests' },
+  { id: 'custody', label: 'layout.tabs.custody', icon: 'custody-procedures', route: null },
+  { id: 'requests', label: 'layout.tabs.requests', icon: 'requests', route: null },
+  { id: 'invoices', label: 'layout.tabs.invoices', icon: 'receipt', route: null },
+  { id: 'contracts', label: 'layout.tabs.contracts', icon: 'file-text', route: null },
+  { id: 'budget', label: 'layout.tabs.budget', icon: 'wallet-outline', route: null },
 ];
 
 /** Page that lists purchase requests; `?view=<id>` opens one in the details panel. */

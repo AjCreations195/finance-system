@@ -186,7 +186,7 @@ export class WorkspaceTabsComponent {
       .slice(0, 5)
       .map((tab) => {
         if (tab.kind === 'module') return { tab, label: this.language.translate(moduleDef(tab.id)!.label), icon: moduleDef(tab.id)!.icon };
-        return { tab, label: this.requests.getById(tab.requestId)?.number ?? `#${tab.requestId}`, icon: 'bi-receipt' };
+        return { tab, label: this.requests.getById(tab.requestId)?.number ?? `#${tab.requestId}`, icon: 'receipt' };
       }),
   );
 

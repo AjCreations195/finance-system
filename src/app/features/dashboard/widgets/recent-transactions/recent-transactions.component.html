@@ -15,7 +15,7 @@
             <th scope="col" [attr.aria-sort]="sort.aria(col)">
               <button type="button" class="sort-header" (click)="sort.toggle(col)">
                 {{ 'transactions.columns.' + col | translate }}
-                <i [class]="sort.icon(col)" aria-hidden="true"></i>
+                <app-icon [name]="sort.icon(col)" class="sort-icon" />
               </button>
             </th>
           }
@@ -70,7 +70,7 @@
     </li>
     <li>
       <a class="dropdown-item" role="menuitem" [href]="'mailto:' + menu.item.employee.email" (click)="emailEmployee()">
-        <app-icon name="bi-envelope" class="me-2" />{{ 'transactions.actions.emailEmployee' | translate }}
+        <app-icon name="mail" class="me-2" />{{ 'transactions.actions.emailEmployee' | translate }}
       </a>
     </li>
     <li><hr class="dropdown-divider" /></li>
