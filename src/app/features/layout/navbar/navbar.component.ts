@@ -14,8 +14,6 @@ import { PurchaseRequest, STATUS_BADGE } from '../../../core/models/purchase-req
 import { PurchaseRequestService } from '../../../core/services/purchase-request.service';
 import { WorkspaceTabsService } from '../../../core/services/workspace-tabs.service';
 import { NAV_FOOTER, NAV_TREE, NAV_TREE_SECONDARY, NavNode } from '../sidebar/nav-items';
-import { ChatService } from '../../../core/services/chat.service';
-import { CHAT_TOGGLE_ID } from '../chat-panel/chat-panel.component';
 
 /** Most results per group in the search dropdown. */
 const MAX_PAGES = 4;
@@ -41,7 +39,8 @@ const SEARCHABLE_PAGES: NavNode[] = (function leaves(nodes: NavNode[]): NavNode[
  * Top bar from the design, in reading order:
  *   [logo][system name | department] ··· [search] ··· [user ▾] [icons…]
  *
- * Icon group: AI assistant (chat), language, Dark/Light toggle, notifications.
+ * Icon group: language, Dark/Light toggle, notifications. (The AI assistant is a
+ * floating button in the bottom-right corner, see ChatFabComponent.)
  * The language button isn't in the Figma but is required by the task.
  * The search box shows only on xl+ (below that it crowds the bar). It finds
  * sidebar pages and purchase requests as you type ("/" focuses it).
@@ -122,28 +121,28 @@ export class NavbarComponent {
   private readonly term = computed(() => this.query().trim().toLowerCase());
 
   /** Sidebar leaves whose label matches (disabled items can't be opened, so they're left out). */
+  /** Empty box: the first pages are suggested. Typing narrows them to the matches. */
   protected readonly pageResults = computed<NavNode[]>(() => {
     const q = this.term();
-    if (!q) return [];
     this.language.lang(); // re-run when the language (and so the labels) change
-    return SEARCHABLE_PAGES.filter((n) => this.language.translate(n.label).toLowerCase().includes(q)).slice(0, MAX_PAGES);
+    const pages = q ? SEARCHABLE_PAGES.filter((n) => this.language.translate(n.label).toLowerCase().includes(q)) : SEARCHABLE_PAGES;
+    return pages.slice(0, MAX_PAGES);
   });
 
   /** Every matching request (the count feeds "View all"); the dropdown shows the first few. */
   private readonly requestMatches = computed<PurchaseRequest[]>(() => {
     const q = this.term();
-    if (!q) return [];
     const lang = this.language.lang();
-    return this.requests
-      .requests()
-      .filter(
-        (r) =>
-          r.number.toLowerCase().includes(q) ||
-          r.description[lang].toLowerCase().includes(q) ||
-          r.budgetItem.name[lang].toLowerCase().includes(q) ||
-          r.budgetItem.code.includes(q) ||
-          r.creator.name[lang].toLowerCase().includes(q),
-      );
+    const all = this.requests.requests();
+    if (!q) return all;
+    return all.filter(
+      (r) =>
+        r.number.toLowerCase().includes(q) ||
+        r.description[lang].toLowerCase().includes(q) ||
+        r.budgetItem.name[lang].toLowerCase().includes(q) ||
+        r.budgetItem.code.includes(q) ||
+        r.creator.name[lang].toLowerCase().includes(q),
+    );
   });
   protected readonly requestResults = computed(() => this.requestMatches().slice(0, MAX_REQUESTS));
   protected readonly requestCount = computed(() => this.requestMatches().length);
@@ -155,7 +154,8 @@ export class NavbarComponent {
     ...(this.requestCount() ? [{ kind: 'all' as const }] : []),
   ]);
 
-  protected readonly searchOpen = computed(() => this.searchFocused() && !!this.term());
+  /** The suggestions open as soon as the field is clicked into (before anything is typed). */
+  protected readonly searchOpen = computed(() => this.searchFocused());
   protected readonly activeId = computed(() => (this.searchOpen() && this.options().length ? `gs-opt-${this.active()}` : null));
   protected readonly statusBadge = STATUS_BADGE;
 
@@ -166,6 +166,12 @@ export class NavbarComponent {
 
   protected onSearchFocus(focused: boolean): void {
     this.searchFocused.set(focused);
+  }
+
+  /** The × button: empties the box and keeps the cursor in it for the next search. */
+  protected clearSearch(): void {
+    this.onQuery('');
+    this.searchInput()?.nativeElement.focus();
   }
 
   /** ↑ / ↓ move the highlight, Enter opens it, Esc clears the box. */
@@ -225,14 +231,6 @@ export class NavbarComponent {
     afterNextRender(() => document.getElementById(`gs-opt-${this.active()}`)?.scrollIntoView({ block: 'nearest' }), {
       injector: this.injector,
     });
-  }
-
-  protected readonly chat = inject(ChatService);
-  protected readonly chatToggleId = CHAT_TOGGLE_ID;
-
-  protected toggleChat(event: MouseEvent): void {
-    event.stopPropagation();
-    this.chat.toggle();
   }
 
   /** Sidebar pages without a route: a module outside this task. */

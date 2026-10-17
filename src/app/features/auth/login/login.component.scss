@@ -234,7 +234,7 @@ a.link-muted:hover {
   color: #fff;
   font-size: 0.9375rem;
   font-weight: 600;
-  transition: background-color 0.15s ease, transform 0.1s ease;
+  transition: background-color 0.15s ease, transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
 
   &:hover,
   &:focus-visible {
@@ -242,8 +242,16 @@ a.link-muted:hover {
     color: #fff;
   }
 
-  &:active {
-    transform: scale(0.99);
+  /* Hover: a small lift with a soft brand-coloured shadow (enabled buttons only) */
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px -8px rgba(127, 21, 59, 0.55);
+  }
+
+  /* Press: a clear squeeze, so the click feels acknowledged */
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+    box-shadow: none;
   }
 
   &:disabled {
@@ -340,24 +348,23 @@ a.link-muted:hover {
   rounded transparent corners were trimmed). Phones / tablets load the
   960px version (9 KB). The crop is centered on the building (58% / 54%).
 
-  Layers, top to bottom:
-    1. dark gradient at the bottom, so the white text stays readable
-    2. the photo
-    3. misty lavender, shown while the photo loads
-  The Figma grid pattern is laid over the photo by ::before (see below).
+  Layers, back to front (the photo is its own element, so it can zoom):
+    1. misty lavender, shown while the photo loads (the panel background)
+    2. the photo, zooming slowly (.hero-photo)
+    3. dark gradient at the bottom, so the white text stays readable (.hero-shade)
+    4. the Figma grid pattern (::before)
+    5. the text (.hero-content)
 */
 .hero-panel {
   position: relative;
+  isolation: isolate;
   display: flex;
   align-items: flex-end;
   min-height: 15rem;
   padding: 1.5rem 1.25rem;
   overflow: hidden;
   color: #fff;
-  background:
-    linear-gradient(to top, rgba(28, 30, 58, 0.66) 0%, rgba(28, 30, 58, 0.28) 45%, transparent 75%),
-    url('../../../../../public/images/login-bg-sm.webp') 58% 54% / cover no-repeat,
-    linear-gradient(180deg, #d9dbe6 0%, #c9cbdc 45%, #a9a9c4 100%);
+  background: linear-gradient(180deg, #d9dbe6 0%, #c9cbdc 45%, #a9a9c4 100%);
 
   @media (min-width: 576px) {
     min-height: 18rem;
@@ -367,10 +374,6 @@ a.link-muted:hover {
   @media (min-width: 992px) {
     min-height: 100vh;
     padding: 3rem clamp(2rem, 4vw, 4rem);
-    background:
-      linear-gradient(to top, rgba(28, 30, 58, 0.62) 0%, rgba(28, 30, 58, 0.25) 35%, transparent 60%),
-      url('../../../../../public/images/login-bg.webp') 58% 54% / cover no-repeat,
-      linear-gradient(180deg, #d9dbe6 0%, #c9cbdc 45%, #a9a9c4 100%);
   }
 
   /* Figma's grid with lighter squares (public/images/login-pattern.webp,
@@ -380,13 +383,45 @@ a.link-muted:hover {
     content: '';
     position: absolute;
     inset: 0;
+    z-index: 2;
     background: url('../../../../../public/images/login-pattern.webp') top center / cover no-repeat;
     pointer-events: none;
   }
 }
 
+/* Photo: slow zoom from 1.12× to 1× over 20s, then it rests (no loop, so it stays calm) */
+.hero-photo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url('../../../../../public/images/login-bg-sm.webp') 58% 54% / cover no-repeat;
+  animation: hero-zoom 20s ease-out both;
+
+  @media (min-width: 992px) {
+    background-image: url('../../../../../public/images/login-bg.webp');
+  }
+}
+
+@keyframes hero-zoom {
+  from {
+    transform: scale(1.12);
+  }
+}
+
+.hero-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to top, rgba(28, 30, 58, 0.66) 0%, rgba(28, 30, 58, 0.28) 45%, transparent 75%);
+
+  @media (min-width: 992px) {
+    background: linear-gradient(to top, rgba(28, 30, 58, 0.62) 0%, rgba(28, 30, 58, 0.25) 35%, transparent 60%);
+  }
+}
+
 .hero-content {
-  position: relative; /* above the grid */
+  position: relative;
+  z-index: 3; /* above the grid */
   width: 100%;
   max-width: 46rem;
 }
@@ -398,6 +433,12 @@ a.link-muted:hover {
   height: auto;
   margin-inline-start: auto;
   margin-bottom: 0.5rem;
+  /* Gentle float: rises and tilts slightly, then settles (uses translate/rotate, so no clash) */
+  animation: sparkle-float 5s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 
   @media (min-width: 992px) {
     width: 3.5rem;
@@ -432,5 +473,35 @@ a.link-muted:hover {
 
   @media (min-width: 992px) {
     font-size: 1rem;
+  }
+}
+
+/* ==================== LARGE SCREENS: +1px text ==================== */
+@media (min-width: 992px) {
+  .form-subtitle,
+  .form-label,
+  .form-control,
+  .reset-sent,
+  .back-link {
+    font-size: 0.9375rem;
+  }
+
+  .link-muted,
+  .register-line,
+  .field-hint,
+  .caps-warning {
+    font-size: 0.875rem;
+  }
+
+  .form-footer {
+    font-size: 0.8125rem;
+  }
+
+  .btn-brand {
+    font-size: 1rem;
+  }
+
+  .hero-text {
+    font-size: 1.0625rem;
   }
 }

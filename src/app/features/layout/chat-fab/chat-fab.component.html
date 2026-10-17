@@ -1,0 +1,7 @@
+<button [id]="toggleId" type="button" class="chat-fab" [class.is-open]="chat.isOpen()" (click)="toggle()"
+  [attr.aria-expanded]="chat.isOpen()" aria-controls="chat-panel" aria-haspopup="dialog"
+  [attr.aria-label]="'chat.title' | translate">
+  <app-icon [name]="chat.isOpen() ? 'close' : 'chat'" />
+  <!-- Name shown beside the button on hover or keyboard focus (wide screens only) -->
+  <span class="fab-tooltip" aria-hidden="true">{{ 'chat.title' | translate }}</span>
+</button>

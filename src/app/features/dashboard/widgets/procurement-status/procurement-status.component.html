@@ -28,9 +28,15 @@
       </dl>
     </div>
 
-    <!-- Donut chart -->
+    <!-- Donut chart, with the total counting up in its centre -->
     <div class="col-12 col-md-6">
-      <app-chart [options]="chartOptions()" />
+      <div class="donut-wrap">
+        <app-chart [options]="chartOptions()" />
+        <div class="donut-center">
+          <span class="donut-value" [appCountUp]="total()"></span>
+          <span class="donut-label">{{ 'procurement.total' | translate }}</span>
+        </div>
+      </div>
     </div>
   </div>
 </app-dashboard-card>

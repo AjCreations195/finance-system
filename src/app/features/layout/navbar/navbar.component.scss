@@ -46,6 +46,13 @@
   }
 }
 
+/* TEMP PREVIEW: phone-only favicon in place of the logo */
+.brand-favicon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
 /* ---- System name | department ---- */
 .system {
   align-items: center;
@@ -85,22 +92,55 @@
 }
 
 /* ---- Global search ---- */
-/* Figma: a wide box with the placeholder at the start and the icon at the end */
+/* Google-style: a full pill with the search icon at the start. The field grows with
+   the screen (height, text and width all scale with the viewport). */
 .global-search {
   flex: 1;
   min-width: 240px; /* never squeezed to a sliver by the items around it */
-  max-width: 560px;
+  max-width: clamp(560px, 46vw, 900px);
   margin-inline: auto;
 
+  /* A white pill with a soft shadow at rest; the shadow deepens on hover and focus */
   input {
-    height: 2.5rem;
-    padding-inline: 1rem 2.75rem;
-    border-radius: 0.625rem;
-    font-size: 0.875rem;
+    height: clamp(2.75rem, 2.45rem + 0.4vw, 3.375rem);
+    padding-inline: 3rem 3rem;
+    border-radius: 999px;
+    border: 1px solid var(--fs-control-border);
+    background: var(--fs-surface);
+    font-size: clamp(0.9375rem, 0.9rem + 0.25vw, 1.125rem);
+    box-shadow: var(--fs-shadow);
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.25s ease;
+
+    /* type="search" adds its own × in Chromium and Edge; our × button replaces it */
+    &::-webkit-search-cancel-button {
+      -webkit-appearance: none;
+      appearance: none;
+      display: none;
+    }
+
+    &::-ms-clear {
+      display: none;
+    }
+
+    &:hover {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16);
+    }
+
+    /* Focus: the pill lifts with a deeper shadow, like Google's bar when it is open */
+    &:focus {
+      background: var(--fs-surface);
+      border-color: transparent;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+    }
   }
 
   > .search-icon {
-    inset-inline: auto 0.875rem;
+    inset-inline: 1.125rem auto;
+    transition: color 0.2s ease;
+  }
+
+  &:focus-within > .search-icon {
+    color: var(--fs-primary-text);
   }
 
   /* The "/" hint sits just before the icon, and hides once the box is in use */
@@ -118,13 +158,51 @@
   &:has(.kbd-hint) input {
     padding-inline-end: 4.25rem;
   }
+
+  /* × button: at the end of the field, only while there is text */
+  > .search-clear {
+    position: absolute;
+    inset-inline-end: 0.75rem;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--fs-text-muted);
+    translate: 0 -50%;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    app-icon {
+      font-size: 0.875rem;
+    }
+
+    &:hover {
+      background: var(--fs-surface-2);
+      color: var(--fs-text);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--fs-primary-text);
+      outline-offset: 1px;
+    }
+  }
+
+  &:has(.search-clear) input {
+    padding-inline-end: 4.25rem;
+  }
 }
 
 /* ---- Search results dropdown ---- */
 .search-results {
   position: absolute;
   top: calc(100% + 0.5rem);
-  inset-inline: 0;
+  inset-inline-start: 0;
+  width: max(100%, 22rem); /* wider than a narrow box, so the rows have room */
   z-index: 1060;
   max-height: min(28rem, calc(100vh - var(--fs-navbar-height) - 1.5rem));
   overflow-y: auto;
@@ -552,4 +630,48 @@
 /* Material icon (menu) has built-in padding: a little larger than the text */
 .menu-icon {
   font-size: 1.25rem;
+}
+
+/* Phones: the field sits right after the logo and takes the rest of the bar */
+@media (max-width: 575.98px) {
+  .global-search {
+    min-width: 0;
+    max-width: none;
+    margin-inline: 0.25rem 0;
+
+    input {
+      height: 2.75rem;
+      /* 16px: iOS zooms the page into any field smaller than this on focus */
+      font-size: 1rem;
+      padding-inline: 2.75rem 2.75rem;
+    }
+
+    > .search-icon {
+      inset-inline: 0.875rem auto;
+      font-size: 1.125rem;
+    }
+
+    > .search-clear {
+      inset-inline-end: 0.4375rem;
+    }
+
+    /* The "/" hint is hidden on phones, so it needs no room (this beats the xl+ rule above) */
+    &:has(.kbd-hint) input {
+      padding-inline-end: 2.75rem;
+    }
+
+    /* The × button needs room too, and it is listed after the hint rule so it wins */
+    &:has(.search-clear) input {
+      padding-inline-end: 4.25rem;
+    }
+  }
+
+  /* Results drop down as a full-width panel under the bar, not a sliver under the field */
+  .search-results {
+    position: fixed;
+    top: calc(var(--fs-navbar-height) + 0.5rem);
+    inset-inline: 0.75rem;
+    width: auto;
+    max-height: calc(100dvh - var(--fs-navbar-height) - 1.25rem);
+  }
 }

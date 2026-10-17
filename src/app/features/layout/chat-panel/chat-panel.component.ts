@@ -23,14 +23,15 @@ const TOOL_ICONS: Record<ChatToolName, string> = {
   open_purchase_request: 'external-link',
 };
 
-/** The navbar button that opens the panel; focus returns to it on close. */
+/** The floating chat button that opens the panel; focus returns to it on close. */
 export const CHAT_TOGGLE_ID = 'chat-toggle';
 
 /**
  * ChatPanelComponent
  * ------------------
- * The AI assistant: a panel that slides in from the inline-end side, below
- * the navbar (from the right in English, from the left in Arabic).
+ * The AI assistant: a card that rises above the floating chat button in the
+ * bottom-right corner (bottom-left in Arabic). On phones it covers the whole
+ * screen below the navbar.
  *
  *   [✦ Finance assistant          🗑 ✕]
  *   [ starter questions / messages   ]

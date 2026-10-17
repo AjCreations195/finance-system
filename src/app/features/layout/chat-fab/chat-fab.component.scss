@@ -1,0 +1,73 @@
+/* Bottom-right corner, clear of the toasts (1090) which sit on top of it */
+.chat-fab {
+  position: fixed;
+  inset-block-end: 1.25rem;
+  inset-inline-end: 1.25rem;
+  z-index: 1030; /* under the panel (1040): on phones the full-screen panel covers it */
+  display: inline-grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fs-primary);
+  color: #fff;
+  font-size: 1.35rem;
+  box-shadow: 0 6px 16px -4px rgba(11, 20, 55, 0.45);
+  transition: background-color 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    background: var(--fs-primary-hover);
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--fs-primary-text);
+    outline-offset: 3px;
+  }
+
+  &.is-open .fab-tooltip {
+    display: none;
+  }
+}
+
+/* Name next to the button, on wide screens only (phones have no hover) */
+.fab-tooltip {
+  position: absolute;
+  inset-inline-end: calc(100% + 0.75rem);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--fs-text);
+  color: var(--fs-surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+
+  .chat-fab:hover &,
+  .chat-fab:focus-visible & {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .fab-tooltip {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-fab,
+  .fab-tooltip {
+    transition: none;
+  }
+}

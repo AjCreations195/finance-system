@@ -44,6 +44,18 @@
   border-radius: var(--fs-radius);
   background: var(--fs-surface);
   box-shadow: var(--fs-shadow);
+
+  /* Cards rise in one after another. `translate` (not `transform`) moves them,
+     so the hover lift on selectable cards is unaffected. */
+  animation: card-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--n, 0) * 90ms);
+}
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
 }
 
 /* Top grows to fill the card, so the bottom row lines up across all cards

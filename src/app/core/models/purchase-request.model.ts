@@ -77,6 +77,19 @@ export const TAB_STATUSES: Record<Exclude<RequestTab, 'all'>, readonly RequestSt
   rejected: ['rejected', 'notExecutable'],
 };
 
+/**
+ * Where each status puts a request's money (dashboard statistics cards):
+ *  - paid:      done and delivered, so the amount has been spent
+ *  - committed: approved or being processed, so the money is reserved
+ *  - pending:   still waiting for a decision
+ * Rejected / not-executable requests use no budget, so they're in no group.
+ */
+export const BUDGET_STATUSES: Record<'paid' | 'committed' | 'pending', readonly RequestStatus[]> = {
+  paid: ['delivered', 'completed', 'closed', 'finished'],
+  committed: ['accepted', 'verified', 'inProgress', 'sent', 'suspended', 'inCorrection'],
+  pending: ['forReview', 'pending'],
+};
+
 /** Final statuses: the request can't be approved any more. */
 export const FINAL_STATUSES: readonly RequestStatus[] = ['accepted', 'completed', 'finished', 'closed', 'delivered', 'rejected', 'notExecutable'];
 

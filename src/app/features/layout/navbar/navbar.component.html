@@ -7,7 +7,9 @@
 
   <!-- ===== Brand: logo  ===== -->
   <div class="brand">
-    <img [src]="logoSrc()" [alt]="'app.ministry' | translate" class="brand-logo" width="188" height="61" />
+    <img [src]="logoSrc()" [alt]="'app.ministry' | translate" class="brand-logo d-none d-sm-block" width="188" height="61" />
+    <!-- TEMP PREVIEW: favicon shown on phones in place of the logo -->
+    <img src="images/favicon.png" [alt]="'app.ministry' | translate" class="brand-favicon d-sm-none" width="32" height="32" />
   </div>
 
   <!-- ===== System name | department ===== -->
@@ -21,14 +23,22 @@
 
   <!-- ===== Global search (centered, xl+ only, where it doesn't crowd the navbar;
        icon on the end side as in Figma) ===== -->
-  <form class="global-search search-box d-none d-xl-flex" role="search" (submit)="$event.preventDefault()">
+  <!-- TEMP PREVIEW: shown on phones too (was xl+ only), right after the logo -->
+  <form class="global-search search-box d-flex" role="search" (submit)="$event.preventDefault()">
     <input #searchInput type="search" role="combobox" autocomplete="off" aria-autocomplete="list"
       aria-controls="global-search-results" [attr.aria-expanded]="searchOpen()"
       [attr.aria-activedescendant]="activeId()" [value]="query()" (input)="onQuery($any($event.target).value)"
       (focus)="onSearchFocus(true)" (blur)="onSearchFocus(false)" (keydown)="onSearchKey($event)"
       [placeholder]="'layout.searchPlaceholder' | translate" [attr.aria-label]="'common.search' | translate" />
     <app-icon name="search" class="search-icon" />
-    <kbd class="kbd-hint" aria-hidden="true">/</kbd>
+    <kbd class="kbd-hint d-none d-sm-block" aria-hidden="true">/</kbd>
+    @if (query()) {
+    <!-- mousedown is cancelled so the box keeps focus, and the results stay open -->
+    <button type="button" class="search-clear" (mousedown)="$event.preventDefault()" (click)="clearSearch()"
+      [attr.aria-label]="'common.clearSearch' | translate">
+      <app-icon name="close" />
+    </button>
+    }
 
     @if (searchOpen()) {
     <!-- mousedown is cancelled so clicking a result doesn't blur (and close) the box first -->
@@ -134,12 +144,7 @@
     }
 
     <div class="icon-group">
-      <!-- Opens the AI assistant panel (rendered by the layout) -->
-      <button [id]="chatToggleId" type="button" class="nav-btn" (click)="toggleChat($event)"
-        [attr.aria-expanded]="chat.isOpen()" aria-controls="chat-panel" aria-haspopup="dialog"
-        [attr.aria-label]="'chat.title' | translate" [title]="'chat.title' | translate">
-        <app-icon name="chat" />
-      </button>
+      <!-- The AI assistant has its own floating button (bottom-right, see ChatFabComponent) -->
       <!-- On phones these two move into the user menu -->
       <app-language-switcher [compact]="true" class="d-none d-sm-flex" />
       <app-theme-toggle [compact]="true" class="d-none d-sm-flex" />

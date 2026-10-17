@@ -20,7 +20,7 @@ const SESSION_KEY = 'fs-user';
 const ACCOUNTS_KEY = 'fs-accounts';
 
 /** Simulated network delay (ms), so loading states are visible. */
-const LATENCY = 700;
+const LATENCY = 600;
 
 /**
  * AuthService

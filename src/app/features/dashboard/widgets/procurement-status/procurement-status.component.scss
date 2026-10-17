@@ -19,6 +19,36 @@
   padding: 0.5rem 1rem 1rem;
 }
 
+/* Centre of the donut: the total counts up here (ApexCharts' own label is off).
+   Clicks pass through to the chart, so its tooltips still work. */
+.donut-wrap {
+  position: relative;
+}
+
+.donut-center {
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.donut-value {
+  color: var(--fs-text);
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.donut-label {
+  color: var(--fs-text-muted);
+  font-size: 0.75rem;
+}
+
 /* 2-column grid with inner dividers, as in the design */
 .breakdown {
   display: grid;

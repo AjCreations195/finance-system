@@ -66,6 +66,54 @@ describe('ChartComponent', () => {
     expect(render).toHaveBeenCalledTimes(1); // updated, not re-created
   });
 
+  it('animates the entrance and data changes by default', async () => {
+    const fixture = await create();
+    const animations = merged(fixture).chart?.animations;
+
+    expect(animations?.enabled).toBe(true);
+    expect(animations?.dynamicAnimation?.enabled).toBe(true);
+  });
+
+  it('turns animation off when the user prefers reduced motion', async () => {
+    vi.spyOn(window, 'matchMedia').mockImplementation(
+      (query: string) => ({ matches: query.includes('reduce'), media: query }) as MediaQueryList,
+    );
+    const fixture = await create();
+    const animations = merged(fixture).chart?.animations;
+
+    expect(animations?.enabled).toBe(false);
+    expect(animations?.dynamicAnimation?.enabled).toBe(false);
+  });
+
+  it('waits for the chart to scroll into view before drawing it', async () => {
+    let onIntersect: IntersectionObserverCallback = () => undefined;
+    const disconnect = vi.fn();
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(callback: IntersectionObserverCallback) {
+          onIntersect = callback;
+        }
+        observe = vi.fn();
+        disconnect = disconnect;
+      },
+    );
+
+    try {
+      const fixture = TestBed.createComponent(ChartComponent);
+      fixture.componentRef.setInput('options', { chart: { type: 'bar' }, series: [{ data: [1, 2] }] });
+      await fixture.whenStable();
+      expect(render).not.toHaveBeenCalled();
+
+      onIntersect([{ isIntersecting: true } as IntersectionObserverEntry], {} as IntersectionObserver);
+      await fixture.whenStable();
+      expect(render).toHaveBeenCalledTimes(1);
+      expect(disconnect).toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('destroys the chart with the component', async () => {
     const fixture = await create();
     fixture.destroy();

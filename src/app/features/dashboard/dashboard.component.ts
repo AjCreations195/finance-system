@@ -46,17 +46,32 @@ import { WarehousesComponent } from './widgets/warehouses/warehouses.component';
     <app-stat-carousel [stats]="data.stats()" />
 
     <div class="row g-3 g-xl-4">
-      <div class="col-12"><app-my-tasks /></div>
+      <div class="col-12 reveal" style="--i: 3"><app-my-tasks /></div>
 
-      <div class="col-12 col-xl-6"><app-recent-activities /></div>
-      <div class="col-12 col-xl-6"><app-procurement-status /></div>
+      <div class="col-12 col-xl-6 reveal" style="--i: 4"><app-recent-activities /></div>
+      <div class="col-12 col-xl-6 reveal" style="--i: 5"><app-procurement-status /></div>
 
-      <div class="col-12 col-xl-6"><app-recent-transactions /></div>
-      <div class="col-12 col-xl-6"><app-warehouses /></div>
+      <div class="col-12 col-xl-6 reveal" style="--i: 6"><app-recent-transactions /></div>
+      <div class="col-12 col-xl-6 reveal" style="--i: 7"><app-warehouses /></div>
 
-      <div class="col-12 col-xl-6"><app-contracts /></div>
-      <div class="col-12 col-xl-6"><app-budget-items /></div>
+      <div class="col-12 col-xl-6 reveal" style="--i: 8"><app-contracts /></div>
+      <div class="col-12 col-xl-6 reveal" style="--i: 9"><app-budget-items /></div>
     </div>
+  `,
+  styles: `
+    /* Widgets rise in after the stat cards (--i is the order, ~90ms apart).
+       Only the opacity and translate change, so the cards' own hover effects are untouched. */
+    .reveal {
+      animation: dashboard-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+      animation-delay: calc(var(--i) * 90ms);
+    }
+
+    @keyframes dashboard-rise {
+      from {
+        opacity: 0;
+        translate: 0 18px;
+      }
+    }
   `,
 })
 export class DashboardComponent {

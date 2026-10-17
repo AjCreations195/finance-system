@@ -3,7 +3,6 @@ import { Router, provideRouter } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { ChatService } from '../../../core/services/chat.service';
 import { PurchaseRequestService } from '../../../core/services/purchase-request.service';
 import { WorkspaceTabsService } from '../../../core/services/workspace-tabs.service';
 import { NavbarComponent } from './navbar.component';
@@ -123,7 +122,7 @@ describe('NavbarComponent', () => {
     });
 
     it('closes when focus leaves it', async () => {
-      focusOut(el.querySelector<HTMLElement>('button[aria-label="Finance assistant"]')!);
+      focusOut(el.querySelector<HTMLElement>('.brand')!);
       await fixture.whenStable();
       expect(menuOpen()).toBe(false);
     });
@@ -143,10 +142,11 @@ describe('NavbarComponent', () => {
       await fixture.whenStable();
     };
 
-    it('stays closed until something is typed', async () => {
+    it('opens suggestions as soon as the field is clicked into, before anything is typed', async () => {
       await type('');
-      expect(el.querySelector('.search-results')).toBeNull();
-      expect(input().getAttribute('aria-expanded')).toBe('false');
+      expect(el.querySelector('.search-results')).not.toBeNull();
+      expect(input().getAttribute('aria-expanded')).toBe('true');
+      expect(options().length).toBeGreaterThan(0);
     });
 
     it('finds sidebar pages by their label', async () => {
@@ -196,27 +196,11 @@ describe('NavbarComponent', () => {
       await type('procure');
       await key('Escape');
       expect(input().value).toBe('');
-      expect(el.querySelector('.search-results')).toBeNull();
     });
   });
 
   it('modules outside the demo show an info toast', () => {
     fixture.componentInstance['notAvailable']();
     expect(TestBed.inject(ToastService).toasts().at(-1)?.type).toBe('info');
-  });
-
-  it('the chat button opens and closes the AI assistant', async () => {
-    const chat = TestBed.inject(ChatService);
-    const button = el.querySelector<HTMLButtonElement>('button[aria-controls="chat-panel"]')!;
-    expect(button.getAttribute('aria-expanded')).toBe('false');
-
-    button.click();
-    await fixture.whenStable();
-    expect(chat.isOpen()).toBe(true);
-    expect(button.getAttribute('aria-expanded')).toBe('true');
-
-    button.click();
-    await fixture.whenStable();
-    expect(chat.isOpen()).toBe(false);
   });
 });

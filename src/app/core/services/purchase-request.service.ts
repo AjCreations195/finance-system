@@ -60,6 +60,37 @@ export class PurchaseRequestService {
 // ===========================================================================
 
 /**
+ * Totals helpers over a list of requests, shared by this page's cards and
+ * the dashboard's (DashboardDataService), so both calculate the same way.
+ * "This month" (`latest`) is the month of the newest request.
+ */
+export function requestTotals(list: readonly PurchaseRequest[]) {
+  /** Months since year 0, so consecutive months differ by 1 across years. */
+  const monthOf = (r: PurchaseRequest) => {
+    const d = new Date(r.date);
+    return d.getFullYear() * 12 + d.getMonth();
+  };
+  const latest = list.reduce((max, r) => Math.max(max, monthOf(r)), 0);
+
+  /** Sum of amounts with these statuses (optionally only in one month). */
+  const total = (statuses: readonly RequestStatus[], month?: number) =>
+    list
+      .filter((r) => statuses.includes(r.status) && (month === undefined || monthOf(r) === month))
+      .reduce((sum, r) => sum + r.amount, 0);
+
+  /** Number of requests with these statuses. */
+  const count = (statuses: readonly RequestStatus[]) => list.filter((r) => statuses.includes(r.status)).length;
+
+  /** % change from `before` to `now`, rounded. */
+  const change = (now: number, before: number) => (before ? Math.round(((now - before) / before) * 100) : 0);
+
+  /** % change of the total from last month to this month. */
+  const monthly = (statuses: readonly RequestStatus[]) => change(total(statuses, latest), total(statuses, latest - 1));
+
+  return { latest, total, count, change, monthly };
+}
+
+/**
  * The page's summary cards:
  *  - Available balance: yearly budget minus what requests have committed
  *    (everything except rejected requests); trend = this month's effect.
@@ -68,19 +99,7 @@ export class PurchaseRequestService {
  * "This month" is the month of the newest request.
  */
 function buildStats(list: PurchaseRequest[]): FinancialStat[] {
-  const monthOf = (r: PurchaseRequest) => {
-    const d = new Date(r.date);
-    return d.getFullYear() * 12 + d.getMonth();
-  };
-  const latest = list.reduce((max, r) => Math.max(max, monthOf(r)), 0);
-  const total = (statuses: readonly RequestStatus[], month?: number) =>
-    list
-      .filter((r) => statuses.includes(r.status) && (month === undefined || monthOf(r) === month))
-      .reduce((sum, r) => sum + r.amount, 0);
-  const count = (statuses: readonly RequestStatus[]) => list.filter((r) => statuses.includes(r.status)).length;
-  /** % change from `before` to `now`, rounded. */
-  const change = (now: number, before: number) => (before ? Math.round(((now - before) / before) * 100) : 0);
-  const monthly = (statuses: readonly RequestStatus[]) => change(total(statuses, latest), total(statuses, latest - 1));
+  const { latest, total, count, change, monthly } = requestTotals(list);
 
   const committing = REQUEST_STATUSES.filter((s) => !TAB_STATUSES.rejected.includes(s));
   const available = ANNUAL_BUDGET - total(committing);

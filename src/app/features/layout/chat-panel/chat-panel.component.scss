@@ -1,34 +1,37 @@
-/* Panel: full height below the navbar, on the inline-end side */
+/* Floating card: anchored bottom-right, rising just above the chat button
+   (3.5rem button + 1.25rem offset + 0.75rem gap) */
 .chat-panel {
   position: fixed;
-  top: var(--fs-navbar-height);
-  bottom: 0;
-  inset-inline-end: 0;
-  z-index: 1040; /* above the mobile sidebar backdrop (1035) */
-  width: min(420px, 100vw);
+  inset-block-end: 5.5rem;
+  inset-inline-end: 1.25rem;
+  z-index: 1040; /* above the chat button (1030) and the mobile sidebar backdrop (1035) */
+  width: min(400px, calc(100vw - 2.5rem));
+  height: min(40rem, calc(100dvh - var(--fs-navbar-height) - 6.5rem));
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   background: var(--fs-surface);
-  border-inline-start: 1px solid var(--fs-border);
-  box-shadow: var(--fs-control-shadow);
-  animation: slide-in 0.22s ease-out;
+  border: 1px solid var(--fs-border);
+  border-radius: 1rem;
+  box-shadow: 0 16px 40px -12px rgba(11, 20, 55, 0.35);
+  animation: rise-in 0.22s ease-out;
 }
 
-@keyframes slide-in {
+@keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateX(1.5rem);
+    transform: translateY(0.75rem) scale(0.98);
   }
 }
 
-:host-context([dir='rtl']) .chat-panel {
-  animation-name: slide-in-rtl;
-}
-
-@keyframes slide-in-rtl {
-  from {
-    opacity: 0;
-    transform: translateX(-1.5rem);
+/* Phones: the card becomes a full-screen sheet below the navbar */
+@media (max-width: 575.98px) {
+  .chat-panel {
+    inset: var(--fs-navbar-height) 0 0 0;
+    width: auto;
+    height: auto;
+    border: 0;
+    border-radius: 0;
   }
 }
 

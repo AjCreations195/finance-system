@@ -19,7 +19,7 @@ export const NAV_TREE: NavNode[] = [
   { label: 'nav.home', icon: 'home', route: '/dashboard' },
   {
     label: 'nav.operations',
-    icon: 'requests',
+    icon: 'tasks',
     children: [
       {
         label: 'nav.departmentRequests',
@@ -33,7 +33,7 @@ export const NAV_TREE: NavNode[] = [
       },
       {
         label: 'nav.warehouseRequests',
-        icon: 'warehouse-requests',
+        icon: 'warehouses',
         children: [
           { label: 'nav.consumables', icon: 'consumables' },
           { label: 'nav.newCustody', icon: 'new-custody' },

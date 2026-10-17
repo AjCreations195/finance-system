@@ -5,7 +5,7 @@ import { AuthService, DEMO_CREDENTIALS } from './auth.service';
 
 const SESSION_KEY = 'fs-user';
 const ACCOUNTS_KEY = 'fs-accounts';
-const LATENCY = 700;
+const LATENCY = 600; // must match LATENCY in auth.service.ts
 
 describe('AuthService', () => {
   let service: AuthService;

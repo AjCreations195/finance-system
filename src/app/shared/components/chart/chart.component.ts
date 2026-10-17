@@ -1,4 +1,4 @@
-import { Component, DestroyRef, ElementRef, afterRenderEffect, computed, inject, input, viewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, afterNextRender, afterRenderEffect, computed, inject, input, signal, viewChild } from '@angular/core';
 import ApexCharts from 'apexcharts';
 import { LanguageService } from '../../../core/services/language.service';
 import { ThemeService } from '../../../core/services/theme.service';
@@ -9,6 +9,9 @@ const CHART_THEME = {
   dark: { text: '#a8a3a3', grid: '#353333' },
 } as const;
 
+/** Height reserved before the chart draws, so the page doesn't jump when it appears. */
+const DEFAULT_HEIGHT = 300;
+
 /**
  * ChartComponent
  * --------------
@@ -16,9 +19,12 @@ const CHART_THEME = {
  * so we don't depend on a third-party wrapper keeping up with Angular releases).
  *
  * Responsibilities:
- *  - Creates the chart after the first render (it needs a real DOM element).
+ *  - Waits until the chart scrolls into view, then creates it, so the
+ *    entrance animation plays where the reader is looking.
  *  - Merges theme- and language-aware defaults into the given options,
  *    so every chart switches to dark mode / Arabic font automatically.
+ *  - Animates the entrance (eased sweep, series one after another) and data
+ *    changes; turns animation off when the user prefers reduced motion.
  *  - Updates the chart whenever the options, theme or language change.
  *  - Destroys the chart on component destroy to avoid memory leaks.
  *
@@ -29,20 +35,34 @@ const CHART_THEME = {
   template: `<div #host></div>`,
   // ApexCharts draws its own SVG layout and doesn't mirror for RTL, so the
   // chart area is kept LTR. Arabic labels still render correctly inside it.
-  host: { dir: 'ltr', class: 'd-block' },
+  host: {
+    dir: 'ltr',
+    class: 'd-block',
+    '[style.min-height.px]': 'reservedHeight()',
+  },
 })
 export class ChartComponent {
   /** ApexCharts configuration from the parent component. */
   readonly options = input.required<ApexCharts.ApexOptions>();
 
   private readonly host = viewChild.required<ElementRef<HTMLDivElement>>('host');
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly theme = inject(ThemeService);
   private readonly language = inject(LanguageService);
+  private readonly reduceMotion = prefersReducedMotion();
   private chart?: ApexCharts;
   /** Last data drawn, so language/theme-only updates don't replay the animation. */
   private lastSeries = '';
+  /** False until the chart has scrolled into view; the chart is created then. */
+  private readonly visible = signal(false);
 
-  /** Parent options combined with theme and language defaults. */
+  protected readonly reservedHeight = computed(() => {
+    const height = this.options().chart?.height;
+    return typeof height === 'number' ? height : DEFAULT_HEIGHT;
+  });
+
+  /** Parent options combined with theme, language and animation defaults. */
   private readonly mergedOptions = computed<ApexCharts.ApexOptions>(() => {
     const opts = this.options();
     const mode = this.theme.theme();
@@ -57,6 +77,14 @@ export class ChartComponent {
         foreColor: colors.text,
         fontFamily,
         toolbar: { show: false },
+        animations: {
+          enabled: !this.reduceMotion,
+          easing: 'easeout',
+          speed: 900,
+          animateGradually: { enabled: true, delay: 150 },
+          dynamicAnimation: { enabled: !this.reduceMotion, speed: 500 },
+          ...opts.chart?.animations,
+        },
       },
       theme: { ...opts.theme, mode },
       grid: { borderColor: colors.grid, strokeDashArray: 4, ...opts.grid },
@@ -65,8 +93,29 @@ export class ChartComponent {
   });
 
   constructor() {
+    // Start drawing once the chart is at least partly on screen (or straight away
+    // where IntersectionObserver is missing, e.g. in tests).
+    afterNextRender(() => {
+      if (typeof IntersectionObserver === 'undefined') {
+        this.visible.set(true);
+        return;
+      }
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry?.isIntersecting) {
+            this.visible.set(true);
+            observer.disconnect();
+          }
+        },
+        { threshold: 0.3 },
+      );
+      observer.observe(this.elementRef.nativeElement);
+      this.destroyRef.onDestroy(() => observer.disconnect());
+    });
+
     // Runs after Angular renders, and again whenever mergedOptions changes.
     afterRenderEffect(() => {
+      if (!this.visible()) return;
       const options = this.mergedOptions();
       const series = JSON.stringify(options.series);
       if (!this.chart) {
@@ -83,6 +132,11 @@ export class ChartComponent {
       }
     });
 
-    inject(DestroyRef).onDestroy(() => this.chart?.destroy());
+    this.destroyRef.onDestroy(() => this.chart?.destroy());
   }
+}
+
+/** True when the OS asks for less motion (also covered by the global CSS rule). */
+function prefersReducedMotion(): boolean {
+  return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 }

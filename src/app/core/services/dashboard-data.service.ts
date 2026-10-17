@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import {
   ActivityItem,
   BudgetMonth,
@@ -13,11 +13,14 @@ import {
   TransactionItem,
   WarehouseItem,
 } from '../models/dashboard.models';
+import { BUDGET_STATUSES, PurchaseRequest, RequestStatus } from '../models/purchase-request.model';
+import { ANNUAL_BUDGET, PurchaseRequestService, requestTotals } from './purchase-request.service';
 
 /**
  * DashboardDataService
  * --------------------
- * Mock data source for every dashboard widget. Each dataset is a signal,
+ * Mock data source for every dashboard widget. Each dataset is a signal
+ * (the statistics cards are computed from PurchaseRequestService),
  * so widgets get live updates (e.g. approving a task changes its status
  * badge, and marking notifications as read updates the bell counter).
  *
@@ -29,13 +32,14 @@ export class DashboardDataService {
   // ------------------------------------------------------------------
   // Financial statistics cards
   // ------------------------------------------------------------------
-  readonly stats = signal<FinancialStat[]>([
-    { id: 'approvedBudget', label: 'dashboard.stats.approvedBudget', amount: 50_000_000, icon: 'stat-document', change: 26, higherIsBetter: false, period: 'dashboard.period.lastMonth' },
-    { id: 'cashBalance', label: 'dashboard.stats.cashBalance', amount: 10_000_000, icon: 'stat-document', change: 28, higherIsBetter: false, period: 'dashboard.period.lastMonth' },
-    { id: 'paidAmounts', label: 'dashboard.stats.paidAmounts', amount: 15_000_000, icon: 'stat-document', change: 26, higherIsBetter: true, period: 'dashboard.period.lastMonth' },
-    { id: 'commitments', label: 'dashboard.stats.commitments', amount: 20_000_000, icon: 'stat-wallet', change: -15, higherIsBetter: true, period: 'dashboard.period.lastYear' },
-    { id: 'obligations', label: 'dashboard.stats.obligations', amount: 5_000_000, icon: 'stat-briefcase', change: 26, higherIsBetter: true, period: 'dashboard.period.lastMonth' },
-  ]);
+  private readonly purchaseRequests = inject(PurchaseRequestService);
+
+  /**
+   * Calculated from the purchase requests, so approving, rejecting or
+   * deleting a request on the Purchase Orders page changes these cards.
+   * See BUDGET_STATUSES for which statuses count as paid / committed / pending.
+   */
+  readonly stats = computed(() => buildDashboardStats(this.purchaseRequests.requests()));
 
   // ------------------------------------------------------------------
   // "My tasks" table
@@ -194,6 +198,48 @@ export class DashboardDataService {
   dismissNotification(id: number): void {
     this._notifications.update((list) => list.filter((n) => n.id !== id));
   }
+}
+
+// ===========================================================================
+// Statistics cards
+// ===========================================================================
+
+/**
+ * The five dashboard cards, from the purchase requests:
+ *  - Approved budget balance: yearly budget minus everything paid, committed or pending
+ *  - Cash balance:            yearly budget minus what has been paid
+ *  - Amounts paid / Commitments / Obligations: totals of the BUDGET_STATUSES groups
+ * Balances compare with the start of this month; totals compare this month
+ * with last month (`requestTotals`).
+ */
+function buildDashboardStats(list: readonly PurchaseRequest[]): FinancialStat[] {
+  const { latest, total, count, change, monthly } = requestTotals(list);
+  const { paid, committed, pending } = BUDGET_STATUSES;
+  const used = [...paid, ...committed, ...pending];
+
+  // A balance this month = its value at the start of the month minus this month's amounts.
+  const budgetBalance = ANNUAL_BUDGET - total(used);
+  const cashBalance = ANNUAL_BUDGET - total(paid);
+
+  const card = (id: string, amount: number, changePct: number, icon: string, higherIsBetter: boolean, statuses?: readonly RequestStatus[]): FinancialStat => ({
+    id,
+    label: `dashboard.stats.${id}`,
+    amount,
+    count: statuses ? count(statuses) : undefined,
+    icon,
+    change: changePct,
+    higherIsBetter,
+    period: 'dashboard.period.lastMonth',
+  });
+
+  return [
+    card('approvedBudget', budgetBalance, change(budgetBalance, budgetBalance + total(used, latest)), 'stat-document', true),
+    card('cashBalance', cashBalance, change(cashBalance, cashBalance + total(paid, latest)), 'stat-document', true),
+    card('paidAmounts', total(paid), monthly(paid), 'stat-document', true, paid),
+    card('commitments', total(committed), monthly(committed), 'stat-wallet', true, committed),
+    // A growing pile of undecided requests is bad news.
+    card('obligations', total(pending), monthly(pending), 'stat-briefcase', false, pending),
+  ];
 }
 
 // ===========================================================================

@@ -48,7 +48,10 @@
   </div>
 
   <!-- ===================== MENU TREE ===================== -->
-  <nav class="menu" [attr.aria-label]="'nav.main' | translate">
+  <nav class="menu" #menu [attr.aria-label]="'nav.main' | translate">
+    <!-- One highlight that glides to the current page (positioned by the component) -->
+    <span class="menu-indicator" #indicator aria-hidden="true"></span>
+
     <ul class="menu-list">
       @for (node of primary(); track node.label) {
         <ng-container [ngTemplateOutlet]="item" [ngTemplateOutletContext]="{ $implicit: node, level: 0 }" />

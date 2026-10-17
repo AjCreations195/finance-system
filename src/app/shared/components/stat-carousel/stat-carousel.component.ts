@@ -1,6 +1,7 @@
 import { Component, ElementRef, inject, input, output, viewChild } from '@angular/core';
 import { FinancialStat } from '../../../core/models/dashboard.models';
 import { LanguageService } from '../../../core/services/language.service';
+import { CountUpDirective } from '../../directives/count-up.directive';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { IconComponent } from '../icon/icon.component';
 
@@ -19,7 +20,7 @@ import { IconComponent } from '../icon/icon.component';
  */
 @Component({
   selector: 'app-stat-carousel',
-  imports: [IconComponent, TranslatePipe],
+  imports: [IconComponent, TranslatePipe, CountUpDirective],
   templateUrl: './stat-carousel.component.html',
   styleUrl: './stat-carousel.component.scss',
 })
@@ -36,10 +37,11 @@ export class StatCarouselComponent {
   private readonly track = viewChild.required<ElementRef<HTMLElement>>('track');
 
   /** "50 million riyals" / "50 مليون ريال" */
-  protected formatAmount(amount: number): string {
+  /** Arrow property, so the count-up directive can call it while it animates. */
+  protected readonly formatAmount = (amount: number): string => {
     const compact = new Intl.NumberFormat(this.language.locale(), { notation: 'compact', compactDisplay: 'long' }).format(amount);
     return `${compact} ${this.language.translate('common.currency')}`;
-  }
+  };
 
   /** Green when the change is good news, red when it's bad news. */
   protected isPositive(stat: FinancialStat): boolean {

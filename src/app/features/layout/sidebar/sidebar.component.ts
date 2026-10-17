@@ -1,7 +1,7 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, ElementRef, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, afterNextRender, afterRenderEffect, computed, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { LanguageService } from '../../../core/services/language.service';
@@ -48,6 +48,11 @@ export class SidebarComponent {
   readonly toggleCollapse = output<void>();
 
   private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
+  private readonly menu = viewChild.required<ElementRef<HTMLElement>>('menu');
+  private readonly indicator = viewChild.required<ElementRef<HTMLElement>>('indicator');
+  /** The highlight is placed without animating on its first position. */
+  private indicatorPlaced = false;
+  private destroyed = false;
 
   // ---- Menu data ----
   protected readonly footerItems = NAV_FOOTER;
@@ -83,6 +88,57 @@ export class SidebarComponent {
       const groups = [...NAV_TREE, ...NAV_TREE_SECONDARY].filter((node) => this.containsRoute(node, url));
       if (groups.length) this.expanded.update((set) => new Set([...set, ...this.openPath(groups, url)]));
     });
+
+    // Move the highlight after every render that can change the menu: navigation,
+    // groups opening or closing, the search filter, and the rail collapsing.
+    afterRenderEffect(() => {
+      this.url();
+      this.expanded();
+      this.query();
+      this.collapsed();
+      untracked(() => this.moveIndicator());
+    });
+
+    inject(DestroyRef).onDestroy(() => (this.destroyed = true));
+
+    // RouterLinkActive sets the `active` class a microtask after navigation, which is
+    // after the render above. Measure once that has happened, on load and on each navigation.
+    afterNextRender(() => setTimeout(() => this.moveIndicator()));
+    this.router.events
+      .pipe(
+        filter((e) => e instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => setTimeout(() => this.moveIndicator()));
+  }
+
+  /** Puts the highlight behind the active link, or hides it when no link is active. */
+  private moveIndicator(): void {
+    // Deferred calls can land after the sidebar is gone
+    if (this.destroyed) return;
+    const menu = this.menu().nativeElement;
+    const bar = this.indicator().nativeElement;
+    const link = menu.querySelector<HTMLElement>('a.menu-link.active');
+    if (!link) {
+      bar.style.opacity = '0';
+      return;
+    }
+
+    const menuBox = menu.getBoundingClientRect();
+    const linkBox = link.getBoundingClientRect();
+    if (!this.indicatorPlaced) {
+      // First placement: jump into position, then let later moves glide
+      bar.style.transition = 'none';
+    }
+    bar.style.transform = `translate(${linkBox.left - menuBox.left}px, ${linkBox.top - menuBox.top}px)`;
+    bar.style.width = `${linkBox.width}px`;
+    bar.style.height = `${linkBox.height}px`;
+    bar.style.opacity = '1';
+    if (!this.indicatorPlaced) {
+      void bar.offsetHeight; // apply the position before the transition comes back
+      bar.style.transition = '';
+      this.indicatorPlaced = true;
+    }
   }
 
   /** A group is open if the user expanded it or a search is active. */

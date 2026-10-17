@@ -206,6 +206,8 @@ describe('StatCarouselComponent', () => {
   }
 
   it('renders one card per stat with a compact amount', async () => {
+    // Reduced motion: the amount is shown at once (the count-up has its own spec)
+    vi.spyOn(window, 'matchMedia').mockImplementation((query: string) => ({ matches: query.includes('reduce'), media: query }) as MediaQueryList);
     const fixture = await create();
     const cards = fixture.nativeElement.querySelectorAll('.stat-card');
     expect(cards.length).toBe(2);

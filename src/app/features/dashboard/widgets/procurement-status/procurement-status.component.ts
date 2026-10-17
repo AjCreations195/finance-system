@@ -11,6 +11,7 @@ import { MonthPickerComponent, YearMonth, currentYearMonth, monthsBetween } from
 import { SelectMenuComponent } from '../../../../shared/components/select-menu/select-menu.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { IconComponent } from '../../../../shared/components/icon/icon.component';
+import { CountUpDirective } from '../../../../shared/directives/count-up.directive';
 
 /** Icon per category, shown in the category dropdown. */
 const CATEGORY_ICONS: Record<string, string> = {
@@ -40,7 +41,7 @@ const STATE_COLORS: Record<Exclude<ProcurementState, 'all'>, string> = {
  */
 @Component({
   selector: 'app-procurement-status',
-  imports: [IconComponent, DashboardCardComponent, MultiFilterMenuComponent, MonthPickerComponent, SelectMenuComponent, ChartComponent, TranslatePipe],
+  imports: [IconComponent, DashboardCardComponent, MultiFilterMenuComponent, MonthPickerComponent, SelectMenuComponent, ChartComponent, TranslatePipe, CountUpDirective],
   templateUrl: './procurement-status.component.html',
   styleUrl: './procurement-status.component.scss',
 })
@@ -83,9 +84,9 @@ export class ProcurementStatusComponent {
     return items;
   });
 
+  /** The centre total is an HTML overlay (see the template), so it can count up. */
   protected readonly chartOptions = computed<ApexCharts.ApexOptions>(() => {
     const items = this.breakdown();
-    const total = this.total();
     return {
       chart: { type: 'donut', height: 260 },
       series: items.map((b) => b.count),
@@ -98,18 +99,7 @@ export class ProcurementStatusComponent {
         pie: {
           donut: {
             size: '58%',
-            labels: {
-              show: true,
-              value: { fontSize: '1.375rem', fontWeight: 700, offsetY: 4 },
-              total: {
-                show: true,
-                showAlways: true,
-                label: this.language.translate('procurement.total'),
-                fontSize: '0.75rem',
-                fontWeight: 400,
-                formatter: () => String(total),
-              },
-            },
+            labels: { show: false },
           },
         },
       },

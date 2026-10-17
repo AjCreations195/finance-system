@@ -1,11 +1,54 @@
 import { TestBed } from '@angular/core/testing';
 import { DashboardDataService } from './dashboard-data.service';
+import { BUDGET_STATUSES } from '../models/purchase-request.model';
+import { ANNUAL_BUDGET, PurchaseRequestService } from './purchase-request.service';
 
 describe('DashboardDataService', () => {
   let service: DashboardDataService;
 
   beforeEach(() => {
     service = TestBed.inject(DashboardDataService);
+  });
+
+  describe('statistics cards (computed from purchase requests)', () => {
+    const stat = (id: string) => service.stats().find((s) => s.id === id)!;
+    const requests = () => TestBed.inject(PurchaseRequestService);
+    const sum = (statuses: readonly string[]) =>
+      requests().requests().filter((r) => statuses.includes(r.status)).reduce((total, r) => total + r.amount, 0);
+
+    it('has the five cards from the design', () => {
+      expect(service.stats().map((s) => s.id)).toEqual(['approvedBudget', 'cashBalance', 'paidAmounts', 'commitments', 'obligations']);
+    });
+
+    it('totals each budget group and derives the balances from the yearly budget', () => {
+      const { paid, committed, pending } = BUDGET_STATUSES;
+      expect(stat('paidAmounts').amount).toBe(sum(paid));
+      expect(stat('commitments').amount).toBe(sum(committed));
+      expect(stat('obligations').amount).toBe(sum(pending));
+      expect(stat('obligations').count).toBe(requests().requests().filter((r) => pending.includes(r.status)).length);
+      expect(stat('cashBalance').amount).toBe(ANNUAL_BUDGET - sum(paid));
+      expect(stat('approvedBudget').amount).toBe(ANNUAL_BUDGET - sum([...paid, ...committed, ...pending]));
+    });
+
+    it('updates live: approving a pending request moves it from obligations to commitments', () => {
+      const request = requests().requests().find((r) => r.status === 'pending')!;
+      const before = { obligations: stat('obligations').amount, commitments: stat('commitments').amount };
+
+      requests().setStatus([request.id], 'accepted');
+
+      expect(stat('obligations').amount).toBe(before.obligations - request.amount);
+      expect(stat('commitments').amount).toBe(before.commitments + request.amount);
+    });
+
+    it('updates live: deleting a paid request lowers the amounts paid and raises the cash balance', () => {
+      const request = requests().requests().find((r) => r.status === 'delivered')!;
+      const before = { paid: stat('paidAmounts').amount, cash: stat('cashBalance').amount };
+
+      requests().delete([request.id]);
+
+      expect(stat('paidAmounts').amount).toBe(before.paid - request.amount);
+      expect(stat('cashBalance').amount).toBe(before.cash + request.amount);
+    });
   });
 
   describe('tasks', () => {

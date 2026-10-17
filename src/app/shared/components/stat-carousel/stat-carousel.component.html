@@ -6,8 +6,8 @@
 
   <!-- Scrollable track -->
   <div class="track" #track>
-    @for (stat of stats(); track stat.id) {
-      <article class="stat-card" [class.selectable]="selectable()" [class.active]="selectable() && stat.id === activeId()">
+    @for (stat of stats(); track stat.id; let i = $index) {
+      <article class="stat-card" [style.--n]="i" [class.selectable]="selectable()" [class.active]="selectable() && stat.id === activeId()">
         <!-- Filter cards: one button covering the whole card (the text stays readable as normal content) -->
         @if (selectable()) {
           <button type="button" class="stat-hit" (click)="statSelect.emit(stat.id)" [attr.aria-pressed]="stat.id === activeId()"
@@ -21,7 +21,7 @@
           </span>
           <div class="min-w-0">
             <p class="stat-label">{{ stat.label | translate }}</p>
-            <p class="stat-value">{{ formatAmount(stat.amount) }}</p>
+            <p class="stat-value" [appCountUp]="stat.amount" [countUpFormat]="formatAmount"></p>
             @if (stat.count !== undefined) {
               <p class="stat-count">{{ 'dashboard.stats.count' | translate: { count: stat.count } }}</p>
             }

@@ -141,6 +141,26 @@
 /* ---- Menu ---- */
 .menu {
   flex: 1;
+  /* Own stacking context, so the highlight can sit behind the links */
+  position: relative;
+  isolation: isolate;
+}
+
+/* Active-page highlight: one pill that glides between links (moved by sidebar.component.ts) */
+.menu-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  border-radius: 0.5rem;
+  background: var(--fs-primary-soft);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.2s ease;
 }
 
 .menu-list,
@@ -184,10 +204,15 @@
     background: var(--fs-surface-2);
   }
 
-  /* Active page (design: burgundy text on light pink) */
+  /* Active page (design: burgundy text on light pink). The pink comes from
+     .menu-indicator, so the link stays transparent and keeps its hover tint off. */
   &.active {
-    background: var(--fs-primary-soft);
+    background: transparent;
     color: var(--fs-primary-text);
+
+    &:hover {
+      background: transparent;
+    }
   }
 
   &.disabled {

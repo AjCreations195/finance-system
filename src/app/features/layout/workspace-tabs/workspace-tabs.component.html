@@ -95,7 +95,7 @@
       <app-icon name="close" />{{ 'layout.tabs.close' | translate }}<kbd>Alt+W</kbd>
     </button>
     <button type="button" class="menu-item" role="menuitem" (click)="menuAction('others')" [disabled]="!canCloseOthers()">
-      <app-icon name="layers" />{{ 'layout.tabs.closeOthers' | translate }}
+      <app-icon name="tasks" />{{ 'layout.tabs.closeOthers' | translate }}
     </button>
     <button type="button" class="menu-item" role="menuitem" (click)="menuAction('after')" [disabled]="!canCloseAfter()">
       <app-icon name="arrow-bar-right" class="flip-rtl" />{{ 'layout.tabs.closeAfter' | translate }}
@@ -105,7 +105,7 @@
     </button>
     <hr class="menu-divider" role="separator" />
     <button type="button" class="menu-item" role="menuitem" (click)="menuAction('reopen')" [disabled]="!workspace.closed().length">
-      <app-icon name="undo" />{{ 'layout.tabs.reopen' | translate }}<kbd>Alt+Shift+T</kbd>
+      <app-icon name="return" />{{ 'layout.tabs.reopen' | translate }}<kbd>Alt+Shift+T</kbd>
     </button>
   </div>
 }
@@ -162,7 +162,7 @@
               <button type="button" class="menu-item" role="menuitem" (click)="reopen(c.tab)">
                 <app-icon [name]="c.icon" />
                 <span [attr.dir]="c.tab.kind === 'record' ? 'ltr' : null">{{ c.label }}</span>
-                <app-icon name="undo" class="menu-end" />
+                <app-icon name="return" class="menu-end" />
               </button>
             }
           </div>

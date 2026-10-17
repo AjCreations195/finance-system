@@ -38,7 +38,8 @@ describe('ProcurementStatusComponent', () => {
     expect(options.series).toEqual([50, 50, 50, 50, 123]);
     expect(options.labels?.length).toBe(5);
     expect(options.colors?.length).toBe(5);
-    expect(options.plotOptions?.pie?.donut?.labels?.total?.formatter?.({} as never)).toBe('323');
+    // The centre total is an overlay (it counts up), so ApexCharts draws no label there
+    expect(options.plotOptions?.pie?.donut?.labels?.show).toBe(false);
   });
 
   it('a category or month change updates the total', () => {
