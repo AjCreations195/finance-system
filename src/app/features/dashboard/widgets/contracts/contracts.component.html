@@ -15,7 +15,7 @@
             <th scope="col" [attr.aria-sort]="sort.aria(col)">
               <button type="button" class="sort-header" (click)="sort.toggle(col)">
                 {{ 'contracts.columns.' + col | translate }}
-                <i [class]="sort.icon(col)" aria-hidden="true"></i>
+                <app-icon [name]="sort.icon(col)" class="sort-icon" />
               </button>
             </th>
           }

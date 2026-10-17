@@ -9,7 +9,7 @@ import { signal } from '@angular/core';
  * @example
  *   protected readonly sort = new TableSort<'number' | 'date'>();
  *   rows = computed(() => this.sort.apply(this.items(), { number: r => r.number, date: r => r.date }));
- *   <th [attr.aria-sort]="sort.aria('date')"><button (click)="sort.toggle('date')">…<i [class]="sort.icon('date')"></i></button></th>
+ *   <th [attr.aria-sort]="sort.aria('date')"><button (click)="sort.toggle('date')">…<app-icon [name]="sort.icon('date')" class="sort-icon" /></button></th>
  */
 export class TableSort<K extends string> {
   readonly key = signal<K | null>(null);
@@ -26,10 +26,10 @@ export class TableSort<K extends string> {
     }
   }
 
-  /** Bootstrap Icons class for a header's sort indicator. */
+  /** Icon name (public/icons) for a header's sort indicator. */
   icon(key: K): string {
-    if (this.key() !== key) return 'bi bi-chevron-expand sort-icon';
-    return this.dir() === 'asc' ? 'bi bi-chevron-up sort-icon' : 'bi bi-chevron-down sort-icon';
+    if (this.key() !== key) return 'chevron-expand';
+    return this.dir() === 'asc' ? 'chevron-up' : 'chevron-down';
   }
 
   /** Value for the header's aria-sort attribute. */

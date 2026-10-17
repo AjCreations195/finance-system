@@ -2,7 +2,7 @@ import { Component, ElementRef, inject, input, model, signal } from '@angular/co
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { IconComponent } from '../icon/icon.component';
 
-/** One option in the filter dropdown. `label` is a translation key; `icon` is an optional Bootstrap Icons class. */
+/** One option in the filter dropdown. `label` is a translation key; `icon` is an optional SVG name (public/icons). */
 export interface FilterOption {
   value: string;
   label: string;

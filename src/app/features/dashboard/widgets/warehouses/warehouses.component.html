@@ -16,7 +16,7 @@
             <th scope="col" [attr.aria-sort]="sort.aria(col)">
               <button type="button" class="sort-header" (click)="sort.toggle(col)">
                 {{ 'warehouses.columns.' + col | translate }}
-                <i [class]="sort.icon(col)" aria-hidden="true"></i>
+                <app-icon [name]="sort.icon(col)" class="sort-icon" />
               </button>
             </th>
           }
@@ -68,7 +68,7 @@
     <li>
       <!-- Already full: nothing to restock -->
       <button type="button" class="dropdown-item" role="menuitem" (click)="askRestock(menu.item)" [disabled]="menu.item.quantity >= menu.item.maxLevel">
-        <app-icon name="bi-box-arrow-in-down" class="me-2" />{{ 'warehouses.actions.restock' | translate }}
+        <app-icon name="move-to-inbox" class="me-2" />{{ 'warehouses.actions.restock' | translate }}
       </button>
     </li>
     <li><hr class="dropdown-divider" /></li>
@@ -87,7 +87,7 @@
     <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-body text-center p-4">
-          <span class="approve-icon mb-3"><app-icon name="bi-box-arrow-in-down" /></span>
+          <span class="approve-icon mb-3"><app-icon name="move-to-inbox" /></span>
           <h2 id="restock-title" class="h5 fw-bold">{{ 'warehouses.confirmRestock.title' | translate }}</h2>
           <p class="text-muted-fs mb-4">
             {{ 'warehouses.confirmRestock.message' | translate: { product: (item.product | localize), from: amount(item.quantity, item), to: amount(item.maxLevel, item) } }}

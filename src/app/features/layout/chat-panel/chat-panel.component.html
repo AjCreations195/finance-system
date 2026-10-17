@@ -1,0 +1,128 @@
+@if (chat.isOpen()) {
+<section id="chat-panel" class="chat-panel" role="dialog" aria-labelledby="chat-title">
+  <!-- ===== Header: title · new chat · close ===== -->
+  <header class="chat-header">
+    <span class="assistant-avatar" aria-hidden="true"><app-icon name="sparkles" /></span>
+    <div class="chat-heading">
+      <h2 id="chat-title" class="chat-title">{{ 'chat.title' | translate }}</h2>
+      <span class="chat-subtitle">{{ 'chat.subtitle' | translate }}</span>
+    </div>
+    <button type="button" class="header-btn" (click)="chat.clear()" [disabled]="!chat.messages().length"
+      [attr.aria-label]="'chat.newChat' | translate" [title]="'chat.newChat' | translate">
+      <app-icon name="delete" />
+    </button>
+    <button type="button" class="header-btn" (click)="close()" [attr.aria-label]="'common.close' | translate"
+      [title]="'common.close' | translate">
+      <app-icon name="close" />
+    </button>
+  </header>
+
+  <!-- ===== Conversation ===== -->
+  <div #log class="chat-log" role="log" [attr.aria-label]="'chat.conversation' | translate">
+    @if (!chat.messages().length) {
+    <div class="chat-welcome">
+      <span class="welcome-icon" aria-hidden="true"><app-icon name="sparkles" /></span>
+      <p class="welcome-title">{{ 'chat.welcomeTitle' | translate }}</p>
+      <p class="welcome-text">{{ 'chat.welcomeText' | translate }}</p>
+      <ul class="suggestions" [attr.aria-label]="'chat.suggestionsLabel' | translate">
+        @for (key of suggestions; track key) {
+        <li>
+          <button type="button" class="suggestion" (click)="sendSuggestion(key)">{{ key | translate }}</button>
+        </li>
+        }
+      </ul>
+    </div>
+    }
+
+    @for (m of chat.messages(); track m.id) {
+    <div class="msg" [class.user]="m.role === 'user'" [attr.aria-busy]="m.status === 'streaming'">
+      <span class="visually-hidden">{{ (m.role === 'user' ? 'chat.you' : 'chat.assistant') | translate }}:</span>
+      @if (m.tools?.length) {
+      <ul class="tool-steps" [attr.aria-label]="'chat.toolsUsed' | translate">
+        @for (tool of m.tools; track tool) {
+        <li class="tool-step"><app-icon [name]="toolIcons[tool]" />{{ 'chat.tools.' + tool | translate }}</li>
+        }
+      </ul>
+      }
+      @if (m.status === 'streaming' && !m.text) {
+      <span class="typing" role="status">
+        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+        <span class="visually-hidden">{{ 'chat.thinking' | translate }}</span>
+      </span>
+      } @else if (m.role === 'user') {
+      <div class="bubble">{{ m.text }}</div>
+      } @else if (m.text) {
+      <!-- Assistant reply: paragraphs, lists, bold and request links (see chat-format.ts) -->
+      <div class="bubble formatted">
+        @for (block of m.text | chatFormat; track $index) {
+        @if (block.kind === 'paragraph') {
+        <p><ng-container *ngTemplateOutlet="inline; context: { $implicit: block.content }" /></p>
+        } @else if (block.ordered) {
+        <ol [start]="block.start">
+          @for (item of block.items; track $index) {
+          <li><ng-container *ngTemplateOutlet="inline; context: { $implicit: item }" /></li>
+          }
+        </ol>
+        } @else {
+        <ul>
+          @for (item of block.items; track $index) {
+          <li><ng-container *ngTemplateOutlet="inline; context: { $implicit: item }" /></li>
+          }
+        </ul>
+        }
+        }
+      </div>
+      }
+      @if (m.status === 'stopped') {
+      <span class="msg-note">{{ 'chat.stopped' | translate }}</span>
+      } @else if (m.status === 'error') {
+      <span class="msg-note error" role="alert">{{ 'chat.errors.' + m.error | translate }}</span>
+      @if ($last && chat.canRetry()) {
+      <button type="button" class="msg-action" (click)="chat.retry()">
+        <app-icon name="return" />{{ 'chat.retry' | translate }}
+      </button>
+      }
+      } @else if (m.role === 'assistant' && m.status === 'done' && m.text) {
+      <button type="button" class="msg-action icon-only" (click)="copy(m.text)" [attr.aria-label]="'chat.copy' | translate"
+        [title]="'chat.copy' | translate">
+        <app-icon name="copy" />
+      </button>
+      }
+    </div>
+    }
+  </div>
+
+  <!-- ===== Composer ===== -->
+  <form class="chat-composer" (submit)="$event.preventDefault(); send()">
+    <div class="composer-box">
+      <textarea #input class="composer-input" rows="1" [value]="draft()" (input)="draft.set(input.value)"
+        (keydown)="onKeydown($event)" [placeholder]="'chat.placeholder' | translate"
+        [attr.aria-label]="'chat.placeholder' | translate" [maxLength]="maxChars"></textarea>
+      @if (chat.busy()) {
+      <button type="button" class="send-btn" (click)="chat.stop()" [attr.aria-label]="'chat.stop' | translate"
+        [title]="'chat.stop' | translate">
+        <app-icon name="stop" />
+      </button>
+      } @else {
+      <button type="submit" class="send-btn" [disabled]="!draft().trim()" [attr.aria-label]="'chat.send' | translate"
+        [title]="'chat.send' | translate">
+        <app-icon name="send-fill" class="send-icon" />
+      </button>
+      }
+    </div>
+    <p class="composer-hint">{{ 'chat.disclaimer' | translate }}</p>
+  </form>
+</section>
+}
+
+<!-- Text runs inside a paragraph or list item; request numbers open the request -->
+<ng-template #inline let-runs>
+  @for (run of runs; track $index) {
+  @switch (run.kind) {
+  @case ('bold') {<strong>{{ run.text }}</strong>}
+  @case ('request') {<button type="button" class="request-link" (click)="openRequest(run.number)"
+    [title]="'chat.openRequest' | translate: { number: run.number }">{{ run.number }}</button>}
+  @default {<span>{{ run.text }}</span>}
+  }
+  }
+</ng-template>

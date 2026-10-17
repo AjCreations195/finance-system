@@ -22,16 +22,11 @@ describe('IconComponent', () => {
     expect(host.getAttribute('aria-label')).toBe('Error');
     expect(host.getAttribute('aria-hidden')).toBeNull();
   });
-});
 
-describe('IconComponent with a Bootstrap name', () => {
-  it('falls back to the Bootstrap icon font for "bi-…" names', async () => {
+  it('exposes its name for CSS targeting', async () => {
     const fixture = TestBed.createComponent(IconComponent);
-    fixture.componentRef.setInput('name', 'bi-truck');
+    fixture.componentRef.setInput('name', 'truck');
     await fixture.whenStable();
-    const host: HTMLElement = fixture.nativeElement;
-    expect(host.querySelector('i.bi.bi-truck')).not.toBeNull();
-    expect(host.classList).not.toContain('svg-icon');
-    expect(host.style.getPropertyValue('--icon-url')).toBe('');
+    expect((fixture.nativeElement as HTMLElement).getAttribute('data-icon')).toBe('truck');
   });
 });

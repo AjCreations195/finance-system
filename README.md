@@ -14,6 +14,57 @@ npm start          # http://localhost:4200
 | `npm run build` | Production build into `dist/` |
 | `npm test` | Unit tests (Vitest) |
 | `npm run test:coverage` | Unit tests with a coverage report in `coverage/` |
+| `npm run server` | Node server for the AI assistant (port 3000), restarts on changes |
+| `npm run test:server` | Server tests (Node test runner, no API key needed) |
+
+## AI assistant (Claude)
+
+The chat icon in the navbar opens a finance assistant that answers with the Claude API. The browser never sees the API key. A small Node/Express server in [`server/`](server/) holds the key, calls Claude, and streams the answer back.
+
+```
+Angular chat panel ──POST /api/chat──► Node server ──► Claude API
+                   ◄── streamed text ──  (API key)  ◄──
+```
+
+To run it locally:
+
+1. Create an API key at [console.anthropic.com](https://console.anthropic.com/settings/keys) and add credit. Set a monthly spend limit there too.
+2. Copy `.env.example` to `.env` and paste the key after `ANTHROPIC_API_KEY=`. `.env` is git-ignored.
+3. Run `npm run server` in one terminal and `npm start` in another. `ng serve` forwards `/api` calls to the server ([proxy.conf.json](proxy.conf.json)).
+
+Without a key the app still works, and the assistant shows "not available".
+
+The model is set with `CLAUDE_MODEL` in `.env`. The default is `claude-opus-5-5`. `claude-haiku-5-5` is about 40 times cheaper and works well for development. The server prints the model it uses when it starts.
+
+In production, `npm run build` followed by `npm run server:prod` serves the built app and the API from one Node process. Each visitor can make 60 chat requests per 10 minutes (a question takes one per tool round), and messages are capped at 2,000 characters.
+
+### Deploy (Render)
+
+[render.yaml](render.yaml) describes one Node web service. It builds the Angular app, then `npm run server:prod` serves both the app and `/api/chat`.
+
+1. In Render, choose **New → Blueprint** and pick this GitHub repository.
+2. When asked, paste the API key for `ANTHROPIC_API_KEY`. Render stores it in the service's Environment settings, never in the repo.
+3. Every push to `main` redeploys. `CLAUDE_MODEL` (Haiku by default here) can be changed in the same settings.
+
+On the free plan the service sleeps when idle, so the first visit after a while takes about a minute to load.
+
+### How it answers from your data
+
+The purchase requests live in the browser session, so Claude's tools run in the browser, not on the server. The answers then match what's on screen, including requests approved, rejected or deleted in this session.
+
+1. The browser sends the conversation to `/api/chat`.
+2. The server adds the system prompt and the tool definitions ([chat-tools.ts](src/app/core/models/chat-tools.ts)) and streams Claude's turn back.
+3. If Claude asks for a tool, [ChatToolsService](src/app/core/services/chat-tools.service.ts) validates the input, runs it on the session's data, and the browser sends the result back. This repeats until Claude answers, for at most 6 rounds per question.
+
+| Tool | What it does |
+| --- | --- |
+| `get_overview` | Today's date, budget, committed amount, available balance, and totals per status and stage |
+| `search_purchase_requests` | Filters requests by text, status, stage, budget item, amount and date |
+| `get_purchase_request` | One request's details, workflow and recent activity |
+| `spending_breakdown` | Totals by budget item, creator, status, stage or month |
+| `open_purchase_request` | Opens a request's details panel in the app |
+
+The browser keeps the conversation append-only, including Claude's reasoning blocks, which are tied to the exact conversation that produced them. The system prompt and tool list never change during a conversation. Very long conversations ask the user to start a new one instead of trimming the history.
 
 ## Demo login
 

@@ -81,7 +81,7 @@ describe('ToastContainerComponent', () => {
     const items = el.querySelectorAll('[role="status"]');
     expect(items.length).toBe(2);
     expect(items[1].classList).toContain('fs-toast-danger');
-    expect(items[1].querySelector('.bi-x-circle-fill')).not.toBeNull();
+    expect(items[1].querySelector('[data-icon="x-circle-fill"]')).not.toBeNull();
 
     el.querySelector<HTMLButtonElement>('.btn-close')!.click();
     await fixture.whenStable();
@@ -95,7 +95,7 @@ describe('ToastContainerComponent', () => {
     await fixture.whenStable();
     const toast = fixture.nativeElement.querySelector('[role="status"]');
     expect(toast.classList).toContain('fs-toast-warning');
-    expect(toast.querySelector('.bi-exclamation-triangle-fill')).not.toBeNull();
+    expect(toast.querySelector('[data-icon="warning-fill"]')).not.toBeNull();
   });
 
   it('is an aria-live region so screen readers announce toasts', () => {
@@ -194,8 +194,8 @@ describe('DashboardCardComponent', () => {
 
 describe('StatCarouselComponent', () => {
   const stats: FinancialStat[] = [
-    { id: 'a', label: 'common.filter', amount: 50_000_000, icon: 'bi-files', change: 26, higherIsBetter: false, period: 'common.today' },
-    { id: 'b', label: 'common.filter', amount: 5_000_000, icon: 'bi-files', change: -15, higherIsBetter: true, period: 'common.today', trendStyle: 'pill' },
+    { id: 'a', label: 'common.filter', amount: 50_000_000, icon: 'stat-document', change: 26, higherIsBetter: false, period: 'common.today' },
+    { id: 'b', label: 'common.filter', amount: 5_000_000, icon: 'stat-document', change: -15, higherIsBetter: true, period: 'common.today', trendStyle: 'pill' },
   ];
 
   async function create() {
@@ -311,8 +311,8 @@ describe('SelectMenuComponent', () => {
   })
   class Host {
     options: FilterOption[] = [
-      { value: 'all', label: 'common.all', icon: 'bi-grid' },
-      { value: 'a', label: 'Alpha', icon: 'bi-lamp' },
+      { value: 'all', label: 'common.all', icon: 'grid' },
+      { value: 'a', label: 'Alpha', icon: 'lamp' },
       { value: 'b', label: 'Beta' },
     ];
     value = signal('all');
@@ -330,7 +330,7 @@ describe('SelectMenuComponent', () => {
   it('shows the selected option with its icon on the button', async () => {
     const { trigger } = await setup();
     expect(trigger.textContent).toContain('All');
-    expect(trigger.querySelector('.bi-grid')).not.toBeNull();
+    expect(trigger.querySelector('[data-icon="grid"]')).not.toBeNull();
     expect(trigger.getAttribute('aria-label')).toBe('Filter: All');
   });
 

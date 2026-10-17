@@ -15,7 +15,7 @@ import { IconComponent } from '../icon/icon.component';
  * restores it), which helps with wide tables on small laptops.
  *
  * Usage:
- *   <app-dashboard-card title="tasks.title" icon="bi-briefcase">
+ *   <app-dashboard-card title="tasks.title" icon="briefcase">
  *     <div card-actions>…toolbar…</div>
  *     …body…
  *   </app-dashboard-card>
@@ -28,11 +28,7 @@ import { IconComponent } from '../icon/icon.component';
       <header class="dash-card-header">
         <div class="title-group">
           <span class="title-icon">
-            @if (icon().startsWith('bi-')) {
-              <i class="bi {{ icon() }}" aria-hidden="true"></i>
-            } @else {
-              <app-icon [name]="icon()" />
-            }
+            <app-icon [name]="icon()" />
           </span>
           <h2 class="dash-card-title" [id]="headingId">{{ title() | translate }}</h2>
           <span class="title-sep" aria-hidden="true"></span>
@@ -64,8 +60,8 @@ import { IconComponent } from '../icon/icon.component';
 export class DashboardCardComponent {
   /** Translation key of the title. */
   readonly title = input.required<string>();
-  /** Icon in the small square: a Figma SVG name (public/icons) or a "bi-…" Bootstrap class. */
-  readonly icon = input('bi-grid');
+  /** Icon in the small square: an SVG name in public/icons. */
+  readonly icon = input('grid');
 
   protected readonly expanded = signal(false);
   protected readonly headingId = `card-title-${nextId++}`;

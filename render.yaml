@@ -1,0 +1,21 @@
+# Render Blueprint: one Node web service that serves the built Angular app
+# and the AI assistant's API (server/). Render reads this file when you
+# create the service with New → Blueprint and pick this repository.
+# The API key is not stored here: Render asks for it when the Blueprint is
+# created (sync: false), and keeps it in the service's Environment settings.
+services:
+  - type: web
+    name: finance-system
+    runtime: node
+    plan: free
+    # --include=dev: the Angular build tools are devDependencies.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run server:prod
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # claude-opus-5-5 gives the best answers; claude-haiku-5-5 costs ~40x less.
+      - key: CLAUDE_MODEL
+        value: claude-haiku-5-5

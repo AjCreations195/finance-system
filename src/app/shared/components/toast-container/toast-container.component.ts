@@ -1,13 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { ToastService, ToastType } from '../../../core/services/toast.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { IconComponent } from '../icon/icon.component';
 
 /** Icon per toast type. */
 const ICONS: Record<ToastType, string> = {
-  success: 'bi-check-circle-fill',
-  danger: 'bi-x-circle-fill',
-  warning: 'bi-exclamation-triangle-fill',
-  info: 'bi-info-circle-fill',
+  success: 'check-circle-fill',
+  danger: 'x-circle-fill',
+  warning: 'warning-fill',
+  info: 'info-fill',
 };
 
 /**
@@ -23,12 +24,12 @@ const ICONS: Record<ToastType, string> = {
  */
 @Component({
   selector: 'app-toast-container',
-  imports: [TranslatePipe],
+  imports: [IconComponent, TranslatePipe],
   template: `
     <div class="toast-stack" aria-live="polite" aria-atomic="false">
       @for (toast of toastService.toasts(); track toast.id) {
         <div class="fs-toast fs-toast-{{ toast.type }}" role="status">
-          <i class="bi {{ icons[toast.type] }} toast-icon" aria-hidden="true"></i>
+          <app-icon [name]="icons[toast.type]" class="toast-icon" />
           <span class="toast-message">{{ toast.message }}</span>
           <button
             type="button"

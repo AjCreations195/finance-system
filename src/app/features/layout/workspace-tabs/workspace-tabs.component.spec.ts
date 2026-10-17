@@ -296,7 +296,7 @@ describe('WorkspaceTabsComponent', () => {
       workspace.close('contracts');
       const menu = await openAdd();
       const reopen = [...menu.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')].find((b) =>
-        b.textContent!.includes('Contracts & tenders') && b.querySelector('.bi-arrow-counterclockwise'),
+        b.textContent!.includes('Contracts & tenders') && b.querySelector('[data-icon="undo"]'),
       )!;
       reopen.click();
       await fixture.whenStable();

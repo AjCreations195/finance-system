@@ -20,3 +20,6 @@ Object.defineProperty(window, 'matchMedia', {
       dispatchEvent: () => false,
     }) as MediaQueryList,
 });
+
+/** ChatService keeps the conversation in sessionStorage; every test starts without one. */
+beforeEach(() => sessionStorage.clear());

@@ -1,13 +1,21 @@
 {
   "name": "financial-system",
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:coverage": "ng test --watch=false --coverage"
+    "test:coverage": "ng test --watch=false --coverage",
+    "server": "node --env-file-if-exists=.env --watch server/index.ts",
+    "server:prod": "node server/index.ts",
+    "test:server": "node --test \"server/**/*.test.ts\"",
+    "typecheck:server": "tsc -p server"
+  },
+  "engines": {
+    "node": ">=24"
   },
   "private": true,
   "packageManager": "npm@11.19.0",
@@ -18,9 +26,11 @@
     "@angular/forms": "^22.2.0",
     "@angular/platform-browser": "^22.2.0",
     "@angular/router": "^22.2.0",
+    "@anthropic-ai/sdk": "^0.135.0",
     "apexcharts": "^8.1.0",
     "bootstrap": "^5.3.8",
-    "bootstrap-icons": "^1.13.2",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -28,6 +38,8 @@
     "@angular/build": "^22.2.2",
     "@angular/cli": "^22.2.2",
     "@angular/compiler-cli": "^22.2.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "^5.0.4",
     "jsdom": "^30.0.0",
     "prettier": "^3.8.1",
