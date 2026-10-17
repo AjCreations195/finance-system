@@ -36,7 +36,6 @@
               }
             ],
             "styles": [
-              "node_modules/bootstrap-icons/font/bootstrap-icons.min.css",
               "src/styles.scss"
             ]
           },
@@ -74,7 +73,10 @@
               "buildTarget": "financial-system:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          }
         },
         "test": {
           "builder": "@angular/build:unit-test",

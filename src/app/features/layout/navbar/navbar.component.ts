@@ -14,6 +14,8 @@ import { PurchaseRequest, STATUS_BADGE } from '../../../core/models/purchase-req
 import { PurchaseRequestService } from '../../../core/services/purchase-request.service';
 import { WorkspaceTabsService } from '../../../core/services/workspace-tabs.service';
 import { NAV_FOOTER, NAV_TREE, NAV_TREE_SECONDARY, NavNode } from '../sidebar/nav-items';
+import { ChatService } from '../../../core/services/chat.service';
+import { CHAT_TOGGLE_ID } from '../chat-panel/chat-panel.component';
 
 /** Most results per group in the search dropdown. */
 const MAX_PAGES = 4;
@@ -39,13 +41,13 @@ const SEARCHABLE_PAGES: NavNode[] = (function leaves(nodes: NavNode[]): NavNode[
  * Top bar from the design, in reading order:
  *   [logo][system name | department] ··· [search] ··· [user ▾] [icons…]
  *
- * Icon group: messages, language, Dark/Light toggle, notifications.
+ * Icon group: AI assistant (chat), language, Dark/Light toggle, notifications.
  * The language button isn't in the Figma but is required by the task.
  * The search box shows only on xl+ (below that it crowds the bar). It finds
  * sidebar pages and purchase requests as you type ("/" focuses it).
  * Below lg (phones, tablets) the system name is hidden too, and a hamburger
  * button opens the sidebar. On phones the language and theme controls move
- * into the user menu, leaving [☰][logo] ··· [avatar][bell].
+ * into the user menu, leaving [☰][logo] ··· [avatar][chat][bell].
  */
 @Component({
   selector: 'app-navbar',
@@ -225,7 +227,15 @@ export class NavbarComponent {
     });
   }
 
-  /** Messages: a module outside this task (also sidebar pages without a route). */
+  protected readonly chat = inject(ChatService);
+  protected readonly chatToggleId = CHAT_TOGGLE_ID;
+
+  protected toggleChat(event: MouseEvent): void {
+    event.stopPropagation();
+    this.chat.toggle();
+  }
+
+  /** Sidebar pages without a route: a module outside this task. */
   protected notAvailable(): void {
     this.toast.show(this.language.translate('login.featureNotAvailable'), 'info');
   }

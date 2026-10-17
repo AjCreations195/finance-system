@@ -5,6 +5,7 @@ import { filter } from 'rxjs';
 import { NavbarComponent } from '../navbar/navbar.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { WorkspaceTabsComponent } from '../workspace-tabs/workspace-tabs.component';
+import { ChatPanelComponent } from '../chat-panel/chat-panel.component';
 
 const COLLAPSE_KEY = 'fs-sidebar-collapsed';
 
@@ -27,7 +28,7 @@ const COLLAPSE_KEY = 'fs-sidebar-collapsed';
  */
 @Component({
   selector: 'app-main-layout',
-  imports: [RouterOutlet, NavbarComponent, SidebarComponent, WorkspaceTabsComponent],
+  imports: [RouterOutlet, NavbarComponent, SidebarComponent, WorkspaceTabsComponent, ChatPanelComponent],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
   host: {
