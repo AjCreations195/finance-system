@@ -97,6 +97,12 @@
   align-items: center;
   justify-content: flex-end;
   gap: 0.5rem;
+
+  /* Phones: the title has the row to itself, and the toolbar takes the full width below it */
+  @media (max-width: 575.98px) {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
 }
 
 .dash-card-body {
