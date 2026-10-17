@@ -424,22 +424,21 @@ body {
     }
   }
 
-  /* Phones: the actions column (just ⋮ there) stays pinned to the visible
-     end of the scrolling table, so it's reachable without scrolling sideways.
+  /* The actions column (the ⋮ button) stays pinned to the visible end of the table
+     at every width: the right edge in English, the left edge in Arabic (logical
+     inset). It's always reachable, and the table's sideways scroll never hides it.
      Odd / selected rows keep their own background via the rules above. */
-  @media (max-width: 767.98px) {
-    .actions-col {
-      position: sticky;
-      inset-inline-end: 0;
-      z-index: 1;
-      background: var(--fs-surface);
-      padding-inline: 0.375rem;
-      box-shadow: inset 1px 0 0 var(--fs-border);
-    }
+  .actions-col {
+    position: sticky;
+    inset-inline-end: 0;
+    z-index: 1;
+    background: var(--fs-surface);
+    padding-inline: 0.375rem;
+    box-shadow: inset 1px 0 0 var(--fs-border);
+  }
 
-    [dir='rtl'] & .actions-col {
-      box-shadow: inset -1px 0 0 var(--fs-border);
-    }
+  [dir='rtl'] & .actions-col {
+    box-shadow: inset -1px 0 0 var(--fs-border);
   }
 
   /* Long text that may wrap onto two lines instead of widening the table */

@@ -25,7 +25,7 @@
               </button>
             </th>
           }
-          <th scope="col" class="actions-col"><span class="visually-hidden">{{ 'common.actions' | translate }}</span></th>
+          <th scope="col" class="actions-cell"><span class="visually-hidden">{{ 'common.actions' | translate }}</span></th>
         </tr>
       </thead>
       <tbody>
@@ -57,8 +57,8 @@
             </td>
             <td class="text-nowrap">{{ task.date | localDate: 'long' }}</td>
             <!-- Row actions (design: approve, return, reject, view, more).
-                 Phones: only ⋮ (the others move into its menu), in a column pinned to the visible edge. -->
-            <td class="actions-col">
+                 Phones: only ⋮ (the others move into its menu). Not pinned, unlike the other widgets. -->
+            <td class="actions-cell">
               <div class="row-actions">
                 <button type="button" class="d-none d-md-inline-grid" (click)="approve(task)" [disabled]="task.status === 'completed'" [title]="'tasks.actions.approve' | translate" [attr.aria-label]="'tasks.actions.approve' | translate">
                   <app-icon name="approve" />

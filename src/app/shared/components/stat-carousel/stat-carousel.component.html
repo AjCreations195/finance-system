@@ -21,7 +21,7 @@
           </span>
           <div class="min-w-0">
             <p class="stat-label">{{ stat.label | translate }}</p>
-            <p class="stat-value" [appCountUp]="stat.amount" [countUpFormat]="formatAmount"></p>
+            <p class="stat-value" [appCountUp]="stat.amount" [countUpFormat]="formatAmount()"></p>
             @if (stat.count !== undefined) {
               <p class="stat-count">{{ 'dashboard.stats.count' | translate: { count: stat.count } }}</p>
             }

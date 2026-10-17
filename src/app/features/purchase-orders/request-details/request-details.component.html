@@ -11,15 +11,17 @@
   <header class="panel-header">
     <span class="header-icon"><app-icon name="building" /></span>
     <div class="header-text">
-      <h2 id="request-details-title">{{ 'requests.details.title' | translate }}</h2>
+      <div class="title-row">
+        <h2 id="request-details-title">{{ 'requests.details.title' | translate }}</h2>
+        <span class="views" [title]="'requests.details.views' | translate: { count: d.views }">
+          <app-icon name="eye" />
+          <span class="visually-hidden">{{ 'requests.details.views' | translate: { count: d.views } }}</span>
+          <span aria-hidden="true">{{ d.views }}</span>
+        </span>
+      </div>
       <p>{{ r.number }}</p>
     </div>
     <div class="header-tools">
-      <span class="views" [title]="'requests.details.views' | translate: { count: d.views }">
-        <app-icon name="eye" />
-        <span class="visually-hidden">{{ 'requests.details.views' | translate: { count: d.views } }}</span>
-        <span aria-hidden="true">{{ d.views }}</span>
-      </span>
       <button type="button" class="tool d-none d-lg-inline-grid" (click)="wide.set(!wide())"
               [attr.aria-label]="(wide() ? 'common.collapse' : 'common.expand') | translate" [attr.aria-pressed]="wide()">
         <app-icon [name]="wide() ? 'collapse' : 'expand'" />
@@ -157,7 +159,7 @@
       <h3>{{ 'requests.details.timeline' | translate }}</h3>
       <ol class="steps">
         @for (step of d.workflow; track step.key) {
-          <li class="step step-{{ step.state }}" [attr.aria-current]="step.state === 'current' ? 'step' : null">
+          <li class="step step-{{ step.state }} key-{{ step.key }}"[attr.aria-current]="step.state === 'current' ? 'step' : null">
             <span class="step-icon"><app-icon [name]="stepIcons[step.key]" /></span>
             <div>
               <div class="step-title">{{ 'requests.details.steps.' + step.key | translate }}</div>

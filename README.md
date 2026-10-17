@@ -121,6 +121,14 @@ The row menus also offer "copy number", and every dangerous action asks for conf
 - Arrows and icons flip to point the right way in RTL.
 - The design's **Lusail** font, which covers both English and Arabic. It ships with the app as WOFF2 files in `public/fonts/` (Light, Regular, Medium and Bold). DM Sans (English) and IBM Plex Sans Arabic (Arabic) are the fallbacks.
 
+### Animations
+Subtle motion that guides the eye without slowing anyone down:
+- **Page changes** cross-fade between routes (Angular's View Transitions).
+- **Login page**: the hero photo slowly zooms in, and the sparkle icon floats gently.
+- **Dashboard**: the statistics cards and then the widgets rise in one after another.
+- **AI assistant**: the chat button pulses softly, the panel rises in, and three bouncing dots show while a reply is coming.
+- Everything turns off when the system's "reduce motion" setting is on.
+
 ### Accessibility
 - Full keyboard use: visible focus, and Esc closes the top-most dialog or menu. Dialogs move focus inside and keep it there.
 - ARIA roles and labels on menus, tabs, dialogs and icon-only buttons. Form errors are announced by screen readers.

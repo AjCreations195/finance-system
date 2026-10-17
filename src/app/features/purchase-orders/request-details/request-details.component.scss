@@ -71,6 +71,13 @@
   flex: 1;
   min-width: 0;
 
+  /* heading and the views badge share a row, badge on the start side */
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
   h2 {
     margin: 0;
     font-size: 1.125rem;
@@ -88,6 +95,7 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  margin-inline-start: 0.5rem; /* gap-2 from the heading, on top of the header's gap */
 }
 
 .views {
@@ -361,7 +369,6 @@
   --step-tile: 1.75rem;
   --step-title: #70747d;
   --step-person: #a4acb8;
-  --step-icon-done: #d1d3d5;
   --step-icon-pending: #8d9097;
   --step-current-title: #111827;
   --step-current-person: #687588;
@@ -375,7 +382,6 @@
 :host-context([data-bs-theme='dark']) .steps {
   --step-title: var(--fs-text-muted);
   --step-person: rgba(255, 255, 255, 0.45);
-  --step-icon-done: rgba(255, 255, 255, 0.3);
   --step-icon-pending: var(--fs-text-muted);
   --step-current-title: var(--fs-text);
   --step-current-person: var(--fs-text-muted);
@@ -435,10 +441,6 @@
   font-size: 0.875rem;
 }
 
-.step-done .step-icon {
-  color: var(--step-icon-done);
-}
-
 .step-current {
   .step-icon {
     border-color: #8a1538;
@@ -456,11 +458,33 @@
   }
 }
 
-/* Not in this Figma frame: kept red so a rejection stands out */
-.step-rejected .step-icon {
-  color: var(--fs-badge-rejected);
-  border-color: var(--fs-badge-rejected-border);
-  background: var(--fs-badge-rejected-bg);
+/* Finished steps take the outcome colour, using the same badge palette as the status pills:
+   submitted = blue, approved / accepted = green, returned = orange, rejected = red.
+   Not in the Figma frame, so these are added on top of the grey stepper. */
+@mixin step-tone($name) {
+  .step-icon {
+    color: var(--fs-badge-#{$name});
+    border-color: var(--fs-badge-#{$name}-border);
+    background: var(--fs-badge-#{$name}-bg);
+  }
+}
+
+.step-done.key-created {
+  @include step-tone(executed);
+}
+
+.step-done.key-approval,
+.step-done.key-accepted {
+  @include step-tone(completed);
+}
+
+.step-done.key-returned {
+  @include step-tone(inProgress);
+}
+
+/* Rejection is red whether the step is done or the current one */
+.step-rejected {
+  @include step-tone(rejected);
 }
 
 /* ---------------- Activity log ---------------- */

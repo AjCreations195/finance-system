@@ -11,10 +11,13 @@ export interface NavNode {
   children?: NavNode[];
   /** Small counter bubble (e.g. pending items). */
   badge?: number;
+  /** Counter bubble filled from live data, by key (see SidebarComponent.liveBadges). */
+  liveBadge?: 'procurement';
   /** Greyed-out item, as in the design. */
   disabled?: boolean;
 }
 
+/** Main group: Home, then the Operations tree (up to three levels deep). */
 export const NAV_TREE: NavNode[] = [
   { label: 'nav.home', icon: 'home', route: '/dashboard' },
   {
@@ -38,6 +41,7 @@ export const NAV_TREE: NavNode[] = [
           { label: 'nav.consumables', icon: 'consumables' },
           { label: 'nav.newCustody', icon: 'new-custody' },
           { label: 'nav.custodyProcedures', icon: 'custody-procedures' },
+          // Greyed out as in the design, so it can't be opened from the menu
           { label: 'nav.scrapRequests', icon: 'scrap-requests', disabled: true },
         ],
       },
@@ -50,9 +54,10 @@ export const NAV_TREE: NavNode[] = [
 /** Second group, shown after the divider. */
 export const NAV_TREE_SECONDARY: NavNode[] = [
   { label: 'nav.warehouses', icon: 'warehouses' },
-  { label: 'nav.accounting', icon: 'accounting', badge: 8 },
-  // Procurement opens the purchase requests page directly (as in the design)
-  { label: 'nav.procurement', icon: 'procurement', route: '/procurement/purchase-requests' },
+  { label: 'nav.accounting', icon: 'accounting' },
+  // Procurement opens the purchase requests page directly (as in the design).
+  // Its badge counts requests still in progress.
+  { label: 'nav.procurement', icon: 'procurement', route: '/procurement/purchase-requests', liveBadge: 'procurement' },
 ];
 
 /** Pinned to the bottom of the sidebar. */

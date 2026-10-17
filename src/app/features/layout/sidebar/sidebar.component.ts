@@ -6,6 +6,8 @@ import { filter, map } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { PurchaseRequestService, requestTotals } from '../../../core/services/purchase-request.service';
+import { TAB_STATUSES } from '../../../core/models/purchase-request.model';
 import { LocalizePipe } from '../../../shared/pipes/localize.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { NAV_FOOTER, NAV_TREE, NAV_TREE_SECONDARY, NavNode } from './nav-items';
@@ -40,6 +42,7 @@ export class SidebarComponent {
   private readonly language = inject(LanguageService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly purchases = inject(PurchaseRequestService);
 
   /** Desktop icon-only mode. */
   readonly collapsed = input(false);
@@ -79,6 +82,16 @@ export class SidebarComponent {
     ),
     { initialValue: this.router.url },
   );
+
+  /** Live counter values, by `NavNode.liveBadge` key. Zero hides the bubble. */
+  private readonly liveBadges = computed<Record<string, number>>(() => ({
+    procurement: requestTotals(this.purchases.requests()).count(TAB_STATUSES.inProgress),
+  }));
+
+  /** Counter to show on a menu item: live value, static `badge`, or nothing. */
+  protected badgeOf(node: NavNode): number | undefined {
+    return node.liveBadge ? this.liveBadges()[node.liveBadge] : node.badge;
+  }
 
   /** Primary + secondary trees after applying the search filter. */
   protected readonly primary = computed(() => this.filterTree(NAV_TREE));

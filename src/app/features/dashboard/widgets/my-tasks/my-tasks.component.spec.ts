@@ -159,7 +159,7 @@ describe('MyTasksComponent', () => {
   it('on phones the row shows only ⋮ (the other buttons are md+ only)', () => {
     const buttons = Array.from(el.querySelectorAll<HTMLButtonElement>('tbody tr:nth-child(1) .row-actions button'));
     expect(buttons.filter((b) => b.classList.contains('d-none')).map((b) => b.getAttribute('aria-label'))).toEqual(['Approve', 'Return', 'Reject', 'View']);
-    expect(el.querySelector('tbody tr:nth-child(1) td.actions-col')).not.toBeNull();
+    expect(el.querySelector('tbody tr:nth-child(1) td.actions-cell')).not.toBeNull();
   });
 
   it('row menu → Copy task number copies it', async () => {

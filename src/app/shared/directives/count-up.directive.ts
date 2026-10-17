@@ -24,7 +24,7 @@ type Format = (value: number) => string;
 export class CountUpDirective {
   /** The number to show. */
   readonly appCountUp = input.required<number>();
-  /** Turns the running number into text. Pass a stable function (an arrow property), not a method. */
+  /** Turns the running number into text. Pass a function that only changes when the text should (e.g. a computed), not a method. */
   readonly countUpFormat = input<Format>(formatInteger);
   /** Length of the count in milliseconds. */
   readonly countUpDuration = input(900);

@@ -38,10 +38,6 @@
             <span class="status-dot" [style.background]="v.dot" aria-hidden="true"></span>
           }
           <span class="tab-text" [attr.dir]="v.tab.kind === 'record' ? 'ltr' : null">{{ v.label }}</span>
-          @if (v.badge) {
-            <span class="tab-count" aria-hidden="true">{{ v.badge }}</span>
-            <span class="visually-hidden">({{ 'layout.tabs.underProcedure' | translate: { count: v.badge } }})</span>
-          }
           @if (v.pinned) {
             <app-icon name="pin" class="pin" />
             <span class="visually-hidden">({{ 'layout.tabs.pinned' | translate }})</span>

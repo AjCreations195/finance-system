@@ -121,6 +121,9 @@
       >
         <app-icon [name]="node.icon" class="menu-icon" />
         <span class="menu-text">{{ node.label | translate }}</span>
+        @if (badgeOf(node); as count) {
+          <span class="menu-badge">{{ count }}</span>
+        }
       </a>
     } @else {
       <button
@@ -134,8 +137,8 @@
       >
         <app-icon [name]="node.icon" class="menu-icon" />
         <span class="menu-text">{{ node.label | translate }}</span>
-        @if (node.badge) {
-          <span class="menu-badge">{{ node.badge }}</span>
+        @if (badgeOf(node); as count) {
+          <span class="menu-badge">{{ count }}</span>
         }
       </button>
     }

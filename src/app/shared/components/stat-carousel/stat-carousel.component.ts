@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, input, output, viewChild } from '@angular/core';
+import { Component, ElementRef, computed, inject, input, output, viewChild } from '@angular/core';
 import { FinancialStat } from '../../../core/models/dashboard.models';
 import { LanguageService } from '../../../core/services/language.service';
 import { CountUpDirective } from '../../directives/count-up.directive';
@@ -39,12 +39,17 @@ export class StatCarouselComponent {
 
   /**
    * Formats an amount as "50 million riyals" / "50 مليون ريال".
-   * Arrow property, so the count-up directive can call it while it animates.
+   * A new function per language: the count-up directive re-draws its text when
+   * it gets a new formatter, so the amounts switch language with the page.
    */
-  protected readonly formatAmount = (amount: number): string => {
-    const compact = new Intl.NumberFormat(this.language.locale(), { notation: 'compact', compactDisplay: 'long' }).format(amount);
-    return `${compact} ${this.language.translate('common.currency')}`;
-  };
+  protected readonly formatAmount = computed(() => {
+    const locale = this.language.locale();
+    const currency = this.language.translate('common.currency');
+    return (amount: number): string => {
+      const compact = new Intl.NumberFormat(locale, { notation: 'compact', compactDisplay: 'long' }).format(amount);
+      return `${compact} ${currency}`;
+    };
+  });
 
   /** Green when the change is good news, red when it's bad news. */
   protected isPositive(stat: FinancialStat): boolean {

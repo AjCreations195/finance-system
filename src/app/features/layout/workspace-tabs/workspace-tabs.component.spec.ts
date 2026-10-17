@@ -87,11 +87,6 @@ describe('WorkspaceTabsComponent', () => {
       expect(tab.querySelector<HTMLElement>('.status-dot')!.style.background).toContain('--fs-badge-');
     });
 
-    it('counts requests under procedure on the Purchase request tab', () => {
-      expect(view('procurement').badge).toBeGreaterThan(0);
-      expect(label('procurement').querySelector('.tab-count')!.textContent!.trim()).toBe(String(view('procurement').badge));
-    });
-
 
     it('clicking a module outside the demo shows a notice', () => {
       const show = vi.spyOn(TestBed.inject(ToastService), 'show');
