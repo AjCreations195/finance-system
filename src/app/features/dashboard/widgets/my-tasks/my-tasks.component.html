@@ -34,7 +34,7 @@
             <td>
               <input type="checkbox" class="form-check-input" [checked]="selected().has(task.id)" (change)="toggleRow(task.id)" [attr.aria-label]="('tasks.selectRow' | translate) + ' ' + task.number" />
             </td>
-            <td><a href="#" class="ref-link" (click)="$event.preventDefault(); notAvailable()">{{ task.number }}</a></td>
+            <td><a href="#" class="ref-link" (click)="$event.preventDefault(); toast.unavailable()">{{ task.number }}</a></td>
             <td class="cell-wrap">{{ task.description | localize }}</td>
             <td class="text-nowrap col-optional">{{ 'tasks.documents' | translate: { count: task.attachments } }}</td>
             <td class="text-nowrap col-optional">
@@ -69,7 +69,7 @@
                 <button type="button" class="d-none d-md-inline-grid" (click)="askReject(task)" [disabled]="task.status === 'rejected'" [title]="'tasks.actions.reject' | translate" [attr.aria-label]="'tasks.actions.reject' | translate">
                   <app-icon name="reject" />
                 </button>
-                <button type="button" class="d-none d-md-inline-grid" (click)="notAvailable()" [title]="'tasks.actions.view' | translate" [attr.aria-label]="'tasks.actions.view' | translate">
+                <button type="button" class="d-none d-md-inline-grid" (click)="toast.unavailable()" [title]="'tasks.actions.view' | translate" [attr.aria-label]="'tasks.actions.view' | translate">
                   <app-icon name="eye" />
                 </button>
                 <button type="button" (click)="openRowMenu(task, $event)" [attr.aria-label]="'common.moreOptions' | translate"
@@ -118,7 +118,7 @@
       </button>
     </li>
     <li class="d-md-none">
-      <button type="button" class="dropdown-item" role="menuitem" (click)="closeRowMenu(); notAvailable()">
+      <button type="button" class="dropdown-item" role="menuitem" (click)="closeRowMenu(); toast.unavailable()">
         <app-icon name="eye" class="me-2" />{{ 'tasks.actions.view' | translate }}
       </button>
     </li>

@@ -57,6 +57,7 @@ export class ChartComponent {
   /** False until the chart has scrolled into view; the chart is created then. */
   private readonly visible = signal(false);
 
+  /** Height set on the host element while the chart is not drawn yet (the chart's own height, or 300px). */
   protected readonly reservedHeight = computed(() => {
     const height = this.options().chart?.height;
     return typeof height === 'number' ? height : DEFAULT_HEIGHT;

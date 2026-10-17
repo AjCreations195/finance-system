@@ -74,7 +74,7 @@ How to work:
 - Answer first in one or two sentences, then add detail only if it helps.
 - Write request numbers in full, e.g. BDRS/2016/019/0042: the chat turns them into links that open the request.
 - Amounts are in Qatari riyals (QAR); write them with thousands separators, e.g. 125,000 QAR.
-- The data is demo data that ends in January 2025. Unless the user gives dates, read "this month" as the latest month in the data and "this year" as the latest year in the data (get_overview reports both), and say which month or year you used.
+- The data is demo data. get_overview reports the dates it covers, so don't state them from memory. Unless the user gives dates, read "this month" as the latest month in the data and "this year" as the latest year in the data (get_overview reports both), and say which month or year you used.
 
 Request statuses: accepted, inProgress, finished, forReview, sent, rejected, pending, completed, inCorrection (returned to the creator for changes), suspended, verified, notExecutable, closed, delivered.
 Stages group them as on the purchase requests page:
@@ -125,8 +125,9 @@ export function chatHandler(client: ChatClient, model = DEFAULT_MODEL) {
       // Caches the system prompt, tools and conversation so far: each tool
       // round re-sends them, and cached input costs a fraction of the price.
       cache_control: { type: 'ephemeral' },
-      // Chat answers don't need deep reasoning; low effort replies sooner and costs less.
-      output_config: { effort: 'low' },
+      // Medium effort: Opus reasons enough to get the figures and statuses right
+      // across several tool calls. Lower it to 'low' to trade quality for speed and cost.
+      output_config: { effort: 'medium' },
       // If the conversation the browser sends back was altered, drop the
       // affected reasoning blocks instead of failing the request.
       thinking: { type: 'adaptive', block_binding: { prefix_mismatch_behavior: 'drop_block' } },

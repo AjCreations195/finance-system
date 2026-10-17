@@ -130,6 +130,7 @@ export class AuthService {
   // Helpers
   // ------------------------------------------------------------------
 
+  /** Stores the signed-in user (localStorage when "remember me" is on, otherwise sessionStorage) and resolves after the simulated delay. */
   private signIn(user: User, remember: boolean): Observable<User> {
     this._user.set(user);
     try {
@@ -140,10 +141,12 @@ export class AuthService {
     return of(user).pipe(delay(LATENCY));
   }
 
+  /** Returns an error after the same delay as a success, so the two can't be told apart by timing. */
   private fail<T>(code: AuthError): Observable<T> {
     return throwError(() => new Error(code)).pipe(delay(LATENCY));
   }
 
+  /** Reads the accounts saved by register(); returns an empty list if storage is missing or corrupt. */
   private readAccounts(): RegisteredAccount[] {
     try {
       return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) ?? '[]') as RegisteredAccount[];

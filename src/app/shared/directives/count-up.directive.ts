@@ -29,8 +29,10 @@ export class CountUpDirective {
   /** Length of the count in milliseconds. */
   readonly countUpDuration = input(900);
 
+  /** The element whose text is written. */
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
+  /** True when the user asked for reduced motion; then the final value is shown at once. */
   private readonly reduceMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /** Number currently on screen, so a change counts from there. */
@@ -39,6 +41,7 @@ export class CountUpDirective {
   private visible = false;
   /** Latest request made while the element was still off screen. */
   private pending: { target: number; format: Format } | null = null;
+  /** Id of the animation frame in progress, so it can be cancelled. */
   private frame = 0;
 
   constructor() {
@@ -63,6 +66,7 @@ export class CountUpDirective {
     this.destroyRef.onDestroy(() => cancelAnimationFrame(this.frame));
   }
 
+  /** Starts the count once the element is half visible (or immediately where IntersectionObserver is missing). */
   private watchVisibility(): void {
     if (typeof IntersectionObserver === 'undefined') {
       this.show();
@@ -90,6 +94,7 @@ export class CountUpDirective {
     }
   }
 
+  /** Counts from the number on screen to `target` over `countUpDuration` ms (or jumps there if animation is off). */
   private countTo(target: number, format: Format): void {
     cancelAnimationFrame(this.frame);
     const from = this.shown;
@@ -114,6 +119,7 @@ export class CountUpDirective {
     this.frame = requestAnimationFrame(step);
   }
 
+  /** Puts the formatted number into the element. */
   private write(value: number, format: Format): void {
     this.element.textContent = format(value);
   }

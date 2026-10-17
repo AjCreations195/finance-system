@@ -1,5 +1,6 @@
 import { Component, DestroyRef, Injector, afterNextRender, computed, inject, signal } from '@angular/core';
 import { WarehouseItem } from '../../../../core/models/dashboard.models';
+import { ClipboardService } from '../../../../core/services/clipboard.service';
 import { DashboardDataService } from '../../../../core/services/dashboard-data.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -37,7 +38,8 @@ const ROW_MENU_WIDTH = 224;
 export class WarehousesComponent {
   protected readonly data = inject(DashboardDataService);
   private readonly language = inject(LanguageService);
-  private readonly toast = inject(ToastService);
+  protected readonly toast = inject(ToastService);
+  private readonly clipboard = inject(ClipboardService);
   private readonly injector = inject(Injector);
 
   /** Row "⋮" menu: which item, and where (fixed position under the button). */
@@ -54,11 +56,16 @@ export class WarehousesComponent {
     inject(DestroyRef).onDestroy(() => document.removeEventListener('scroll', closeMenu, { capture: true }));
   }
 
+  /** Which balance view is shown: items with the most or the least stock. */
   protected readonly view = signal<BalanceView>('high');
+  /** The two balance views, for the toggle. */
   protected readonly views: BalanceView[] = ['high', 'low'];
+  /** Column sort state (see TableSort). */
   protected readonly sort = new TableSort<SortKey>();
+  /** Sortable columns, in display order. */
   protected readonly columns: SortKey[] = ['number', 'product', 'quantity', 'min', 'max'];
 
+  /** The VISIBLE_ROWS items for the chosen balance view, then sorted by the chosen column. */
   protected readonly rows = computed(() => {
     const lang = this.language.lang();
     // Fill ratio = quantity / max. High → highest ratios first; Low → lowest first.
@@ -75,6 +82,7 @@ export class WarehousesComponent {
     });
   });
 
+  /** Two-digit display used in the design ("01", "08"). */
   protected pad(n: number): string {
     return String(n).padStart(2, '0');
   }
@@ -82,10 +90,6 @@ export class WarehousesComponent {
   /** "05 boxes" style label: padded number + localized unit. */
   protected amount(n: number, item: WarehouseItem): string {
     return `${this.pad(n)} ${item.unit[this.language.lang()]}`;
-  }
-
-  protected notAvailable(): void {
-    this.toast.show(this.language.translate('login.featureNotAvailable'), 'info');
   }
 
   // ---- Row menu (⋮) ----
@@ -104,23 +108,20 @@ export class WarehousesComponent {
     afterNextRender(() => document.querySelector<HTMLElement>('.row-menu [role="menuitem"]')?.focus(), { injector: this.injector });
   }
 
+  /** Copies the product number and closes the row menu. */
   protected copyNumber(item: WarehouseItem): void {
     this.closeRowMenu();
-    const done = () => this.toast.show(this.language.translate('warehouses.toast.numberCopied'), 'success');
-    const fail = () => this.toast.show(this.language.translate('requests.details.copyFailed'), 'danger');
-    if (!navigator.clipboard) {
-      fail();
-      return;
-    }
-    navigator.clipboard.writeText(item.number).then(done, fail);
+    this.clipboard.copy(item.number, 'warehouses.toast.numberCopied');
   }
 
+  /** Restock needs confirmation, so this only opens the dialog. */
   protected askRestock(item: WarehouseItem): void {
     this.rowMenu.set(null);
     this.pendingRestock.set(item);
     this.focusDialog();
   }
 
+  /** Fills the item up to its max level in the open confirmation. */
   protected confirmRestock(): void {
     const item = this.pendingRestock();
     if (!item) return;
@@ -130,12 +131,14 @@ export class WarehousesComponent {
     this.toast.show(this.language.translate('warehouses.toast.restocked', { product, quantity: this.amount(item.maxLevel, item) }), 'success');
   }
 
+  /** Delete needs confirmation, so this only opens the dialog. */
   protected askDelete(item: WarehouseItem): void {
     this.rowMenu.set(null);
     this.pendingDelete.set(item);
     this.focusDialog();
   }
 
+  /** Removes the item in the open confirmation. */
   protected confirmDelete(): void {
     const item = this.pendingDelete();
     if (!item) return;

@@ -108,8 +108,11 @@ export class LoginComponent {
   private readonly language = inject(LanguageService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
+  /** Shown in the hint text and the password error. */
   protected readonly passwordMinLength = PASSWORD_MIN_LENGTH;
+  /** Shown in the page footer. */
   protected readonly version = APP_VERSION;
+  /** Current year, for the footer copyright line. */
   protected readonly year = new Date().getFullYear();
 
   // ---- UI state (signals, so the zoneless app re-renders on change) ----
@@ -134,12 +137,14 @@ export class LoginComponent {
 
   // ---- Reactive form definitions ----
   // nonNullable: reset() restores the initial values instead of null.
+  /** Sign-in form: username or email, password, and the "remember me" choice. */
   protected readonly loginForm = this.fb.nonNullable.group({
     identifier: ['', [Validators.required, emailOrUsernameValidator]],
     password: ['', [Validators.required, Validators.minLength(PASSWORD_MIN_LENGTH)]],
     remember: [true],
   });
 
+  /** "Forgot password" form: only the email address. */
   protected readonly forgotForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.pattern(EMAIL_PATTERN)]],
   });
@@ -208,6 +213,10 @@ export class LoginComponent {
   // ------------------------------------------------------------------
   // Login
   // ------------------------------------------------------------------
+  /**
+   * Sign-in submit: validates, shows the spinner, then either navigates to the
+   * requested page or shows the "wrong credentials" alert.
+   */
   protected onSubmit(): void {
     this.submitted.set(true);
     this.loginError.set(null);
@@ -240,6 +249,7 @@ export class LoginComponent {
   // ------------------------------------------------------------------
   // Forgot password
   // ------------------------------------------------------------------
+  /** Switches to the "forgot password" view, pre-filling the email if one was typed. */
   protected openForgot(event: Event): void {
     event.preventDefault();
     // Pre-fill with the typed identifier when it already looks like an email.
@@ -251,11 +261,13 @@ export class LoginComponent {
     this.focus('#reset-email');
   }
 
+  /** Returns from the "forgot password" view to the sign-in form. */
   protected backToLogin(): void {
     this.view.set('login');
     this.focus('#identifier');
   }
 
+  /** Sends the reset request (mock) and shows the confirmation with the email address. */
   protected onForgotSubmit(): void {
     this.resetSubmitted.set(true);
     if (this.forgotForm.invalid) {
@@ -275,6 +287,7 @@ export class LoginComponent {
   // ------------------------------------------------------------------
   // Create account
   // ------------------------------------------------------------------
+  /** Switches to the "create account" view with an empty form. */
   protected openRegister(event: Event): void {
     event.preventDefault();
     this.registerForm.reset();
@@ -285,6 +298,10 @@ export class LoginComponent {
     this.focus('#reg-name');
   }
 
+  /**
+   * Creates the account (mock). On success, goes back to sign-in with the new
+   * email filled in; on a duplicate email, shows the error on the email field.
+   */
   protected onRegisterSubmit(): void {
     this.registerSubmitted.set(true);
     this.registerError.set(null);

@@ -112,18 +112,22 @@ import { IconComponent } from '../icon/icon.component';
   },
 })
 export class MultiFilterMenuComponent {
+  /** This component's own element; used to tell inside clicks from outside ones. */
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
 
+  /** The choices shown as checkboxes. */
   readonly options = input.required<FilterOption[]>();
   /** Ticked values (two-way bindable). */
   readonly value = model.required<string[]>();
   /** Optional translation key shown as the list heading. */
   readonly legend = input('');
 
+  /** Whether the checklist is visible. */
   protected readonly open = signal(false);
   /** A filter is applied when not every option is ticked. */
   protected readonly active = computed(() => this.value().length < this.options().length);
 
+  /** Whether an option is ticked. */
   protected isChecked(value: string): boolean {
     return this.value().includes(value);
   }
@@ -135,10 +139,12 @@ export class MultiFilterMenuComponent {
     this.value.set(this.options().map((o) => o.value).filter((v) => next.includes(v)));
   }
 
+  /** Ticks every option (the "Select all" link), which clears the filter. */
   protected selectAll(): void {
     this.value.set(this.options().map((o) => o.value));
   }
 
+  /** Closes the checklist when a click lands outside this component. */
   protected onDocumentClick(event: MouseEvent): void {
     if (this.open() && !this.host.nativeElement.contains(event.target as Node)) this.open.set(false);
   }

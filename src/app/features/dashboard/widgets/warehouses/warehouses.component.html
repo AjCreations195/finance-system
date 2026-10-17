@@ -26,7 +26,7 @@
       <tbody>
         @for (w of rows(); track w.id) {
           <tr>
-            <td><a href="#" class="ref-link" (click)="$event.preventDefault(); notAvailable()">{{ w.number }}</a></td>
+            <td><a href="#" class="ref-link" (click)="$event.preventDefault(); toast.unavailable()">{{ w.number }}</a></td>
             <td class="text-nowrap person-name-cell">{{ w.product | localize }}</td>
             <td class="text-nowrap">{{ pad(w.quantity) }} {{ w.unit | localize }}</td>
             <!-- Min level (red trend) / Max level (green trend), as in the design -->
@@ -51,7 +51,7 @@
     </table>
   </div>
 
-  <button type="button" class="show-more" (click)="notAvailable()">
+  <button type="button" class="show-more" (click)="toast.unavailable()">
     {{ 'warehouses.showMore' | translate: { count: data.warehouseTotal() - rows().length } }}
     <span class="show-more-arrow"><app-icon name="arrow-left" /></span>
   </button>

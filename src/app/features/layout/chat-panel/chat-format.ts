@@ -1,14 +1,21 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-/** A run of text inside a paragraph or list item. */
+/**
+ * A run of text inside a paragraph or list item: plain or bold text, or a
+ * purchase request number (rendered as a link to that request).
+ */
 export type ChatInline = { kind: 'text'; text: string } | { kind: 'bold'; text: string } | { kind: 'request'; number: string };
 
+/** A block of the reply: a paragraph, or a bulleted / numbered list. */
 export type ChatBlock =
   | { kind: 'paragraph'; content: ChatInline[] }
   | { kind: 'list'; ordered: boolean; start: number; items: ChatInline[][] };
 
+/** A "- item" or "• item" or "* item" line. */
 const BULLET = /^\s*[-•*]\s+(.*)$/;
+/** A "1. item" or "1) item" line; group 1 is the number, group 2 the text. */
 const NUMBERED = /^\s*(\d+)[.)]\s+(.*)$/;
+/** **bold** text; the capture group keeps the bold part. */
 const BOLD = /\*\*(.+?)\*\*/g;
 /** Purchase request numbers, e.g. BDRS/2016/019/0042. */
 const REQUEST_NUMBER = /BDRS\/\d{4}\/\d{3}\/\d{4}/g;
@@ -26,12 +33,14 @@ const REQUEST_NUMBER = /BDRS\/\d{4}\/\d{3}\/\d{4}/g;
 export function formatChatText(text: string): ChatBlock[] {
   const blocks: ChatBlock[] = [];
   let paragraph: string[] = [];
+  /** Turns the lines collected so far into a paragraph block. */
   const endParagraph = () => {
     if (paragraph.length) blocks.push({ kind: 'paragraph', content: parseInline(paragraph.join('\n')) });
     paragraph = [];
   };
 
   for (const line of text.split('\n')) {
+    // A list item joins the list before it when both are the same kind; a blank line or a paragraph line ends the paragraph.
     const bullet = BULLET.exec(line);
     const numbered = bullet ? null : NUMBERED.exec(line);
     if (bullet || numbered) {
@@ -51,6 +60,7 @@ export function formatChatText(text: string): ChatBlock[] {
   return blocks;
 }
 
+/** Splits one line of text into bold runs, plain runs and request numbers. */
 function parseInline(text: string): ChatInline[] {
   const out: ChatInline[] = [];
   // split() with a capture group puts the bold parts at the odd indexes.

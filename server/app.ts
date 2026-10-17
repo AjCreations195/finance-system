@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import express from 'express';
 import { rateLimit } from 'express-rate-limit';
-import { type ChatClient, chatHandler } from './chat.ts';
+import { type ChatClient, chatHandler, DEFAULT_MODEL } from './chat.ts';
 
 export interface AppOptions {
   /** Claude API client; null when no API key is set (the chat answers 503). */
@@ -18,7 +18,7 @@ const CHAT_WINDOW_MS = 10 * 60 * 1000;
 
 /**
  * The Express app:
- *   GET  /api/health  → { ok, ai } (ai: whether a Claude API key is set)
+ *   GET  /api/health  → { ok, ai, model } (ai: whether a Claude API key is set; model: the Claude model in use)
  *   POST /api/chat    → streamed reply (see chat.ts), rate limited per IP
  *   anything else     → the Angular app, when `staticDir` exists
  */
@@ -29,7 +29,7 @@ export function createApp({ client, staticDir, model, chatLimit = 60 }: AppOptio
   app.set('trust proxy', 1);
 
   app.get('/api/health', (_req, res) => {
-    res.json({ ok: true, ai: client !== null });
+    res.json({ ok: true, ai: client !== null, model: model ?? DEFAULT_MODEL });
   });
 
   app.post(

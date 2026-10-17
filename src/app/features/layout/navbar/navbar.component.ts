@@ -19,9 +19,6 @@ import { NAV_FOOTER, NAV_TREE, NAV_TREE_SECONDARY, NavNode } from '../sidebar/na
 const MAX_PAGES = 4;
 const MAX_REQUESTS = 5;
 
-/** "View all" opens the purchase requests list filtered by the search term (?q=). */
-const REQUESTS_PAGE = '/procurement/purchase-requests';
-
 /** One row of the search dropdown. */
 type SearchOption =
   | { kind: 'page'; node: NavNode }
@@ -29,7 +26,8 @@ type SearchOption =
   | { kind: 'all' };
 
 /** Every page in the sidebar menu (its leaves), minus the greyed-out ones. */
-const SEARCHABLE_PAGES: NavNode[] = (function leaves(nodes: NavNode[]): NavNode[] {
+// Search index for the navbar: every sidebar page that can be opened.
+const SEARCHABLE_PAGES: NavNode[] =(function leaves(nodes: NavNode[]): NavNode[] {
   return nodes.flatMap((n) => (n.children ? leaves(n.children) : n.disabled ? [] : [n]));
 })([...NAV_TREE, ...NAV_TREE_SECONDARY, ...NAV_FOOTER]);
 
@@ -79,6 +77,7 @@ export class NavbarComponent {
   private readonly userBtn = viewChild<ElementRef<HTMLButtonElement>>('userBtn');
   private readonly userDropdown = viewChild<ElementRef<HTMLElement>>('userDropdown');
 
+  /** Opens or closes the user menu under the avatar. */
   protected toggleUserMenu(event: MouseEvent): void {
     event.stopPropagation();
     if (this.userMenuOpen()) {
@@ -103,6 +102,7 @@ export class NavbarComponent {
     if (next && !next.closest('.user-menu')) this.closeUserMenu();
   }
 
+  /** Closes the user menu when a click lands outside it. */
   protected onDocumentClick(event: MouseEvent): void {
     if (this.userMenuOpen() && !(event.target as HTMLElement).closest('.user-menu')) {
       this.userMenuOpen.set(false);
@@ -120,8 +120,10 @@ export class NavbarComponent {
 
   private readonly term = computed(() => this.query().trim().toLowerCase());
 
-  /** Sidebar leaves whose label matches (disabled items can't be opened, so they're left out). */
-  /** Empty box: the first pages are suggested. Typing narrows them to the matches. */
+  /**
+   * Sidebar leaves whose label matches (disabled items can't be opened, so they're left out).
+   * Empty box: the first pages are suggested. Typing narrows them to the matches.
+   */
   protected readonly pageResults = computed<NavNode[]>(() => {
     const q = this.term();
     this.language.lang(); // re-run when the language (and so the labels) change
@@ -156,14 +158,18 @@ export class NavbarComponent {
 
   /** The suggestions open as soon as the field is clicked into (before anything is typed). */
   protected readonly searchOpen = computed(() => this.searchFocused());
+  /** id of the highlighted option, for aria-activedescendant (null when the list is closed). */
   protected readonly activeId = computed(() => (this.searchOpen() && this.options().length ? `gs-opt-${this.active()}` : null));
+  /** Badge colour family per request status, used in the request results. */
   protected readonly statusBadge = STATUS_BADGE;
 
+  /** Stores the new search text and highlights the first option again. */
   protected onQuery(value: string): void {
     this.query.set(value);
     this.active.set(0);
   }
 
+  /** Tracks whether the search box has focus (the suggestions show while it does). */
   protected onSearchFocus(focused: boolean): void {
     this.searchFocused.set(focused);
   }
@@ -198,21 +204,23 @@ export class NavbarComponent {
     }
   }
 
+  /** Acts on the option at `index`: open a request, go to a page, or show the "not available" notice. */
   protected choose(index: number): void {
     const option = this.options()[index];
     if (!option) return;
-    const term = this.query().trim();
     this.onQuery('');
     this.searchInput()?.nativeElement.blur();
 
     if (option.kind === 'request') {
       this.workspace.openRequest(option.request.id);
     } else if (option.kind === 'all') {
-      void this.router.navigate([REQUESTS_PAGE], { queryParams: { q: term } });
+      // The filtered requests list isn't built yet
+      this.toast.unavailable();
     } else if (option.node.route) {
       void this.router.navigateByUrl(option.node.route);
     } else {
-      this.notAvailable();
+      // Sidebar pages without a route: a module outside this task
+      this.toast.unavailable();
     }
   }
 
@@ -227,17 +235,14 @@ export class NavbarComponent {
     input.focus();
   }
 
+  /** Keeps the highlighted option visible when it moves past the edge of the list. */
   private scrollActiveIntoView(): void {
     afterNextRender(() => document.getElementById(`gs-opt-${this.active()}`)?.scrollIntoView({ block: 'nearest' }), {
       injector: this.injector,
     });
   }
 
-  /** Sidebar pages without a route: a module outside this task. */
-  protected notAvailable(): void {
-    this.toast.show(this.language.translate('login.featureNotAvailable'), 'info');
-  }
-
+  /** Signs out and goes to the login page. */
   protected logout(): void {
     this.auth.logout();
     void this.router.navigate(['/login']);

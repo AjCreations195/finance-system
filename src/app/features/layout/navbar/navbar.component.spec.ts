@@ -171,7 +171,7 @@ describe('NavbarComponent', () => {
       expect(openRequest).toHaveBeenCalledWith(request.id);
     });
 
-    it('arrow keys move the highlight, and "View all" opens the filtered list', async () => {
+    it('arrow keys move the highlight, and "View all" shows a not-available toast', async () => {
       const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
       const request = TestBed.inject(PurchaseRequestService).requests()[0];
       await type(request.number);
@@ -183,7 +183,8 @@ describe('NavbarComponent', () => {
       expect(input().getAttribute('aria-activedescendant')).toBe(last.id);
 
       await key('Enter');
-      expect(navigate).toHaveBeenCalledWith(['/procurement/purchase-requests'], { queryParams: { q: request.number } });
+      expect(navigate).not.toHaveBeenCalled();
+      expect(TestBed.inject(ToastService).toasts().at(-1)?.type).toBe('info');
     });
 
     it('says so when nothing matches', async () => {
@@ -199,8 +200,4 @@ describe('NavbarComponent', () => {
     });
   });
 
-  it('modules outside the demo show an info toast', () => {
-    fixture.componentInstance['notAvailable']();
-    expect(TestBed.inject(ToastService).toasts().at(-1)?.type).toBe('info');
-  });
 });

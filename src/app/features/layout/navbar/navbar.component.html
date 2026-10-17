@@ -31,7 +31,6 @@
       (focus)="onSearchFocus(true)" (blur)="onSearchFocus(false)" (keydown)="onSearchKey($event)"
       [placeholder]="'layout.searchPlaceholder' | translate" [attr.aria-label]="'common.search' | translate" />
     <app-icon name="search" class="search-icon" />
-    <kbd class="kbd-hint d-none d-sm-block" aria-hidden="true">/</kbd>
     @if (query()) {
     <!-- mousedown is cancelled so the box keeps focus, and the results stay open -->
     <button type="button" class="search-clear" (mousedown)="$event.preventDefault()" (click)="clearSearch()"
@@ -111,7 +110,6 @@
           </span>
           <div class="profile-text">
             <div class="profile-name">{{ user.name | localize }}</div>
-            <span class="profile-role">{{ user.role | localize }}</span>
             <div class="profile-email" [title]="user.email">{{ user.email }}</div>
           </div>
         </div>

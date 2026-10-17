@@ -1,5 +1,6 @@
 import { Component, DestroyRef, Injector, afterNextRender, computed, inject, signal } from '@angular/core';
 import { TASK_STATUSES, TaskItem, TaskStatus } from '../../../../core/models/dashboard.models';
+import { ClipboardService } from '../../../../core/services/clipboard.service';
 import { DashboardDataService } from '../../../../core/services/dashboard-data.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -10,6 +11,7 @@ import { LocalizePipe } from '../../../../shared/pipes/localize.pipe';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TableSort } from '../../../../shared/utils/table-sort';
 import { IconComponent } from '../../../../shared/components/icon/icon.component';
+/** Rows per page of the tasks table. */
 const PAGE_SIZE = 5;
 
 /** Icon shown inside each status badge. */
@@ -51,7 +53,8 @@ type SortKey = 'number' | 'description' | 'attachments' | 'notes' | 'status' | '
 export class MyTasksComponent {
   private readonly data = inject(DashboardDataService);
   private readonly language = inject(LanguageService);
-  private readonly toast = inject(ToastService);
+  protected readonly toast = inject(ToastService);
+  private readonly clipboard = inject(ClipboardService);
   private readonly injector = inject(Injector);
 
   protected readonly statusIcons = STATUS_ICONS;
@@ -81,12 +84,14 @@ export class MyTasksComponent {
     inject(DestroyRef).onDestroy(() => document.removeEventListener('scroll', closeMenu, { capture: true }));
   }
 
+  /** Options of the status filter: All, then one per task status. */
   protected readonly statusOptions: FilterOption[] = [
     { value: 'all', label: 'common.all' },
     ...TASK_STATUSES.map((s) => ({ value: s, label: `tasks.status.${s}` })),
   ];
 
   // ---- Derived rows ----
+  /** Tasks that pass the status filter and the search text. */
   private readonly filtered = computed(() => {
     const q = this.search().trim().toLowerCase();
     const status = this.status();
@@ -101,6 +106,7 @@ export class MyTasksComponent {
     );
   });
 
+  /** The filtered tasks in the chosen column order. */
   private readonly sorted = computed(() => {
     const lang = this.language.lang();
     return this.sort.apply(this.filtered(), {
@@ -114,31 +120,38 @@ export class MyTasksComponent {
     });
   });
 
+  /** Number of pages (at least 1). */
   protected readonly totalPages = computed(() => Math.max(1, Math.ceil(this.sorted().length / PAGE_SIZE)));
   /** Clamped so filtering can't leave you on an empty page. */
   protected readonly currentPage = computed(() => Math.min(this.page(), this.totalPages()));
+  /** The rows shown on the current page. */
   protected readonly rows = computed(() => {
     const start = (this.currentPage() - 1) * PAGE_SIZE;
     return this.sorted().slice(start, start + PAGE_SIZE);
   });
 
+  /** True when every row on this page is ticked (drives the header checkbox). */
   protected readonly allOnPageSelected = computed(() => this.rows().length > 0 && this.rows().every((r) => this.selected().has(r.id)));
 
   // ---- Handlers ----
+  /** Sets the search text and returns to page 1. */
   protected onSearch(value: string): void {
     this.search.set(value);
     this.page.set(1);
   }
 
+  /** Sets the status filter and returns to page 1. */
   protected onStatus(value: string): void {
     this.status.set(value);
     this.page.set(1);
   }
 
+  /** Moves to a page, kept between 1 and the last page. */
   protected goTo(page: number): void {
     this.page.set(Math.min(Math.max(1, page), this.totalPages()));
   }
 
+  /** Ticks or unticks one row. */
   protected toggleRow(id: number): void {
     this.selected.update((set) => {
       const next = new Set(set);
@@ -148,6 +161,7 @@ export class MyTasksComponent {
     });
   }
 
+  /** Ticks every row on this page, or clears them if they are all ticked already. */
   protected toggleAllOnPage(): void {
     const ids = this.rows().map((r) => r.id);
     const selectAll = !this.allOnPageSelected();
@@ -159,32 +173,31 @@ export class MyTasksComponent {
   }
 
   // ---- Row actions ----
+  /** Approve: the task moves to "completed" at once. */
   protected approve(task: TaskItem): void {
     this.data.setTaskStatus(task.id, 'completed');
     this.toast.show(this.language.translate('tasks.toast.approved', { number: task.number }), 'success');
   }
 
+  /** Return: the task goes back to "review" at once. */
   protected returnTask(task: TaskItem): void {
     this.data.setTaskStatus(task.id, 'review');
     this.toast.show(this.language.translate('tasks.toast.returned', { number: task.number }), 'info');
   }
 
+  /** Reject needs confirmation, so this only opens the dialog. */
   protected askReject(task: TaskItem): void {
     this.pendingReject.set(task);
     this.focusDialog();
   }
 
+  /** Rejects the task in the open confirmation dialog. */
   protected confirmReject(): void {
     const task = this.pendingReject();
     if (!task) return;
     this.data.setTaskStatus(task.id, 'rejected');
     this.pendingReject.set(null);
     this.toast.show(this.language.translate('tasks.toast.rejected', { number: task.number }), 'info');
-  }
-
-  /** View / task number: the task module is outside this task. */
-  protected notAvailable(): void {
-    this.toast.show(this.language.translate('login.featureNotAvailable'), 'info');
   }
 
   // ---- Row menu (⋮) ----
@@ -208,27 +221,24 @@ export class MyTasksComponent {
 
   protected copyNumber(task: TaskItem): void {
     this.closeRowMenu();
-    const done = () => this.toast.show(this.language.translate('tasks.toast.numberCopied'), 'success');
-    const fail = () => this.toast.show(this.language.translate('requests.details.copyFailed'), 'danger');
-    if (!navigator.clipboard) {
-      fail();
-      return;
-    }
-    navigator.clipboard.writeText(task.number).then(done, fail);
+    this.clipboard.copy(task.number, 'tasks.toast.numberCopied');
   }
 
+  /** Sets the task back to "in progress" from its row menu. */
   protected markInProgress(task: TaskItem): void {
     this.closeRowMenu();
     this.data.setTaskStatus(task.id, 'inProgress');
     this.toast.show(this.language.translate('tasks.toast.inProgress', { number: task.number }), 'info');
   }
 
+  /** Delete needs confirmation, so this only opens the dialog. */
   protected askDelete(task: TaskItem): void {
     this.rowMenu.set(null);
     this.pendingDelete.set(task);
     this.focusDialog();
   }
 
+  /** Deletes the task in the open confirmation dialog and unticks it. */
   protected confirmDelete(): void {
     const task = this.pendingDelete();
     if (!task) return;

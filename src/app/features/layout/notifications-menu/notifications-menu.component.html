@@ -17,6 +17,7 @@
   @if (open()) {
     <!-- ===================== PANEL ===================== -->
     <section class="notif-panel" role="dialog" [attr.aria-label]="'notifications.title' | translate">
+      <!-- Header: title, All / Unread filter, and "Mark all as read" (disabled when nothing is unread) -->
       <header class="notif-header">
         <div class="d-flex align-items-center gap-2">
           <h2 class="notif-title">{{ 'notifications.title' | translate }}</h2>

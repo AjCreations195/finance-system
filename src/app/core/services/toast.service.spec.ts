@@ -50,4 +50,10 @@ describe('ToastService', () => {
     service.dismiss(9999);
     expect(service.toasts().length).toBe(1);
   });
+
+  it('unavailable() shows the shared info notice', () => {
+    service.unavailable();
+    expect(service.toasts().at(-1)?.type).toBe('info');
+  });
 });
+

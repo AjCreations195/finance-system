@@ -47,14 +47,19 @@ export class SidebarComponent {
   readonly open = input(false);
   readonly toggleCollapse = output<void>();
 
+  /** The menu search box (focused by Ctrl/⌘ + K). */
   private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
+  /** The menu list; the highlight is positioned relative to it. */
   private readonly menu = viewChild.required<ElementRef<HTMLElement>>('menu');
+  /** The sliding highlight bar behind the active link. */
   private readonly indicator = viewChild.required<ElementRef<HTMLElement>>('indicator');
   /** The highlight is placed without animating on its first position. */
   private indicatorPlaced = false;
+  /** Set on destroy, so deferred highlight updates don't touch a removed element. */
   private destroyed = false;
 
   // ---- Menu data ----
+  /** Items pinned to the bottom of the sidebar (support, settings). */
   protected readonly footerItems = NAV_FOOTER;
 
   /** Text typed into the menu search box. */
@@ -164,7 +169,7 @@ export class SidebarComponent {
   /** Leaf without a route = module outside this task. */
   protected notAvailable(node: NavNode): void {
     if (node.disabled) return;
-    this.toast.show(this.language.translate('login.featureNotAvailable'), 'info');
+    this.toast.unavailable();
   }
 
   /** Ctrl / ⌘ + K focuses the menu search, as hinted in the design. */

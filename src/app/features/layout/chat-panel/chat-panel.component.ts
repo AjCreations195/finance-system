@@ -5,6 +5,7 @@ import { ChatToolName } from '../../../core/models/chat-tools';
 import { ChatService } from '../../../core/services/chat.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { PurchaseRequestService } from '../../../core/services/purchase-request.service';
+import { ClipboardService } from '../../../core/services/clipboard.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { WorkspaceTabsService } from '../../../core/services/workspace-tabs.service';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
@@ -59,15 +60,22 @@ export class ChatPanelComponent {
   private readonly requests = inject(PurchaseRequestService);
   private readonly workspace = inject(WorkspaceTabsService);
   private readonly toast = inject(ToastService);
+  private readonly clipboard = inject(ClipboardService);
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
 
+  /** Starter questions, as translation keys. */
   protected readonly suggestions = SUGGESTIONS;
+  /** Length limit of the message box, shown as a counter near the limit. */
   protected readonly maxChars = CHAT_LIMITS.maxChars;
+  /** Icon per tool, for the "tools used" line above a reply. */
   protected readonly toolIcons = TOOL_ICONS;
+  /** Text typed in the message box, not sent yet. */
   protected readonly draft = signal('');
 
+  /** The message box (focused when the panel opens). */
   private readonly input = viewChild<ElementRef<HTMLTextAreaElement>>('input');
+  /** The scrollable message list (kept scrolled to the newest message). */
   private readonly log = viewChild<ElementRef<HTMLElement>>('log');
 
   constructor() {
@@ -89,6 +97,7 @@ export class ChatPanelComponent {
     });
   }
 
+  /** Sends the given text (or the draft) unless it is empty or a reply is still streaming; then clears the box. */
   protected send(text = this.draft()): void {
     if (!text.trim() || this.chat.busy()) return;
     void this.chat.send(text);
@@ -128,12 +137,8 @@ export class ChatPanelComponent {
     if (!this.document.defaultView?.matchMedia('(min-width: 992px)').matches) this.chat.close();
   }
 
+  /** Copies one answer to the clipboard. */
   protected copy(text: string): void {
-    const fail = () => this.toast.show(this.language.translate('requests.details.copyFailed'), 'danger');
-    if (!navigator.clipboard) {
-      fail();
-      return;
-    }
-    navigator.clipboard.writeText(text).then(() => this.toast.show(this.language.translate('chat.copied'), 'success'), fail);
+    this.clipboard.copy(text, 'chat.copied');
   }
 }

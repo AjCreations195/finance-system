@@ -34,10 +34,13 @@ export class StatCarouselComponent {
   readonly statSelect = output<string>();
 
   private readonly language = inject(LanguageService);
+  /** The scrollable row of cards. */
   private readonly track = viewChild.required<ElementRef<HTMLElement>>('track');
 
-  /** "50 million riyals" / "50 مليون ريال" */
-  /** Arrow property, so the count-up directive can call it while it animates. */
+  /**
+   * Formats an amount as "50 million riyals" / "50 مليون ريال".
+   * Arrow property, so the count-up directive can call it while it animates.
+   */
   protected readonly formatAmount = (amount: number): string => {
     const compact = new Intl.NumberFormat(this.language.locale(), { notation: 'compact', compactDisplay: 'long' }).format(amount);
     return `${compact} ${this.language.translate('common.currency')}`;

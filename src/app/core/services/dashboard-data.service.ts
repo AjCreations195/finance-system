@@ -60,11 +60,13 @@ export class DashboardDataService {
   // ------------------------------------------------------------------
   // Recent activities
   // ------------------------------------------------------------------
+  /** Recent activity feed (mock), newest first as the widget shows it. */
   readonly activities = signal<ActivityItem[]>(generateActivities());
 
   // ------------------------------------------------------------------
   // Procurement status: base counts, scaled by category / month
   // ------------------------------------------------------------------
+  /** Category filter options of the procurement widget ('all' = no filter). */
   readonly procurementCategories = ['all', 'itEquipment', 'furniture', 'vehicles', 'services'] as const;
 
   /** Breakdown for a category + month (0 = this month, 1 = last month …; deterministic mock variation). */
@@ -153,7 +155,8 @@ export class DashboardDataService {
   // ------------------------------------------------------------------
   // Budget items: stacked bars per month, per year
   // ------------------------------------------------------------------
-  readonly budgetYears = [2026, 2025, 2024];
+  /** Years the budget chart's year selector offers. */
+  readonly budgetYears = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
   budgetItems(year: number): BudgetMonth[] {
     // Base values approximate the design; other years vary slightly.
@@ -189,12 +192,15 @@ export class DashboardDataService {
     },
   ]);
   readonly notifications = this._notifications.asReadonly();
+  /** Number shown on the bell badge. */
   readonly unreadCount = computed(() => this._notifications().filter((n) => n.unread).length);
 
+  /** Marks every notification as read (bell menu → Mark all as read). */
   markAllRead(): void {
     this._notifications.update((list) => list.map((n) => ({ ...n, unread: false })));
   }
 
+  /** Removes one notification from the bell menu. */
   dismissNotification(id: number): void {
     this._notifications.update((list) => list.filter((n) => n.id !== id));
   }
@@ -251,12 +257,14 @@ function t(en: string, ar: string): LocalizedText {
   return { en, ar };
 }
 
+/** ISO date-time `days` days before now (mock data). */
 function daysAgo(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() - days);
   return d.toISOString();
 }
 
+/** ISO date-time `minutes` minutes before now (mock data). */
 function minutesAgo(minutes: number): string {
   return new Date(Date.now() - minutes * 60_000).toISOString();
 }
@@ -270,6 +278,10 @@ const PEOPLE: Person[] = [
   { name: t('Haifa Hatem Hijab', 'هيفاء حاتم حجاب'), email: 'haifahatem@moi.gov.qa' },
 ];
 
+/**
+ * Task descriptions for the mock "My tasks" data. generateTasks() cycles
+ * through them by index, so a task's description repeats every 10 tasks.
+ */
 const TASK_DESCRIPTIONS: LocalizedText[] = [
   t('Supply of computers', 'توريد أجهزة حواسيب'),
   t('License renewal', 'تجديد تراخيص'),
@@ -283,6 +295,7 @@ const TASK_DESCRIPTIONS: LocalizedText[] = [
   t('Training program fees', 'رسوم برنامج تدريبي'),
 ];
 
+/** Statuses handed out in turn when generating mock tasks. */
 const TASK_STATUS_CYCLE: TaskStatus[] = ['completed', 'inProgress', 'executed', 'review', 'sent'];
 
 /** Build `count` tasks; the first five match the design rows. */

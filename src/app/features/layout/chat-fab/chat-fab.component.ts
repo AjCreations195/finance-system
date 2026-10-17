@@ -19,9 +19,12 @@ import { CHAT_TOGGLE_ID } from '../chat-panel/chat-panel.component';
   styleUrl: './chat-fab.component.scss',
 })
 export class ChatFabComponent {
+  /** Shared chat state; the icon reads isOpen from it. */
   protected readonly chat = inject(ChatService);
+  /** DOM id of this button, so the panel can return focus to it on close. */
   protected readonly toggleId = CHAT_TOGGLE_ID;
 
+  /** Opens or closes the chat panel. */
   protected toggle(): void {
     this.chat.toggle();
   }

@@ -9,6 +9,7 @@ import { LanguageService } from '../../core/services/language.service';
  */
 const formatterCache = new Map<string, Intl.DateTimeFormat | Intl.NumberFormat>();
 
+/** Returns the cached formatter for `key`, creating it with `create` the first time. */
 function cached<T extends Intl.DateTimeFormat | Intl.NumberFormat>(key: string, create: () => T): T {
   if (!formatterCache.has(key)) formatterCache.set(key, create());
   return formatterCache.get(key) as T;
@@ -30,6 +31,7 @@ const DATE_STYLES: Record<string, Intl.DateTimeFormatOptions> = {
 export class LocalDatePipe implements PipeTransform {
   private readonly language = inject(LanguageService);
 
+  /** Formats the date with one of the DATE_STYLES presets; empty for a missing value. */
   transform(value: string | Date | null | undefined, style: keyof typeof DATE_STYLES = 'medium'): string {
     if (!value) return '';
     // Date-only strings ("2026-10-12") are parsed as LOCAL dates to avoid timezone day-shifts.
@@ -41,13 +43,14 @@ export class LocalDatePipe implements PipeTransform {
 
 /**
  * Localized currency amount (uses the app-wide CURRENCY).
- * @example {{ 12500 | money }}            → "SAR 12,500.00"
- * @example {{ 12500 | money: 'compact' }} → "SAR 12.5K"
+ * @example {{ 12500 | money }}            → "QAR 12,500.00"
+ * @example {{ 12500 | money: 'compact' }} → "QAR 12.5K"
  */
 @Pipe({ name: 'money', pure: false })
 export class MoneyPipe implements PipeTransform {
   private readonly language = inject(LanguageService);
 
+  /** Formats the amount in the active locale; empty for null or undefined. */
   transform(value: number | null | undefined, mode: 'full' | 'compact' = 'full'): string {
     if (value == null) return '';
     return formatMoney(value, this.language.locale(), mode);

@@ -12,13 +12,17 @@ export interface ToolOutcome {
   isError: boolean;
 }
 
+/** One of the stage groups (fullyCompleted, partiallyCompleted, inProgress, rejected). */
 type Stage = (typeof TOOL_STAGES)[number];
+/** The raw input object Claude sent for a tool call, before validation. */
 type Input = Record<string, unknown>;
 
 /** A bad tool input; the message goes back to Claude so it can correct the call. */
 class ToolInputError extends Error {}
 
+/** Validated filters shared by search_purchase_requests and spending_breakdown (see readFilters). */
 interface Filters {
+  /** Free text, matched against the request number, description, budget item and creator. */
   query?: string;
   statuses?: RequestStatus[];
   stage?: Stage;
@@ -29,6 +33,7 @@ interface Filters {
   dateTo?: string;
 }
 
+/** Requests returned by search_purchase_requests when the input gives no limit. */
 const DEFAULT_LIMIT = 10;
 
 /**
@@ -48,6 +53,10 @@ export class ChatToolsService {
   private readonly language = inject(LanguageService);
   private readonly workspace = inject(WorkspaceTabsService);
 
+  /**
+   * Entry point for one tool call. Never throws: a bad input or an unexpected
+   * failure becomes an error outcome, so Claude gets a result either way.
+   */
   run(name: string, input: unknown): ToolOutcome {
     try {
       const args = input && typeof input === 'object' && !Array.isArray(input) ? (input as Input) : {};
@@ -58,6 +67,7 @@ export class ChatToolsService {
     }
   }
 
+  /** Dispatches to the handler for `name`; unknown names are a bad call. */
   private call(name: string, args: Input): unknown {
     switch (name as ChatToolName) {
       case 'get_overview':
@@ -82,6 +92,10 @@ export class ChatToolsService {
   // Tools
   // ------------------------------------------------------------------
 
+  /**
+   * get_overview: budget figures, the data's date range, and totals per stage
+   * and per status. "Latest month" is the month of the newest request.
+   */
   private overview() {
     const list = this.requests.requests();
     const days = list.map((r) => localDay(r.date)).sort();
@@ -106,6 +120,7 @@ export class ChatToolsService {
     };
   }
 
+  /** search_purchase_requests: filters the requests, sorts them, and returns the top `limit` plus the totals. */
   private search(args: Input) {
     const sort = optionalEnum(args, 'sort', TOOL_SORTS) ?? 'newest';
     const limit = optionalInt(args, 'limit', 1, 25) ?? DEFAULT_LIMIT;
@@ -132,6 +147,7 @@ export class ChatToolsService {
     };
   }
 
+  /** spending_breakdown: groups the filtered requests by one field and totals each group. Month groups are sorted by date; the others by amount. */
   private breakdown(args: Input) {
     const groupBy = optionalEnum(args, 'group_by', TOOL_GROUPINGS);
     if (!groupBy) throw new ToolInputError(`group_by is required: one of ${TOOL_GROUPINGS.join(', ')}.`);
@@ -161,6 +177,7 @@ export class ChatToolsService {
     return { group_by: groupBy, total_requests: matches.length, total_amount: sum(matches), groups: list };
   }
 
+  /** get_purchase_request: the table row plus the details the side panel shows (workflow, activity, attachments). */
   private details(request: PurchaseRequest) {
     const d = this.requests.getDetails(request);
     const current = d.workflow.find((s) => s.state === 'current');
@@ -193,6 +210,7 @@ export class ChatToolsService {
   // Helpers
   // ------------------------------------------------------------------
 
+  /** Returns the requests that match every filter that was given. */
   private filter(f: Filters): PurchaseRequest[] {
     const q = f.query?.toLowerCase();
     const budget = f.budgetItem?.toLowerCase();
@@ -221,6 +239,10 @@ export class ChatToolsService {
     return text.en.toLowerCase().includes(term) || text.ar.toLowerCase().includes(term);
   }
 
+  /**
+   * Finds one request by full number, or by its last digits ("0042" or "42").
+   * Throws a ToolInputError when nothing matches, so Claude can try again.
+   */
   private findByNumber(args: Input): PurchaseRequest {
     const number = optionalString(args, 'number');
     if (!number) throw new ToolInputError('number is required, e.g. "BDRS/2016/019/0042" or "0042".');
@@ -233,6 +255,7 @@ export class ChatToolsService {
     return request;
   }
 
+  /** The compact form of a request that every tool returns. */
   private row(r: PurchaseRequest) {
     return {
       number: r.number,
@@ -247,11 +270,13 @@ export class ChatToolsService {
     };
   }
 
+  /** The text in the interface language, so results match what the user reads. */
   private text(t: LocalizedText): string {
     return t[this.language.lang()];
   }
 }
 
+/** Validates the filter inputs shared by the search and breakdown tools. Throws on bad input. */
 function readFilters(args: Input): Filters {
   const from = optionalDate(args, 'date_from');
   const to = optionalDate(args, 'date_to');
@@ -268,14 +293,17 @@ function readFilters(args: Input): Filters {
   };
 }
 
+/** The stage group a status belongs to (the same grouping as the purchase requests tabs). */
 function stageOf(status: RequestStatus): Stage {
   return TOOL_STAGES.find((s) => TAB_STATUSES[s].includes(status))!;
 }
 
+/** Total amount (QAR) of a list of requests. */
 function sum(list: PurchaseRequest[]): number {
   return list.reduce((total, r) => total + r.amount, 0);
 }
 
+/** Count and total amount of a list of requests, in the shape the tools return. */
 function totals(list: PurchaseRequest[]) {
   return { count: list.length, total_amount: sum(list) };
 }
@@ -288,16 +316,28 @@ function localDay(iso: string): string {
 
 // --- Input validation: absent or null means "not given"; anything else must be valid.
 
+/**
+ * True when the input has a value for `key`. A missing key, or one set to
+ * null, counts as "not given", so the optional helpers below return undefined.
+ */
 function given(args: Input, key: string): boolean {
   return args[key] !== undefined && args[key] !== null;
 }
 
+/**
+ * Reads an optional text input. Returns the trimmed text, or undefined when it
+ * is absent or blank. Throws a ToolInputError if the value is not a string.
+ */
 function optionalString(args: Input, key: string): string | undefined {
   if (!given(args, key)) return undefined;
   if (typeof args[key] !== 'string') throw new ToolInputError(`${key} must be a string.`);
   return (args[key] as string).trim() || undefined;
 }
 
+/**
+ * Reads an optional number, such as an amount in QAR. It must be a finite
+ * number of 0 or more; anything else throws a ToolInputError.
+ */
 function optionalNumber(args: Input, key: string): number | undefined {
   if (!given(args, key)) return undefined;
   const value = args[key];
@@ -305,6 +345,10 @@ function optionalNumber(args: Input, key: string): number | undefined {
   return value;
 }
 
+/**
+ * Reads an optional whole number within [min, max], such as a result limit.
+ * Builds on optionalNumber, so the same basic checks apply first.
+ */
 function optionalInt(args: Input, key: string, min: number, max: number): number | undefined {
   const value = optionalNumber(args, key);
   if (value !== undefined && (!Number.isInteger(value) || value < min || value > max)) {
@@ -313,6 +357,10 @@ function optionalInt(args: Input, key: string, min: number, max: number): number
   return value;
 }
 
+/**
+ * Reads an optional date in the YYYY-MM-DD form. It checks the shape and that
+ * Date.parse accepts the string; a wrong format throws a ToolInputError.
+ */
 function optionalDate(args: Input, key: string): string | undefined {
   const value = optionalString(args, key);
   if (value !== undefined && (!/^\d{4}-\d{2}-\d{2}$/.test(value) || isNaN(Date.parse(value)))) {
@@ -321,12 +369,22 @@ function optionalDate(args: Input, key: string): string | undefined {
   return value;
 }
 
+/**
+ * Reads an optional single choice from a fixed list, such as a sort order or
+ * a stage. The value must be one of `values`; anything else throws a ToolInputError
+ * that lists the allowed choices, so Claude can correct the call.
+ */
 function optionalEnum<T extends string>(args: Input, key: string, values: readonly T[]): T | undefined {
   if (!given(args, key)) return undefined;
   if (!values.includes(args[key] as T)) throw new ToolInputError(`${key} must be one of: ${values.join(', ')}.`);
   return args[key] as T;
 }
 
+/**
+ * Reads an optional list of choices from a fixed list, such as several
+ * statuses. Must be an array whose every item is one of `values` (an empty
+ * array is accepted, and means no filter). Otherwise throws a ToolInputError.
+ */
 function optionalEnumArray<T extends string>(args: Input, key: string, values: readonly T[]): T[] | undefined {
   if (!given(args, key)) return undefined;
   const list = args[key];

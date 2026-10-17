@@ -547,6 +547,11 @@ body {
   app-icon[data-icon='eye'] {
     font-size: 1.2em;
   }
+
+  /* return.svg draws its arrow inside a smaller box than approve/reject: scale it up to match */
+  app-icon[data-icon='return'] {
+    font-size: 1.1em;
+  }
 }
 
 /* Footer row under a table: "Page 1 of 10" + Previous / Next */

@@ -45,6 +45,7 @@ interface TabTip {
   count?: string;
 }
 
+/** One breadcrumb item. `link` is set on items that go back to a page. */
 interface Crumb {
   label: string;
   link?: string;
@@ -126,6 +127,7 @@ export class WorkspaceTabsComponent {
     () => this.requests.requests().filter((r) => TAB_STATUSES.inProgress.includes(r.status)).length,
   );
 
+  /** Everything the template draws for each open tab, built from the tabs model and the request data. */
   protected readonly views = computed<TabView[]>(() => {
     const activeId = this.workspace.activeId();
     return this.workspace.tabs().map((tab) => {
@@ -232,6 +234,7 @@ export class WorkspaceTabsComponent {
       .slice(0, SEARCH_RESULTS);
   });
 
+  /** CSS colour of a request's status badge (for the quick-open results). */
   protected readonly badgeOf = (r: PurchaseRequest) => `var(--fs-badge-${STATUS_BADGE[r.status]})`;
 
   /** Element to focus again when a menu closes. */
@@ -263,11 +266,13 @@ export class WorkspaceTabsComponent {
   // Tab actions
   // ------------------------------------------------------------------
 
+  /** Switches to a tab; tabs without a page yet show the "not available" notice. */
   protected select(view: TabView): void {
     this.hideTip(0);
-    if (!this.workspace.activate(view.tab)) this.openUnavailable();
+    if (!this.workspace.activate(view.tab)) this.toast.unavailable();
   }
 
+  /** Closes a tab (not the pinned Dashboard). If focus was in the strip, it moves to the neighbouring tab. */
   protected close(view: TabView, event?: Event): void {
     event?.preventDefault();
     event?.stopPropagation();
@@ -305,14 +310,12 @@ export class WorkspaceTabsComponent {
     }
   }
 
-  protected openUnavailable(): void {
-    this.toast.show(this.language.translate('login.featureNotAvailable'), 'info');
-  }
 
   // ------------------------------------------------------------------
   // Context menu (right-click, Shift+F10, ContextMenu key)
   // ------------------------------------------------------------------
 
+  /** Opens the tab's context menu at the pointer, or under the tab when opened from the keyboard. */
   protected openTabMenu(view: TabView, event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
@@ -329,9 +332,10 @@ export class WorkspaceTabsComponent {
     this.focusFirstItem('.tab-menu');
   }
 
+  /** The tab the context menu is for. */
   protected readonly menuTab = computed(() => this.views().find((v) => v.tab.id === this.tabMenu()?.id) ?? null);
 
-  /** Something to close after the menu's tab (non-pinned). */
+  /** Whether any non-pinned tab sits to the right of the menu's tab (enables "Close tabs to the right"). */
   protected readonly canCloseAfter = computed(() => {
     const id = this.tabMenu()?.id;
     const views = this.views();
@@ -339,8 +343,10 @@ export class WorkspaceTabsComponent {
     return views.slice(index + 1).some((v) => !v.pinned);
   });
 
+  /** Whether any other non-pinned tab is open (enables "Close other tabs"). */
   protected readonly canCloseOthers = computed(() => this.views().some((v) => !v.pinned && v.tab.id !== this.tabMenu()?.id));
 
+  /** Runs one item of the context menu, then closes the menu and returns focus to the strip. */
   protected menuAction(action: 'close' | 'others' | 'after' | 'all' | 'reopen'): void {
     const view = this.menuTab();
     this.closeMenus(false);
@@ -357,6 +363,7 @@ export class WorkspaceTabsComponent {
   // "+" quick-open menu
   // ------------------------------------------------------------------
 
+  /** Opens or closes the "+" menu below its button, and focuses its search box when opened. */
   protected toggleAddMenu(event: MouseEvent): void {
     event.stopPropagation();
     if (this.addMenu()) return this.closeMenus();
@@ -371,6 +378,7 @@ export class WorkspaceTabsComponent {
     afterNextRender(() => this.host.querySelector<HTMLInputElement>('.add-menu input')?.focus(), { injector: this.injector });
   }
 
+  /** Opens a request in its own tab, closing the menu first. */
   protected openRequest(request: PurchaseRequest): void {
     this.closeMenus(false);
     this.workspace.openRequest(request.id);
@@ -382,11 +390,13 @@ export class WorkspaceTabsComponent {
     if (first) this.openRequest(first);
   }
 
+  /** Adds a module's tab from the "+" menu, or shows the "not available" notice if the page isn't built. */
   protected openModule(id: string): void {
     this.closeMenus(false);
-    if (!this.workspace.openModule(id)) this.openUnavailable();
+    if (!this.workspace.openModule(id)) this.toast.unavailable();
   }
 
+  /** Reopens one recently closed tab from the "+" menu. */
   protected reopen(tab: WorkspaceTab): void {
     this.closeMenus(false);
     this.workspace.reopen(tab.id);
@@ -438,7 +448,9 @@ export class WorkspaceTabsComponent {
     if (id === ADD_TIP) return { heading: this.language.translate('layout.tabs.add'), ltr: false };
     return this.views().find((v) => v.tab.id === id)?.tip ?? null;
   });
+  /** Tooltip id used for the "+" button. */
   protected readonly addTip = ADD_TIP;
+  /** Pending hover timer (see showTip / hideTip). */
   private tipTimer: ReturnType<typeof setTimeout> | undefined;
 
   /** Hover: wait a moment (no flicker when sweeping across the strip); once one is open, others follow at once. */
@@ -455,6 +467,7 @@ export class WorkspaceTabsComponent {
     if ((event.target as HTMLElement).matches(':focus-visible')) this.showTip(id, true);
   }
 
+  /** Hides the tooltip after `delay` ms (or at once with 0). The delay lets the pointer move onto it. */
   hideTip(delay = TIP_GRACE): void {
     clearTimeout(this.tipTimer);
     if (!delay) this.tip.set(null);
@@ -533,6 +546,7 @@ export class WorkspaceTabsComponent {
     });
   }
 
+  /** The page a URL shows, used to tell whether a navigation changes page or only the request in the panel. */
   private pageFor(url: string): string | null {
     const tab = this.workspace.tabFor(url);
     return tab ? pageOf(tab) : null;
@@ -564,6 +578,7 @@ export class WorkspaceTabsComponent {
     );
   }
 
+  /** Focuses the first enabled menu item inside `selector` once it is drawn. */
   private focusFirstItem(selector: string): void {
     afterNextRender(() => this.host.querySelector<HTMLElement>(`${selector} [role="menuitem"]:not(:disabled)`)?.focus(), {
       injector: this.injector,

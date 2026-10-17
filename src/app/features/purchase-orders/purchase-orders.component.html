@@ -15,10 +15,10 @@
       <p class="page-subtitle">{{ 'requests.subtitle' | translate }}</p>
     </div>
     <div class="d-flex align-items-center gap-2">
-      <button type="button" class="btn btn-primary btn-create" (click)="notAvailable()">
+      <button type="button" class="btn btn-primary btn-create" (click)="toast.unavailable()">
         <app-icon name="add" /> {{ 'requests.create' | translate }}
       </button>
-      <button type="button" class="btn-fs px-2" (click)="notAvailable()" [attr.aria-label]="'requests.moreActions' | translate">
+      <button type="button" class="btn-fs px-2" (click)="toast.unavailable()" [attr.aria-label]="'requests.moreActions' | translate">
         <app-icon name="more-vertical" />
       </button>
     </div>
@@ -149,7 +149,7 @@
 <!-- ===================== 3. STICKY ACTION BAR ===================== -->
 <footer class="action-bar">
   <div class="d-flex flex-wrap align-items-center gap-2">
-    <button type="button" class="btn btn-primary btn-create" (click)="notAvailable()">
+    <button type="button" class="btn btn-primary btn-create" (click)="toast.unavailable()">
       <app-icon name="add" /> {{ 'requests.createFull' | translate }}
     </button>
     <button type="button" class="btn-fs" (click)="sendSelected()">
@@ -177,7 +177,7 @@
     <!-- Phones: icon only (the label comes back from sm up), so all the buttons fit in two rows -->
     <button type="button" class="btn-fs" (click)="print()" [attr.aria-label]="'requests.print' | translate"><app-icon name="print" /> <span class="d-none d-sm-inline">{{ 'requests.print' | translate }}</span></button>
     <button type="button" class="btn-fs" (click)="back()" [attr.aria-label]="'requests.back' | translate"><app-icon name="return" /> <span class="d-none d-sm-inline">{{ 'requests.back' | translate }}</span></button>
-    <button type="button" class="btn-fs px-2" (click)="notAvailable()" [attr.aria-label]="'requests.moreActions' | translate">
+    <button type="button" class="btn-fs px-2" (click)="toast.unavailable()" [attr.aria-label]="'requests.moreActions' | translate">
       <app-icon name="more-vertical" />
     </button>
   </div>

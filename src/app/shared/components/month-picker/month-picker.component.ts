@@ -177,6 +177,7 @@ export class MonthPickerComponent {
   /** Translation key naming the control, for screen readers. */
   readonly ariaLabel = input('');
 
+  /** Whether the month panel is visible. */
   protected readonly open = signal(false);
   /** Year shown in the panel (can differ from the selected year while browsing). */
   protected readonly viewYear = signal(this.value().year);
@@ -208,21 +209,25 @@ export class MonthPickerComponent {
     });
   });
 
+  /** Opens or closes the panel. Opening starts on the year of the selected month. */
   protected toggle(): void {
     if (!this.open()) this.viewYear.set(this.value().year);
     this.open.set(!this.open());
   }
 
+  /** Selects a month in the year currently shown, then closes the panel. */
   protected select(month: number): void {
     this.value.set({ year: this.viewYear(), month });
     this.open.set(false);
   }
 
+  /** The "This month" link: selects the current month and closes the panel. */
   protected selectThisMonth(): void {
     this.value.set(currentYearMonth());
     this.open.set(false);
   }
 
+  /** Closes the panel when a click lands outside this component. */
   protected onDocumentClick(event: MouseEvent): void {
     if (this.open() && !this.host.nativeElement.contains(event.target as Node)) this.open.set(false);
   }

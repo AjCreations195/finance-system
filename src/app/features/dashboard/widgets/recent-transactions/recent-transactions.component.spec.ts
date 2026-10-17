@@ -57,10 +57,10 @@ describe('RecentTransactionsComponent', () => {
     const item = (label: string) =>
       Array.from(el().querySelectorAll<HTMLElement>('.row-menu [role="menuitem"]')).find((b) => b.textContent!.includes(label))!;
 
-    it('opens with three actions and closes on an outside click', async () => {
+    it('opens with two actions and closes on an outside click', async () => {
       await openMenu(2);
       expect(el().querySelector('tbody tr:nth-child(2) .row-actions button')!.getAttribute('aria-expanded')).toBe('true');
-      expect(el().querySelectorAll('.row-menu [role="menuitem"]').length).toBe(3);
+      expect(el().querySelectorAll('.row-menu [role="menuitem"]').length).toBe(2);
 
       await click(document.body);
       expect(el().querySelector('.row-menu')).toBeNull();
@@ -73,12 +73,6 @@ describe('RecentTransactionsComponent', () => {
       await click(item('Copy transaction number'));
       await Promise.resolve();
       expect(writeText).toHaveBeenCalledWith('BDRS/2026/BR/8008');
-    });
-
-    it('Email employee is a mailto link to that employee', async () => {
-      await openMenu(1);
-      const link = item('Email employee') as HTMLAnchorElement;
-      expect(link.getAttribute('href')).toMatch(/^mailto:\S+@\S+/);
     });
 
     it('Hide from recent asks first, then removes the row', async () => {

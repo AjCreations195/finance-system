@@ -116,6 +116,8 @@ const ICONS: Record<ToastType, string> = {
   `,
 })
 export class ToastContainerComponent {
+  /** Source of the toasts to draw and of dismiss(). */
   protected readonly toastService = inject(ToastService);
+  /** Icon per toast type, used by the template. */
   protected readonly icons = ICONS;
 }

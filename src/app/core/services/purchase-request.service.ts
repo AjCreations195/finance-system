@@ -24,6 +24,7 @@ export const ANNUAL_BUDGET = 50_000_000;
 @Injectable({ providedIn: 'root' })
 export class PurchaseRequestService {
   private readonly _requests = signal<PurchaseRequest[]>(generateRequests(130));
+  /** All purchase requests, read-only for the components. */
   readonly requests = this._requests.asReadonly();
 
   /**
@@ -33,6 +34,7 @@ export class PurchaseRequestService {
    */
   readonly stats = computed(() => buildStats(this._requests()));
 
+  /** Finds a request by its numeric id, or undefined if it was deleted or never existed. */
   getById(id: number): PurchaseRequest | undefined {
     return this._requests().find((r) => r.id === id);
   }
@@ -139,8 +141,10 @@ function buildStats(list: PurchaseRequest[]): FinancialStat[] {
 // Mock data: the first 13 rows reproduce the Figma table exactly
 // ===========================================================================
 
+/** Shorthand for a LocalizedText. */
 const t = (en: string, ar: string): LocalizedText => ({ en, ar });
 
+/** Budget item names; index k matches row k of the design (see generateRequests). */
 const BUDGET_ITEMS: LocalizedText[] = [
   t('Miscellaneous equipment', 'أجهزة ومعدات متنوعة'),
   t('Computer software costs', 'تكاليف برامج الحاسبات الآلية'),
@@ -157,6 +161,7 @@ const BUDGET_ITEMS: LocalizedText[] = [
   t('Information & communication technology', 'تقنية المعلومات والاتصالات'),
 ];
 
+/** Request descriptions, cycled through by generateRequests. */
 const DESCRIPTIONS: LocalizedText[] = [
   t('Supply of modem devices', 'توريد أجهزة مودم'),
   t('License renewal', 'تجديد تراخيص'),
@@ -173,6 +178,7 @@ const DESCRIPTIONS: LocalizedText[] = [
   t('Innovation & development workshops', 'تنظيم ورش عمل للابتكار والتطوير'),
 ];
 
+/** People who create requests; row k of the design uses CREATORS[k]. */
 const CREATORS: Person[] = [
   { name: t('Fares Osama Tariq', 'فارس أسامة طارق'), email: 'farestarek@moi.gov.qa' },
   { name: t('Hamed Hadi Zaeem', 'حامد هادي زعيم'), email: 'hamedzaiim@moi.gov.qa' },
@@ -195,10 +201,27 @@ const STATUSES: RequestStatus[] = [
   'completed', 'inCorrection', 'suspended', 'verified', 'notExecutable', 'closed', 'delivered',
 ];
 
-/** Notes count and day of January from the design rows. */
+/** Notes count and day of the month from the design rows. */
 const NOTES = [5, 2, 8, 11, 14, 20, 23, 31, 37, 42, 48, 53, 60];
-const JAN_DAYS = [22, 20, 24, 26, 18, 28, 16, 30, 14, 12, 8, 6, 4];
+const ROW_DAYS = [22, 20, 24, 26, 18, 28, 16, 30, 14, 12, 8, 6, 4];
 
+/**
+ * Date of a design row in the month `cycle` months before the current one.
+ * A day that doesn't exist in that month (e.g. 30 in February) becomes the
+ * month's last day, so the date never rolls over into the next month.
+ */
+function rowDate(day: number, cycle: number): Date {
+  const now = new Date();
+  const month = new Date(now.getFullYear(), now.getMonth() - cycle, 1);
+  const lastDay = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+  return new Date(month.getFullYear(), month.getMonth(), Math.min(day, lastDay));
+}
+
+/**
+ * Builds `count` mock requests, deterministically (the same on every load).
+ * Row k = i % 13 picks the budget item, creator, note count and day from the
+ * design; cycle = i / 13 moves each later block of 13 back one month.
+ */
 function generateRequests(count: number): PurchaseRequest[] {
   return Array.from({ length: count }, (_, i) => {
     const k = i % 13; // position within the design's 13 rows
@@ -207,8 +230,8 @@ function generateRequests(count: number): PurchaseRequest[] {
       name: BUDGET_ITEMS[k],
       code: `14027-${1303139 + k}-${String(k).padStart(3, '0')}`,
     };
-    // Page 1 = January 2025 (design); later pages go back month by month.
-    const date = new Date(2025, -cycle, JAN_DAYS[k]);
+    // Page 1 = the current month (the design's rows, dated now); later pages go back month by month.
+    const date = rowDate(ROW_DAYS[k], cycle);
     return {
       id: i + 1,
       number: `BDRS/2016/019/${String(8 + i).padStart(4, '0')}`,
@@ -234,10 +257,15 @@ const MANAGER = t('Salim Abu Al-Haj', 'سليم أبو الحاج');
 const REVIEWER = t('Jassim Mohammed Hamed', 'جاسم محمد حامد');
 const PURCHASING = t('Purchasing department', 'إدارة المشتريات');
 
-const IN_APPROVAL: RequestStatus[] = ['pending', 'forReview', 'sent', 'inProgress', 'suspended'];
+// Status groups that decide each workflow step (see buildWorkflow).
+const IN_APPROVAL: RequestStatus[] =['pending', 'forReview', 'sent', 'inProgress', 'suspended'];
 const APPROVED: RequestStatus[] = ['accepted', 'completed', 'finished', 'closed', 'delivered'];
 const REJECTED: RequestStatus[] = ['rejected', 'notExecutable'];
 
+/**
+ * The approval timeline for the side panel: created → approval → (returned
+ * for correction) → accepted or rejected. Each step's state follows the status.
+ */
 function buildWorkflow(request: PurchaseRequest): WorkflowStep[] {
   const s = request.status;
   const steps: WorkflowStep[] = [{ key: 'created', state: 'done', person: request.creator.name }];
@@ -254,6 +282,7 @@ function buildWorkflow(request: PurchaseRequest): WorkflowStep[] {
   return steps;
 }
 
+/** Mock activity log for the side panel, timed relative to the request date. */
 function buildActivity(request: PurchaseRequest): ActivityEntry[] {
   const at = (hours: number) => new Date(new Date(request.date).getTime() + hours * 3_600_000).toISOString();
   return [
@@ -286,6 +315,7 @@ function buildActivity(request: PurchaseRequest): ActivityEntry[] {
   ];
 }
 
+/** Everything the side panel shows for a request, derived from its id so it is the same on every open. */
 function buildDetails(request: PurchaseRequest): PurchaseRequestDetails {
   const id = request.id;
   return {

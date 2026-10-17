@@ -143,22 +143,6 @@
     color: var(--fs-primary-text);
   }
 
-  /* The "/" hint sits just before the icon, and hides once the box is in use */
-  > .kbd-hint {
-    inset-inline-end: 2.625rem;
-    transition: opacity 0.15s ease;
-  }
-
-  &:focus-within > .kbd-hint,
-  &:has(input:not(:placeholder-shown)) > .kbd-hint {
-    opacity: 0;
-  }
-
-  /* Leave room for both the hint and the icon (overrides the shared .search-box rule) */
-  &:has(.kbd-hint) input {
-    padding-inline-end: 4.25rem;
-  }
-
   /* × button: at the end of the field, only while there is text */
   > .search-clear {
     position: absolute;
@@ -379,7 +363,7 @@
 }
 
 .user-name {
-  font-size: 0.875rem;
+  font-size: 0.975rem;
   font-weight: 600;
 }
 
@@ -473,21 +457,10 @@
   line-height: 1.3;
 }
 
-.profile-role {
-  display: inline-block;
-  margin-block: 0.25rem 0.375rem;
-  padding: 0.0625rem 0.5rem;
-  border-radius: 999px;
-  background: var(--fs-primary-soft);
-  color: var(--fs-primary-text);
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
 .profile-email {
   overflow: hidden;
   color: var(--fs-text-muted);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   text-overflow: ellipsis;
   white-space: nowrap;
   direction: ltr; /* emails read left to right, even in Arabic */
@@ -653,11 +626,6 @@
 
     > .search-clear {
       inset-inline-end: 0.4375rem;
-    }
-
-    /* The "/" hint is hidden on phones, so it needs no room (this beats the xl+ rule above) */
-    &:has(.kbd-hint) input {
-      padding-inline-end: 2.75rem;
     }
 
     /* The × button needs room too, and it is listed after the hint rule so it wins */

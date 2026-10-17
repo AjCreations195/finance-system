@@ -1,5 +1,6 @@
 import { Component, DestroyRef, Injector, afterNextRender, computed, inject, signal } from '@angular/core';
 import { ContractItem } from '../../../../core/models/dashboard.models';
+import { ClipboardService } from '../../../../core/services/clipboard.service';
 import { DashboardDataService } from '../../../../core/services/dashboard-data.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -77,7 +78,8 @@ const ROW_MENU_WIDTH = 224;
 export class ContractsComponent {
   protected readonly data = inject(DashboardDataService);
   private readonly language = inject(LanguageService);
-  private readonly toast = inject(ToastService);
+  protected readonly toast = inject(ToastService);
+  private readonly clipboard = inject(ClipboardService);
   private readonly injector = inject(Injector);
 
   /** Row "⋮" menu: which contract, and where (fixed position under the button). */
@@ -94,11 +96,16 @@ export class ContractsComponent {
     inject(DestroyRef).onDestroy(() => document.removeEventListener('scroll', closeMenu, { capture: true }));
   }
 
+  /** Search text (contract number or supplier name). */
   protected readonly search = signal('');
+  /** Progress range filter: 'all', 'low', 'mid' or 'high'. */
   protected readonly range = signal('all');
+  /** Column sort state (see TableSort). */
   protected readonly sort = new TableSort<SortKey>();
+  /** Sortable columns, in display order. */
   protected readonly columns: SortKey[] = ['number', 'supplier', 'date', 'progress'];
 
+  /** Options of the progress filter. */
   protected readonly rangeOptions: FilterOption[] = [
     { value: 'all', label: 'common.all' },
     { value: 'low', label: '0–33%' },
@@ -106,10 +113,12 @@ export class ContractsComponent {
     { value: 'high', label: '67–100%' },
   ];
 
+  /** The contracts after search, progress filter and sort: what the table shows. */
   protected readonly rows = computed(() => {
     const q = this.search().trim().toLowerCase();
     const lang = this.language.lang();
     const range = this.range();
+    /** Whether a progress value (0–100) is inside the selected range. */
     const inRange = (p: number): boolean => {
       switch (range) {
         case 'low':
@@ -140,11 +149,8 @@ export class ContractsComponent {
     return name.trim().charAt(0);
   }
 
-  protected notAvailable(): void {
-    this.toast.show(this.language.translate('login.featureNotAvailable'), 'info');
-  }
-
   // ---- Row menu (⋮) ----
+  /** Opens the ⋮ menu of a row, or closes it if that row's menu is already open. */
   protected openRowMenu(item: ContractItem, event: MouseEvent): void {
     event.stopPropagation();
     if (this.rowMenu()?.item.id === item.id) {
@@ -160,17 +166,13 @@ export class ContractsComponent {
     afterNextRender(() => document.querySelector<HTMLElement>('.row-menu [role="menuitem"]')?.focus(), { injector: this.injector });
   }
 
+  /** Copies the contract number and closes the row menu. */
   protected copyNumber(item: ContractItem): void {
     this.closeRowMenu();
-    const done = () => this.toast.show(this.language.translate('contracts.toast.numberCopied'), 'success');
-    const fail = () => this.toast.show(this.language.translate('requests.details.copyFailed'), 'danger');
-    if (!navigator.clipboard) {
-      fail();
-      return;
-    }
-    navigator.clipboard.writeText(item.number).then(done, fail);
+    this.clipboard.copy(item.number, 'contracts.toast.numberCopied');
   }
 
+  /** "Mark as completed" needs confirmation, so this only opens the dialog. */
   protected askComplete(item: ContractItem): void {
     this.rowMenu.set(null);
     this.pendingComplete.set(item);
@@ -185,6 +187,7 @@ export class ContractsComponent {
     this.toast.show(this.language.translate('contracts.toast.completed', { number: item.number }), 'success');
   }
 
+  /** Delete needs confirmation, so this only opens the dialog. */
   protected askDelete(item: ContractItem): void {
     this.rowMenu.set(null);
     this.pendingDelete.set(item);
@@ -200,6 +203,7 @@ export class ContractsComponent {
   }
 
   // ---- Closing layers ----
+  /** Closes the row menu when a click lands outside it. */
   protected onDocumentClick(event: MouseEvent): void {
     if (this.rowMenu() && !(event.target as HTMLElement).closest('.row-menu')) this.rowMenu.set(null);
   }
@@ -214,6 +218,7 @@ export class ContractsComponent {
     }
   }
 
+  /** Closes the row menu and gives focus back to its ⋮ button. */
   private closeRowMenu(): void {
     this.rowMenu.set(null);
     this.rowMenuTrigger?.focus();

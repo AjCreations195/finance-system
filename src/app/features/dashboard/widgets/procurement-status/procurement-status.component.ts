@@ -49,10 +49,12 @@ export class ProcurementStatusComponent {
   private readonly data = inject(DashboardDataService);
   private readonly language = inject(LanguageService);
 
+  /** Selected category ('all' = every category). */
   protected readonly category = signal('all');
   /** Selected month (any month up to the current one). */
   protected readonly month = signal<YearMonth>(currentYearMonth());
 
+  /** Options of the category dropdown, each with its icon. */
   protected readonly categoryOptions: FilterOption[] = this.data.procurementCategories.map((c) => ({
     value: c,
     label: `procurement.categories.${c}`,
@@ -68,13 +70,17 @@ export class ProcurementStatusComponent {
   /** States currently shown (all by default). */
   protected readonly states = signal<string[]>(this.stateOptions.map((o) => o.value));
 
-  /** Breakdown for the category + month, limited to the ticked states. */
+  /**
+   * Breakdown for the category + month, limited to the ticked states.
+   * The month is turned into "months back from now", which the mock data uses.
+   */
   private readonly breakdown = computed(() => {
     const shown = this.states();
     return this.data
       .procurementBreakdown(this.category(), monthsBetween(currentYearMonth(), this.month()))
       .filter((b) => shown.includes(b.state));
   });
+  /** Sum of the visible states: the number in the donut's centre. */
   protected readonly total = computed(() => this.breakdown().reduce((sum, b) => sum + b.count, 0));
 
   /** Grid order from the design: "all" goes second (new, all, shipping, …). */

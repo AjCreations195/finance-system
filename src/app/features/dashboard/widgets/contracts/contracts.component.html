@@ -1,4 +1,5 @@
 <app-dashboard-card title="contracts.title" icon="tasks">
+  <!-- Toolbar: progress-range filter and search box -->
   <div card-actions class="d-flex gap-2">
     <app-filter-menu [options]="rangeOptions" [(value)]="range" />
     <div class="search-box" style="flex: 0 1 13rem; min-width: 8rem">
@@ -7,6 +8,7 @@
     </div>
   </div>
 
+  <!-- Contracts table: sortable headers, supplier logo, progress bar, ⋮ menu per row -->
   <div class="table-responsive">
     <table class="table fs-table">
       <thead>
@@ -25,7 +27,7 @@
       <tbody>
         @for (c of rows(); track c.id) {
           <tr>
-            <td><a href="#" class="ref-link" (click)="$event.preventDefault(); notAvailable()">{{ c.number }}</a></td>
+            <td><a href="#" class="ref-link" (click)="$event.preventDefault(); toast.unavailable()">{{ c.number }}</a></td>
             <td>
               <div class="d-flex align-items-center gap-2 text-nowrap">
                 <!-- Supplier logo (decorative: the name follows); initial on its brand color if there's none -->
@@ -63,7 +65,8 @@
     </table>
   </div>
 
-  <button type="button" class="show-more" (click)="notAvailable()">
+  <!-- "Show N more" link: the full list is not built in this demo, so it shows the notice -->
+  <button type="button" class="show-more" (click)="toast.unavailable()">
     {{ 'contracts.showMore' | translate: { count: data.contractsTotal() - data.contracts().length } }}
     <span class="show-more-arrow"><app-icon name="arrow-left" /></span>
   </button>

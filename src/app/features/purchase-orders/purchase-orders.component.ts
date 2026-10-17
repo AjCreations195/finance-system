@@ -82,30 +82,42 @@ interface MenuState {
   },
 })
 export class PurchaseOrdersComponent {
+  // Services and framework helpers used by the page.
   protected readonly service = inject(PurchaseRequestService);
   private readonly language = inject(LanguageService);
-  private readonly toast = inject(ToastService);
+  protected readonly toast = inject(ToastService);
   private readonly location = inject(Location);
   private readonly injector = inject(Injector);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly doc = inject(DOCUMENT);
+  /** The page's own element; used to find dialogs and buttons inside it. */
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
 
+  /** Badge colour per status, and icon per status (see STATUS_BADGE / STATUS_ICON). */
   protected readonly badge = STATUS_BADGE;
   protected readonly statusIcon = STATUS_ICON;
+  /** Status tabs above the table, in display order. */
   protected readonly tabs: RequestTab[] = ['all', 'fullyCompleted', 'partiallyCompleted', 'inProgress', 'rejected'];
+  /** Columns that can be sorted, in display order. */
   protected readonly columns: SortKey[] = ['number', 'budgetItem', 'description', 'products', 'notes', 'status', 'creator', 'date'];
+  /** Column sort state (click a header to sort; see TableSort). */
   protected readonly sort = new TableSort<SortKey>();
 
   // ------------------------------------------------------------------
   // UI state
   // ------------------------------------------------------------------
+  /** Active status tab. */
   protected readonly tab = signal<RequestTab>('all');
+  /** Exact-status filter from the "Filter" menu ('all' = no filter). */
   protected readonly status = signal('all');
+  /** Search text (matches number, description, budget item, code or creator). */
   protected readonly search = signal('');
+  /** Current table page, starting at 1. */
   protected readonly page = signal(1);
+  /** Ids of the rows ticked for bulk actions. */
   protected readonly selected = signal<Set<number>>(new Set());
+  /** Full-screen mode of the table card. */
   protected readonly expanded = signal(false);
 
   /** Open row menu (null = closed). */
@@ -133,6 +145,7 @@ export class PurchaseOrdersComponent {
   /** The ⋮ button of the open row menu. */
   private rowMenuTrigger: HTMLElement | null = null;
 
+  /** Options of the "Filter" menu: All, then one entry per exact status. */
   protected readonly statusOptions: FilterOption[] = [
     { value: 'all', label: 'common.all' },
     ...REQUEST_STATUSES.map((s) => ({ value: s, label: `requests.status.${s}` })),
@@ -141,6 +154,7 @@ export class PurchaseOrdersComponent {
   // ------------------------------------------------------------------
   // Derived data: tab → filter → search → sort → page
   // ------------------------------------------------------------------
+  /** Requests that pass the tab, the status filter and the search text. */
   private readonly filtered = computed(() => {
     const tab = this.tab();
     const status = this.status();
@@ -161,6 +175,7 @@ export class PurchaseOrdersComponent {
     });
   });
 
+  /** The filtered requests in the chosen column order. */
   private readonly sorted = computed(() => this.sortList(this.filtered()));
 
   /** Applies the current column sort to any list of requests. */
@@ -178,15 +193,19 @@ export class PurchaseOrdersComponent {
     });
   }
 
+  /** Number of pages (at least 1). */
   protected readonly totalPages = computed(() => Math.max(1, Math.ceil(this.sorted().length / PAGE_SIZE)));
   /** Clamped, so deleting or filtering can't leave you on an empty page. */
   protected readonly currentPage = computed(() => Math.min(this.page(), this.totalPages()));
+  /** The rows shown on the current page. */
   protected readonly rows = computed(() => {
     const start = (this.currentPage() - 1) * PAGE_SIZE;
     return this.sorted().slice(start, start + PAGE_SIZE);
   });
 
+  /** True when every row on this page is ticked (drives the header checkbox). */
   protected readonly allOnPageSelected = computed(() => this.rows().length > 0 && this.rows().every((r) => this.selected().has(r.id)));
+  /** How many rows are ticked. */
   protected readonly selectedCount = computed(() => this.selected().size);
 
   // ------------------------------------------------------------------
@@ -210,12 +229,14 @@ export class PurchaseOrdersComponent {
 
   /** Set when printing starts (button or Ctrl+P), shown in the report header. */
   protected readonly printedAt = signal(new Date());
+  /** The print time, formatted for the current language and locale. */
   protected readonly printedAtLabel = computed(() =>
     new Intl.DateTimeFormat(this.language.locale(), { dateStyle: 'medium', timeStyle: 'short' }).format(this.printedAt()),
   );
 
   constructor() {
     // Coming back to the tab: pick up where the user left (filters, sort, page, selection).
+    // The state is saved again on every change, so it survives leaving the tab.
     const pageState = inject(PageStateService);
     this.restoreState(pageState.restore<ListState>(STATE_KEY));
     effect(() => {
@@ -275,12 +296,16 @@ export class PurchaseOrdersComponent {
   // ------------------------------------------------------------------
   // Filters (each resets to page 1)
   // ------------------------------------------------------------------
+  /** Switches the status tab and returns to page 1. */
   protected setTab(tab: RequestTab): void {
     this.tab.set(tab);
     this.page.set(1);
   }
 
-  /** Summary card → table tab it summarises (the balance card shows everything). */
+  /**
+   * Summary card → table tab it summarises (the balance card shows everything).
+   * The card ids come from StatCarouselComponent's `statSelect` output.
+   */
   private readonly statTabs: Record<string, RequestTab> = {
     available: 'all',
     posted: 'fullyCompleted',
@@ -303,16 +328,19 @@ export class PurchaseOrdersComponent {
     this.setTab(tab === this.tab() && tab !== 'all' ? 'all' : tab);
   }
 
+  /** Sets the exact-status filter and returns to page 1. */
   protected setStatus(value: string): void {
     this.status.set(value);
     this.page.set(1);
   }
 
+  /** Sets the search text and returns to page 1. */
   protected onSearch(value: string): void {
     this.search.set(value);
     this.page.set(1);
   }
 
+  /** Moves to a page, kept between 1 and the last page. */
   protected goTo(page: number): void {
     this.page.set(Math.min(Math.max(1, page), this.totalPages()));
   }
@@ -320,6 +348,7 @@ export class PurchaseOrdersComponent {
   // ------------------------------------------------------------------
   // Selection
   // ------------------------------------------------------------------
+  /** Ticks or unticks one row. */
   protected toggleRow(id: number): void {
     this.selected.update((set) => {
       const next = new Set(set);
@@ -329,6 +358,7 @@ export class PurchaseOrdersComponent {
     });
   }
 
+  /** Ticks every row on this page, or clears them if they are all ticked already. */
   protected toggleAllOnPage(): void {
     const ids = this.rows().map((r) => r.id);
     const selectAll = !this.allOnPageSelected();
@@ -342,6 +372,7 @@ export class PurchaseOrdersComponent {
   // ------------------------------------------------------------------
   // Row menu (View / Approve / Delete)
   // ------------------------------------------------------------------
+  /** Opens the ⋮ menu of a row, or closes it if that row's menu is already open. */
   protected openRowMenu(request: PurchaseRequest, event: MouseEvent): void {
     event.stopPropagation();
     if (this.rowMenu()?.request.id === request.id) {
@@ -356,6 +387,7 @@ export class PurchaseOrdersComponent {
     this.rowMenu.set({ request, top: rect.bottom + 4, left: Math.max(8, left) });
   }
 
+  /** A request can be approved until it reaches a final status (see FINAL_STATUSES). */
   protected canApprove(request: PurchaseRequest): boolean {
     return !FINAL_STATUSES.includes(request.status);
   }
@@ -372,6 +404,7 @@ export class PurchaseOrdersComponent {
     this.router.navigate([], { relativeTo: this.route, queryParams: { view: request.id }, queryParamsHandling: 'merge' });
   }
 
+  /** Closes the details panel (removes ?view from the URL) and returns focus to the element that opened it. */
   protected closeDetails(): void {
     this.router.navigate([], { relativeTo: this.route, queryParams: { view: null }, queryParamsHandling: 'merge', replaceUrl: true });
     const opener = this.panelOpener;
@@ -380,6 +413,7 @@ export class PurchaseOrdersComponent {
   }
 
   /** Approve / approve & send from the panel (one request, so no confirmation, like the row menu). */
+  /** Approve from the panel: sets the status and shows the matching toast. */
   protected approveFromDetails(status: 'accepted' | 'sent'): void {
     const request = this.viewing();
     if (!request || !this.canApprove(request)) return;
@@ -388,17 +422,20 @@ export class PurchaseOrdersComponent {
     this.toast.show(this.language.translate(key, { number: request.number }), 'success');
   }
 
+  /** Delete from the panel: goes through the same confirmation dialog as the row menu. */
   protected deleteFromDetails(): void {
     const request = this.viewing();
     if (request) this.askDelete([request]);
   }
 
+  /** Approves one request from its row menu (no confirmation). */
   protected approve(request: PurchaseRequest): void {
     this.rowMenu.set(null);
     this.service.setStatus([request.id], 'accepted');
     this.toast.show(this.language.translate('requests.toast.approved', { number: request.number }), 'success');
   }
 
+  /** Opens the delete confirmation for the given requests (no-op for an empty list). */
   protected askDelete(requests: PurchaseRequest[]): void {
     this.rowMenu.set(null);
     this.actionsOpen.set(false);
@@ -412,6 +449,7 @@ export class PurchaseOrdersComponent {
     afterNextRender(() => this.host.querySelector<HTMLElement>(`.confirm-modal ${button}`)?.focus(), { injector: this.injector });
   }
 
+  /** Deletes the requests in the open confirmation, and removes them from the selection. */
   protected confirmDelete(): void {
     const list = this.pendingDelete();
     if (!list) return;
@@ -454,6 +492,7 @@ export class PurchaseOrdersComponent {
    * action can't be repeated on them by accident. Rows that were skipped stay
    * selected, so the user can see which ones need attention.
    */
+  /** Sends every ticked request ("sent" status), then clears the selection. */
   protected sendSelected(): void {
     this.withSelection((list) => {
       this.service.setStatus(list.map((r) => r.id), 'sent');
@@ -476,6 +515,7 @@ export class PurchaseOrdersComponent {
     });
   }
 
+  /** Approves the requests in the open bulk-approve dialog. Skipped (already final) rows stay selected. */
   protected confirmApprove(): void {
     const pending = this.pendingApprove();
     if (!pending) return;
@@ -492,10 +532,12 @@ export class PurchaseOrdersComponent {
     );
   }
 
+  /** Asks to delete every ticked request. */
   protected deleteSelected(): void {
     this.withSelection((list) => this.askDelete(list));
   }
 
+  /** Opens or closes the bottom bar's "Actions" menu. */
   protected toggleActions(event: MouseEvent): void {
     event.stopPropagation();
     this.actionsOpen.update((o) => !o);
@@ -513,14 +555,12 @@ export class PurchaseOrdersComponent {
     afterNextRender(() => window.print(), { injector: this.injector });
   }
 
+  /** Goes back to the previous page in the browser history. */
   protected back(): void {
     this.location.back();
   }
 
-  protected notAvailable(): void {
-    this.toast.show(this.language.translate('login.featureNotAvailable'), 'info');
-  }
-
+  /** Closes the row menu and the Actions menu. */
   protected closeMenus(): void {
     this.rowMenu.set(null);
     this.actionsOpen.set(false);

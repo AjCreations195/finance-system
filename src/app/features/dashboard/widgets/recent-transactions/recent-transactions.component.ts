@@ -1,5 +1,6 @@
 import { Component, DestroyRef, Injector, afterNextRender, computed, inject, signal } from '@angular/core';
 import { TRANSACTION_TYPES, TransactionItem } from '../../../../core/models/dashboard.models';
+import { ClipboardService } from '../../../../core/services/clipboard.service';
 import { DashboardDataService } from '../../../../core/services/dashboard-data.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -21,8 +22,7 @@ const ROW_MENU_WIDTH = 224;
  * RecentTransactionsComponent ("المعاملات الأخيرة")
  * -----------------------------------------------
  * Compact table with type filter, search and sorting.
- * Row ⋮ menu: Copy transaction number, Email employee (mailto) and Hide
- * from recent (with confirmation).
+ * Row ⋮ menu: Copy transaction number and Hide from recent (with confirmation).
  * Esc closes the top-most layer (dialog, then menu).
  */
 @Component({
@@ -38,7 +38,8 @@ const ROW_MENU_WIDTH = 224;
 export class RecentTransactionsComponent {
   protected readonly data = inject(DashboardDataService);
   private readonly language = inject(LanguageService);
-  private readonly toast = inject(ToastService);
+  protected readonly toast = inject(ToastService);
+  private readonly clipboard = inject(ClipboardService);
   private readonly injector = inject(Injector);
 
   /** Row "⋮" menu: which transaction, and where (fixed position under the button). */
@@ -54,16 +55,22 @@ export class RecentTransactionsComponent {
     inject(DestroyRef).onDestroy(() => document.removeEventListener('scroll', closeMenu, { capture: true }));
   }
 
+  /** Search text (transaction number or employee name). */
   protected readonly search = signal('');
+  /** Type filter: 'all' or one transaction type. */
   protected readonly type = signal('all');
+  /** Column sort state (see TableSort). */
   protected readonly sort = new TableSort<SortKey>();
+  /** Sortable columns, in display order. */
   protected readonly columns: SortKey[] = ['number', 'type', 'employee', 'duration'];
 
+  /** Options of the type filter: All, then one per transaction type. */
   protected readonly typeOptions: FilterOption[] = [
     { value: 'all', label: 'common.all' },
     ...TRANSACTION_TYPES.map((t) => ({ value: t, label: `transactions.types.${t}` })),
   ];
 
+  /** The transactions after type filter, search and sort: what the table shows. */
   protected readonly rows = computed(() => {
     const q = this.search().trim().toLowerCase();
     const type = this.type();
@@ -88,10 +95,6 @@ export class RecentTransactionsComponent {
     return `${String(t.duration.value).padStart(2, '0')} ${this.language.translate(`transactions.units.${t.duration.unit}`)}`;
   }
 
-  protected notAvailable(): void {
-    this.toast.show(this.language.translate('login.featureNotAvailable'), 'info');
-  }
-
   // ---- Row menu (⋮) ----
   protected openRowMenu(item: TransactionItem, event: MouseEvent): void {
     event.stopPropagation();
@@ -109,28 +112,20 @@ export class RecentTransactionsComponent {
     afterNextRender(() => document.querySelector<HTMLElement>('.row-menu [role="menuitem"]')?.focus(), { injector: this.injector });
   }
 
+  /** Copies the transaction number and closes the row menu. */
   protected copyNumber(item: TransactionItem): void {
     this.closeRowMenu();
-    const done = () => this.toast.show(this.language.translate('transactions.toast.numberCopied'), 'success');
-    const fail = () => this.toast.show(this.language.translate('requests.details.copyFailed'), 'danger');
-    if (!navigator.clipboard) {
-      fail();
-      return;
-    }
-    navigator.clipboard.writeText(item.number).then(done, fail);
+    this.clipboard.copy(item.number, 'transactions.toast.numberCopied');
   }
 
-  /** The mailto link does the work; this just closes the menu. */
-  protected emailEmployee(): void {
-    this.rowMenu.set(null);
-  }
-
+  /** Hide needs confirmation, so this only opens the dialog (focus goes to its danger button). */
   protected askHide(item: TransactionItem): void {
     this.rowMenu.set(null);
     this.pendingHide.set(item);
     afterNextRender(() => document.querySelector<HTMLElement>('.confirm-modal .btn-danger')?.focus(), { injector: this.injector });
   }
 
+  /** Hides the transaction from this list (it still counts in the total). */
   protected confirmHide(): void {
     const item = this.pendingHide();
     if (!item) return;

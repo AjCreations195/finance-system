@@ -18,4 +18,4 @@ services:
         sync: false
       # claude-opus-5-5 gives the best answers; claude-haiku-5-5 costs ~40x less.
       - key: CLAUDE_MODEL
-        value: claude-haiku-5-5
+        value: claude-opus-5-5

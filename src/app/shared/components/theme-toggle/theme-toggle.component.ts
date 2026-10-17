@@ -57,6 +57,7 @@ import { IconComponent } from '../icon/icon.component';
   `,
 })
 export class ThemeToggleComponent {
+  /** Shared theme state; the button calls toggle() on it. */
   protected readonly theme = inject(ThemeService);
 
   /** Navbar look: the shared 40px .nav-btn instead of the larger login square. */

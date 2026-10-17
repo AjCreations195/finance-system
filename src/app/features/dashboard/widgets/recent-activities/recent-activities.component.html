@@ -40,6 +40,8 @@
       <p class="empty">{{ 'activities.empty' | translate }}</p>
     }
 
+    <!-- Show all / Show less: appears only when the period has more items than the collapsed list.
+         Toggles showAll; the chevron flips up when the full list is open. -->
     @if (hasMore()) {
       <button type="button" class="toggle-all" (click)="showAll.set(!showAll())" [attr.aria-expanded]="showAll()">
         <app-icon name="chevron-down" class="toggle-chevron" [class.up]="showAll()" />

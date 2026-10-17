@@ -25,12 +25,18 @@ describe('BudgetItemsComponent', () => {
 
   const series = () => component['chartOptions']().series as { name: string; data: number[] }[];
 
+  it('starts on the current year', () => {
+    expect(component['year']()).toBe(new Date().getFullYear());
+  });
+
   it('shows both stacked series by default', () => {
     expect(series().map((s) => s.name)).toEqual(['Spent', 'Remaining']);
     expect(series()[0].data.length).toBe(12);
   });
 
   it('the total adds up the visible series', () => {
+    // The design values are the 2025 data, so these tests pick 2025 explicitly.
+    component['year'].set(2025);
     // 2025 design values: spent 359,000 + remaining 373,000
     expect(component['total']()).toBe('732,000.00');
 
@@ -48,6 +54,7 @@ describe('BudgetItemsComponent', () => {
   });
 
   it('in Arabic, January moves to the right and the value axis flips', () => {
+    component['year'].set(2025);
     TestBed.inject(LanguageService).setLanguage('ar');
     const options = component['chartOptions']();
     expect(series()[0].data.at(-1)).toBe(42_000);

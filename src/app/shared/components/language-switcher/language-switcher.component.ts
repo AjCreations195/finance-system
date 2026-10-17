@@ -104,11 +104,13 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   `,
 })
 export class LanguageSwitcherComponent {
+  /** Shared language state; the buttons call setLanguage on it. */
   protected readonly language = inject(LanguageService);
 
   /** Slightly smaller variant for the navbar. */
   readonly compact = input(false);
 
+  /** The two choices, in the fixed EN-then-AR order. `short` is the label, `name` is read by screen readers. */
   protected readonly options: { code: LanguageCode; short: string; name: string }[] = [
     { code: 'en', short: 'EN', name: 'English' },
     { code: 'ar', short: 'AR', name: 'العربية' },

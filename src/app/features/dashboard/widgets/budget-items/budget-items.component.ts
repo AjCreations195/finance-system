@@ -6,6 +6,7 @@ import { ThemeService } from '../../../../core/services/theme.service';
 import { ChartComponent } from '../../../../shared/components/chart/chart.component';
 import { DashboardCardComponent } from '../../../../shared/components/dashboard-card/dashboard-card.component';
 import { FilterMenuComponent, FilterOption } from '../../../../shared/components/filter-menu/filter-menu.component';
+import { SelectMenuComponent } from '../../../../shared/components/select-menu/select-menu.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 /** Bar colors from the design: light (bottom segment) and darker blue (top segment). */
@@ -24,7 +25,7 @@ const BAR_COLORS_DARK = { spent: '#3e5c9a', remaining: '#8db4f5' };
  */
 @Component({
   selector: 'app-budget-items',
-  imports: [DashboardCardComponent, FilterMenuComponent, ChartComponent, TranslatePipe],
+  imports: [DashboardCardComponent, FilterMenuComponent, SelectMenuComponent, ChartComponent, TranslatePipe],
   templateUrl: './budget-items.component.html',
   styles: `
     .chart-head {
@@ -52,13 +53,11 @@ const BAR_COLORS_DARK = { spent: '#3e5c9a', remaining: '#8db4f5' };
     .chart-body {
       padding: 0 0.75rem;
     }
-    .year-select {
-      width: auto;
+    /* Centres the year dropdown under the chart */
+    .year-wrap {
+      display: flex;
+      justify-content: center;
       margin: 0 auto 1rem;
-      border: 0;
-      background-color: transparent;
-      font-size: 0.875rem;
-      font-weight: 600;
     }
   `,
 })
@@ -67,17 +66,25 @@ export class BudgetItemsComponent {
   private readonly language = inject(LanguageService);
   private readonly theme = inject(ThemeService);
 
+  /** Years offered by the year selector. */
   protected readonly years = this.data.budgetYears;
-  protected readonly year = signal(2025);
+  /** The year selector's options; the select menu works with strings, so the years are converted. */
+  protected readonly yearOptions: FilterOption[] = this.years.map((y) => ({ value: String(y), label: String(y) }));
+  /** Lets the template turn the numeric year into the select's string value. */
+  protected readonly String = String;
+  /** Selected year. */
+  protected readonly year = signal(new Date().getFullYear());
   /** 'all' | 'spent' | 'remaining' */
   protected readonly series = signal('all');
 
+  /** Options of the series filter (labels are translation keys). */
   protected readonly seriesOptions: FilterOption[] = [
     { value: 'all', label: 'common.all' },
     { value: 'spent', label: 'budget.spent' },
     { value: 'remaining', label: 'budget.remaining' },
   ];
 
+  /** Spent and remaining amount for each month of the selected year. */
   private readonly months = computed(() => this.data.budgetItems(this.year()));
 
   /** Total of the visible series, e.g. 589,235.99 */
@@ -90,6 +97,7 @@ export class BudgetItemsComponent {
     return new Intl.NumberFormat(this.language.locale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(sum);
   });
 
+  /** ApexCharts options: the stacked bars for the visible series, with RTL and theme colours. */
   protected readonly chartOptions = computed<ApexCharts.ApexOptions>(() => {
     const rtl = this.language.isRtl();
     const colors = this.theme.isDark() ? BAR_COLORS_DARK : BAR_COLORS;
@@ -118,7 +126,8 @@ export class BudgetItemsComponent {
       dataLabels: { enabled: false },
       legend: { show: false },
       xaxis: {
-        categories: ordered.map((m) => monthFmt.format(new Date(2025, m.month, 1))),
+        // Month names for the selected year (the names themselves don't change with the year).
+        categories: ordered.map((m) => monthFmt.format(new Date(this.year(), m.month, 1))),
         axisBorder: { show: false },
         axisTicks: { show: false },
         labels: { style: { fontSize: '10px' } },

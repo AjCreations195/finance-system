@@ -1,4 +1,5 @@
 <app-dashboard-card title="transactions.title" icon="tasks">
+  <!-- Toolbar: type filter and search box -->
   <div card-actions class="d-flex gap-2">
     <app-filter-menu [options]="typeOptions" [(value)]="type" />
     <div class="search-box" style="flex: 0 1 13rem; min-width: 8rem">
@@ -7,6 +8,7 @@
     </div>
   </div>
 
+  <!-- Transactions table: sortable headers, one row per transaction, ⋮ menu per row -->
   <div class="table-responsive">
     <table class="table fs-table">
       <thead>
@@ -25,7 +27,7 @@
       <tbody>
         @for (t of rows(); track t.id) {
           <tr>
-            <td><a href="#" class="ref-link" (click)="$event.preventDefault(); notAvailable()">{{ t.number }}</a></td>
+            <td><a href="#" class="ref-link" (click)="$event.preventDefault(); toast.unavailable()">{{ t.number }}</a></td>
             <td class="text-nowrap">{{ 'transactions.types.' + t.type | translate }}</td>
             <td>
               <div class="person-cell">
@@ -54,7 +56,8 @@
     </table>
   </div>
 
-  <button type="button" class="show-more" (click)="notAvailable()">
+  <!-- "Show N more" link: the full list is not built in this demo, so it shows the notice -->
+  <button type="button" class="show-more" (click)="toast.unavailable()">
     {{ 'transactions.showMore' | translate: { count: data.transactionsTotal() - data.transactions().length } }}
     <span class="show-more-arrow"><app-icon name="arrow-left" /></span>
   </button>
@@ -67,11 +70,6 @@
       <button type="button" class="dropdown-item" role="menuitem" (click)="copyNumber(menu.item)">
         <app-icon name="copy" class="me-2" />{{ 'transactions.actions.copyNumber' | translate }}
       </button>
-    </li>
-    <li>
-      <a class="dropdown-item" role="menuitem" [href]="'mailto:' + menu.item.employee.email" (click)="emailEmployee()">
-        <app-icon name="mail" class="me-2" />{{ 'transactions.actions.emailEmployee' | translate }}
-      </a>
     </li>
     <li><hr class="dropdown-divider" /></li>
     <li>

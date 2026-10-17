@@ -3,6 +3,7 @@ import { ApiMessage, CHAT_LIMITS, ChatErrorCode, ChatEvent, ChatRequest } from '
 import { ChatToolName } from '../models/chat-tools';
 import { ChatToolsService } from './chat-tools.service';
 
+/** Who wrote a message: the user or Claude. */
 export type ChatRole = 'user' | 'assistant';
 
 /** `streaming` while the reply is still arriving; `stopped` when the user pressed Stop. */
@@ -26,6 +27,7 @@ export interface ChatMessage {
   tools?: ChatToolName[];
 }
 
+/** Claude's complete message for one request, as sent by the server. */
 type Turn = Extract<ChatEvent, { type: 'turn' }>;
 
 /** Failures that may succeed if asked again (unlike a refusal or a missing API key). */
@@ -42,6 +44,7 @@ interface SavedChat {
 /** The Node server's chat endpoint (proxied to localhost:3000 by `ng serve`). */
 export const CHAT_URL = '/api/chat';
 
+/** An error whose `kind` is shown to the user (see chat.errors.* in the translations). */
 class ChatError extends Error {
   constructor(readonly kind: ChatErrorKind) {
     super(kind);
@@ -74,14 +77,19 @@ class ChatError extends Error {
 @Service()
 export class ChatService {
   private readonly tools = inject(ChatToolsService);
+  /** The conversation restored from sessionStorage (empty on a fresh tab). */
   private readonly saved = restore();
+  /** Next message id; starts after the highest restored id so ids stay unique. */
   private nextId = Math.max(0, ...this.saved.messages.map((m) => m.id)) + 1;
+  /** Controller for the request in progress; aborting it is what Stop does. */
   private abort: AbortController | null = null;
   private transcript: ApiMessage[] = this.saved.transcript;
 
+  /** Whether the chat panel is visible. */
   readonly isOpen = signal(false);
 
   private readonly _messages = signal<ChatMessage[]>(this.saved.messages);
+  /** The messages the panel shows, read-only for the components. */
   readonly messages = this._messages.asReadonly();
 
   /** True while a reply is streaming; sending is blocked until it ends. */
@@ -93,10 +101,12 @@ export class ChatService {
     return last?.status === 'error' && RETRYABLE.includes(last.error!);
   });
 
+  /** Opens the panel if it is closed, closes it if it is open. */
   toggle(): void {
     this.isOpen.update((o) => !o);
   }
 
+  /** Hides the panel; the conversation is kept. */
   close(): void {
     this.isOpen.set(false);
   }
@@ -239,10 +249,12 @@ export class ChatService {
     throw new ChatError('failed');
   }
 
+  /** Looks up a message by id. */
   private message(id: number): ChatMessage | undefined {
     return this._messages().find((m) => m.id === id);
   }
 
+  /** Appends a message to the panel and returns its id. */
   private add(role: ChatRole, text: string, status: ChatStatus): number {
     const id = this.nextId++;
     this._messages.update((list) => [...list, { id, role, text, status }]);

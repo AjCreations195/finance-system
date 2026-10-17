@@ -31,8 +31,40 @@
     outline-offset: 3px;
   }
 
+  /* Pulse: a glowing ring grows out from the button and fades, on a loop.
+     It stops while the panel is open or on hover. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--fs-primary);
+    pointer-events: none;
+    opacity: 0;
+    z-index: -1;
+    animation: fab-pulse 2.4s ease-out infinite;
+  }
+
+  &:hover::before,
+  &.is-open::before {
+    animation: none;
+  }
+
   &.is-open .fab-tooltip {
     display: none;
+  }
+}
+
+@keyframes fab-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.45;
+    box-shadow: 0 0 0 0 var(--fs-primary);
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+    box-shadow: 0 0 12px 6px var(--fs-primary);
   }
 }
 
@@ -69,5 +101,10 @@
   .chat-fab,
   .fab-tooltip {
     transition: none;
+  }
+
+  /* No pulse for people who asked the system to reduce motion */
+  .chat-fab::before {
+    animation: none;
   }
 }

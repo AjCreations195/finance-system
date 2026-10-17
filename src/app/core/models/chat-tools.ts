@@ -19,10 +19,13 @@ export const TOOL_STATUSES = [
 /** The table's status groups (TAB_STATUSES keys). */
 export const TOOL_STAGES = ['fullyCompleted', 'partiallyCompleted', 'inProgress', 'rejected'] as const;
 
+/** The "group_by" choices of spending_breakdown. */
 export const TOOL_GROUPINGS = ['budget_item', 'creator', 'status', 'stage', 'month'] as const;
 
+/** The "sort" choices of search_purchase_requests. */
 export const TOOL_SORTS = ['newest', 'oldest', 'amount_desc', 'amount_asc'] as const;
 
+/** Names of the tools the browser can run (matched in ChatToolsService). */
 export type ChatToolName =
   | 'get_overview'
   | 'search_purchase_requests'
@@ -30,6 +33,8 @@ export type ChatToolName =
   | 'spending_breakdown'
   | 'open_purchase_request';
 
+// Reusable schema fragments, shared by several tools so the wording stays the same.
+// Reusable schema fragments, shared by several tools so the wording stays the same.
 const statuses = {
   type: 'array',
   items: { type: 'string', enum: TOOL_STATUSES },
@@ -47,6 +52,7 @@ const requestNumber = {
   description: 'The request number, e.g. "BDRS/2016/019/0042", or just its last digits, e.g. "0042" or "42".',
 };
 
+// The tool definitions Claude sees. `description` tells Claude when to use each tool.
 const tools: (Anthropic.Beta.BetaTool & { name: ChatToolName })[] = [
   {
     name: 'get_overview',

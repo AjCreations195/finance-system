@@ -363,7 +363,6 @@ export const EN = {
     },
     actions: {
       copyNumber: 'Copy transaction number',
-      emailEmployee: 'Email employee',
       hide: 'Hide from recent',
     },
     toast: {

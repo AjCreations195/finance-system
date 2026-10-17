@@ -16,13 +16,16 @@ const STORAGE_KEY = 'fs-page-state';
  */
 @Injectable({ providedIn: 'root' })
 export class PageStateService {
+  /** In-memory copy of the saved states, loaded from sessionStorage once at startup. */
   private readonly store = new Map<string, unknown>(read());
 
+  /** Saves a page's state under `key` and writes the whole store to sessionStorage. */
   save(key: string, state: unknown): void {
     this.store.set(key, state);
     this.persist();
   }
 
+  /** Returns the state saved under `key`, or undefined if the page never saved one. */
   restore<T>(key: string): T | undefined {
     return this.store.get(key) as T | undefined;
   }
@@ -33,6 +36,7 @@ export class PageStateService {
     this.persist();
   }
 
+  /** Writes the store to sessionStorage as a list of [key, state] pairs. */
   private persist(): void {
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify([...this.store]));
@@ -42,6 +46,7 @@ export class PageStateService {
   }
 }
 
+/** Reads the saved [key, state] pairs; returns an empty list if storage is missing or corrupt. */
 function read(): [string, unknown][] {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);

@@ -2,6 +2,7 @@ import { Component, ElementRef, afterNextRender, computed, inject, input, output
 import { FINAL_STATUSES, PurchaseRequest, STATUS_BADGE, STATUS_ICON, WorkflowStep } from '../../../core/models/purchase-request.model';
 import { LanguageService } from '../../../core/services/language.service';
 import { PurchaseRequestService } from '../../../core/services/purchase-request.service';
+import { ClipboardService } from '../../../core/services/clipboard.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { LocalDatePipe, MoneyPipe } from '../../../shared/pipes/format.pipes';
 import { LocalizePipe } from '../../../shared/pipes/localize.pipe';
@@ -46,24 +47,33 @@ export class RequestDetailsComponent {
   private readonly service = inject(PurchaseRequestService);
   private readonly language = inject(LanguageService);
   private readonly toast = inject(ToastService);
+  private readonly clipboard = inject(ClipboardService);
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
 
+  /** The request to show (the parent looks it up from the ?view id). */
   readonly request = input.required<PurchaseRequest>();
+  /** Emitted when the panel asks to close (the parent removes ?view from the URL). */
   readonly closed = output<void>();
   /** Approve ('accepted') or approve & send ('sent'). */
   readonly approve = output<'accepted' | 'sent'>();
+  /** Emitted when the user chooses Delete; the parent asks for confirmation. */
   readonly remove = output<void>();
 
+  /** Panel data for this request (directorate, workflow, activity…). */
   protected readonly details = computed(() => this.service.getDetails(this.request()));
+  /** Whether the Approve buttons are enabled (false for final statuses). */
   protected readonly canApprove = computed(() => !FINAL_STATUSES.includes(this.request().status));
   /** tel: link without the spaces and brackets of the displayed number. */
   protected readonly phoneHref = computed(() => 'tel:' + this.details().creatorPhone.replace(/[^\d+]/g, ''));
+  /** Badge colour and icon per status (see the purchase request model). */
   protected readonly badge = STATUS_BADGE;
   protected readonly statusIcon = STATUS_ICON;
+  /** Icon per workflow step. */
   protected readonly stepIcons = STEP_ICONS;
 
   /** Wide mode (the ⤢ button), for reading long timelines on large screens. */
   protected readonly wide = signal(false);
+  /** Whether the "more" (⋯) menu is open. */
   protected readonly menuOpen = signal(false);
 
   constructor() {
@@ -73,19 +83,22 @@ export class RequestDetailsComponent {
 
   /** Copies a link that opens this request's panel directly. */
   protected share(): void {
-    this.copy(window.location.href, 'requests.details.linkCopied');
+    this.clipboard.copy(window.location.href, 'requests.details.linkCopied');
   }
 
+  /** Copies the request number and closes the "more" menu. */
   protected copyNumber(): void {
     this.menuOpen.set(false);
-    this.copy(this.request().number, 'requests.details.numberCopied');
+    this.clipboard.copy(this.request().number, 'requests.details.numberCopied');
   }
 
+  /** Asks the parent to delete this request (the parent shows the confirmation). */
   protected deleteRequest(): void {
     this.menuOpen.set(false);
     this.remove.emit();
   }
 
+  /** Attachment preview is not part of this demo, so it shows a notice. */
   protected openAttachment(): void {
     this.toast.show(this.language.translate('requests.details.previewUnavailable'), 'info');
   }
@@ -115,17 +128,8 @@ export class RequestDetailsComponent {
     }
   }
 
+  /** Closes the "more" menu when a click lands outside it. */
   protected onDocumentClick(event: MouseEvent): void {
     if (this.menuOpen() && !(event.target as HTMLElement).closest('.more-menu')) this.menuOpen.set(false);
-  }
-
-  private copy(text: string, successKey: string): void {
-    const done = () => this.toast.show(this.language.translate(successKey), 'success');
-    const fail = () => this.toast.show(this.language.translate('requests.details.copyFailed'), 'danger');
-    if (!navigator.clipboard) {
-      fail();
-      return;
-    }
-    navigator.clipboard.writeText(text).then(done, fail);
   }
 }

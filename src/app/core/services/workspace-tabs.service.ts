@@ -16,6 +16,7 @@ export interface ModuleDef {
   pinned?: boolean;
 }
 
+/** Every module that can have a tab, in tab-strip order. Modules with `route: null` are not built yet. */
 export const MODULES: readonly ModuleDef[] = [
   { id: 'dashboard', label: 'layout.tabs.dashboard', icon: 'dashboard', route: '/dashboard', pinned: true },
   { id: 'procurement', label: 'layout.tabs.procurement', icon: 'procurement', route: '/procurement/purchase-requests' },
@@ -45,6 +46,7 @@ export const MAX_RECORD_TABS = 8;
 /** Closed tabs remembered for "Reopen closed tab". */
 const MAX_CLOSED = 10;
 
+/** localStorage key prefix; the signed-in user's id is appended (see storageKey). */
 const TABS_KEY = 'fs-workspace-tabs';
 
 interface StoredTabs {
@@ -73,10 +75,12 @@ export class WorkspaceTabsService {
 
   private readonly _tabs = signal<WorkspaceTab[]>([]);
   private readonly _closed = signal<WorkspaceTab[]>([]);
+  /** Open tabs, in strip order. */
   readonly tabs = this._tabs.asReadonly();
+  /** Recently closed tabs, most recent first (for "Reopen closed tab"). */
   readonly closed = this._closed.asReadonly();
 
-  /** Current URL. */
+  /** Current URL, updated after every completed navigation. */
   readonly url = toSignal(
     this.router.events.pipe(
       filter((e) => e instanceof NavigationEnd),
@@ -88,6 +92,7 @@ export class WorkspaceTabsService {
   /** Id of the tab showing the current URL (null on pages without a tab). */
   readonly activeId = computed(() => this.tabFor(this.url())?.id ?? null);
 
+  /** Per-user localStorage key, so each account keeps its own tabs. */
   private readonly storageKey = computed(() => `${TABS_KEY}:${this.auth.user()?.id ?? 'guest'}`);
 
   constructor() {
@@ -148,6 +153,7 @@ export class WorkspaceTabsService {
     void this.router.navigateByUrl(this.router.createUrlTree([REQUESTS_ROUTE], { queryParams: { view: id } }));
   }
 
+  /** Close one tab (pinned tabs stay open). */
   close(id: string): void {
     this.closeMany([id]);
   }
@@ -164,6 +170,7 @@ export class WorkspaceTabsService {
     this.closeMany(list.slice(index + 1).map((t) => t.id), id);
   }
 
+  /** Close every tab except the pinned ones. */
   closeAll(): void {
     this.closeMany(this._tabs().map((t) => t.id));
   }
@@ -177,6 +184,7 @@ export class WorkspaceTabsService {
     this.activate(tab);
   }
 
+  /** Pinned tabs (the dashboard) can't be closed. */
   isPinned(tab: WorkspaceTab): boolean {
     return tab.kind === 'module' && !!moduleDef(tab.id)?.pinned;
   }
@@ -267,6 +275,7 @@ export class WorkspaceTabsService {
     if (next) this.activate(next);
   }
 
+  /** Adds tabs to the "recently closed" list, newest first, without duplicates. */
   private remember(tabs: WorkspaceTab[]): void {
     const ids = new Set(tabs.map((t) => t.id));
     this._closed.update((list) => [...[...tabs].reverse(), ...list.filter((t) => !ids.has(t.id))].slice(0, MAX_CLOSED));
@@ -291,6 +300,7 @@ export function scrollKey(page: string): string {
   return `scroll:${page}`;
 }
 
+/** Position of a module in MODULES (-1 if unknown); used to keep tabs in order. */
 function moduleIndex(id: string): number {
   return MODULES.findIndex((m) => m.id === id);
 }
@@ -315,6 +325,11 @@ function sanitize(tabs: WorkspaceTab[] | undefined, keepPinned = true): Workspac
   return [...pinned, ...valid];
 }
 
+/**
+ * Reads a JSON value from storage (localStorage or sessionStorage).
+ * Returns null when the key is missing, or when the stored text can't be
+ * parsed or storage is blocked, so the caller can fall back to defaults.
+ */
 function readJson<T>(storage: Storage, key: string): T | null {
   try {
     const raw = storage.getItem(key);
@@ -324,6 +339,10 @@ function readJson<T>(storage: Storage, key: string): T | null {
   }
 }
 
+/**
+ * Saves a value as JSON under `key`. Failures (full or blocked storage) are
+ * ignored: the tabs still work for this visit, they just aren't remembered.
+ */
 function writeJson(storage: Storage, key: string, value: unknown): void {
   try {
     storage.setItem(key, JSON.stringify(value));

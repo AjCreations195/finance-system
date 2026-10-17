@@ -56,6 +56,11 @@ describe('ChatToolsService', () => {
   const all = () => requests.requests();
   const total = (list = all()) => list.reduce((s, r) => s + r.amount, 0);
 
+  // The mock data is dated relative to the current month, so the tests compute the expected month.
+  const now = new Date();
+  const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const lastDayOfThisMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
   it('the shared tool definitions use the app\'s statuses and stages', () => {
     expect([...TOOL_STATUSES]).toEqual([...REQUEST_STATUSES]);
     const search = CHAT_TOOLS.find((t) => t.name === 'search_purchase_requests')!;
@@ -76,7 +81,7 @@ describe('ChatToolsService', () => {
       expect(o.annual_budget).toBe(ANNUAL_BUDGET);
       expect(o.committed).toBe(committed);
       expect(o.available_balance).toBe(ANNUAL_BUDGET - committed);
-      expect(o.latest_month).toBe('2025-01');
+      expect(o.latest_month).toBe(thisMonth);
       expect(o.today).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       const stages = Object.values(o.by_stage);
       expect(stages.reduce((s, g) => s + g.count, 0)).toBe(all().length);
@@ -115,9 +120,10 @@ describe('ChatToolsService', () => {
     });
 
     it('filters by date range (inclusive)', () => {
-      const r = run<{ requests: { date: string }[] }>('search_purchase_requests', { date_from: '2025-01-01', date_to: '2025-01-31', limit: 25 });
+      const date_to = `${thisMonth}-${String(lastDayOfThisMonth).padStart(2, '0')}`;
+      const r = run<{ requests: { date: string }[] }>('search_purchase_requests', { date_from: `${thisMonth}-01`, date_to, limit: 25 });
       expect(r.requests.length).toBe(13);
-      expect(r.requests.every((x) => x.date.startsWith('2025-01'))).toBe(true);
+      expect(r.requests.every((x) => x.date.startsWith(thisMonth))).toBe(true);
     });
 
     it('rejects bad inputs with a message Claude can act on', () => {
@@ -172,7 +178,7 @@ describe('ChatToolsService', () => {
       const r = run<{ groups: { group: string }[] }>('spending_breakdown', { group_by: 'month' });
       const months = r.groups.map((g) => g.group);
       expect(months).toEqual([...months].sort());
-      expect(months.at(-1)).toBe('2025-01');
+      expect(months.at(-1)).toBe(thisMonth);
     });
 
     it('requires group_by', () => {

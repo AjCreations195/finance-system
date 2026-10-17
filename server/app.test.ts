@@ -138,8 +138,8 @@ describe('server', () => {
     before(async () => ({ url, server } = await listen(createApp({ client: fake.client }))));
     after(() => server.close());
 
-    it('GET /api/health reports the AI as configured', async () => {
-      assert.deepEqual(await (await fetch(`${url}/api/health`)).json(), { ok: true, ai: true });
+    it('GET /api/health reports the AI as configured and the model in use', async () => {
+      assert.deepEqual(await (await fetch(`${url}/api/health`)).json(), { ok: true, ai: true, model: 'claude-opus-5-5' });
     });
 
     it('streams the text, then Claude\'s whole turn', async () => {
@@ -181,6 +181,7 @@ describe('server', () => {
     const fake = fakeClient({ content: [{ type: 'text', text: 'Hi' }] });
     const { url, server } = await listen(createApp({ client: fake.client, model: 'claude-haiku-5-5' }));
     try {
+      assert.deepEqual(await (await fetch(`${url}/api/health`)).json(), { ok: true, ai: true, model: 'claude-haiku-5-5' });
       await (await post(url, question)).text();
       const params = fake.calls[0];
       assert.equal(params['model'], 'claude-haiku-5-5');
@@ -251,7 +252,7 @@ describe('server', () => {
 
   it('without an API key the chat answers 503 not_configured', async () => {
     await withServer(null, async (url) => {
-      assert.deepEqual(await (await fetch(`${url}/api/health`)).json(), { ok: true, ai: false });
+      assert.deepEqual(await (await fetch(`${url}/api/health`)).json(), { ok: true, ai: false, model: 'claude-opus-5-5' });
       const res = await post(url, question);
       assert.equal(res.status, 503);
       assert.deepEqual(await res.json(), { error: 'not_configured' });

@@ -31,18 +31,22 @@ export class NotificationsMenuComponent {
   private readonly toast = inject(ToastService);
   private readonly language = inject(LanguageService);
 
+  /** Whether the dropdown panel is visible. */
   protected readonly open = signal(false);
   /** Filter tabs inside the panel. */
   protected readonly filter = signal<'all' | 'unread'>('all');
+  /** Options of the filter menu (labels are translation keys). */
   protected readonly filterOptions: FilterOption[] = [
     { value: 'all', label: 'notifications.all' },
     { value: 'unread', label: 'notifications.unread' },
   ];
 
+  /** The notifications to list, after the filter is applied. */
   protected readonly items = computed(() =>
     this.filter() === 'unread' ? this.data.notifications().filter((n) => n.unread) : this.data.notifications(),
   );
 
+  /** Opens or closes the panel. stopPropagation stops the document click handler from closing it at once. */
   protected toggle(event: MouseEvent): void {
     event.stopPropagation();
     this.open.update((o) => !o);

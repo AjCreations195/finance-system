@@ -34,8 +34,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/purchase-orders/purchase-orders.component').then((m) => m.PurchaseOrdersComponent),
       },
-      // Old URL, kept so existing links and bookmarks still work
-      { path: 'purchase-orders', redirectTo: 'procurement/purchase-requests' },
     ],
   },
 

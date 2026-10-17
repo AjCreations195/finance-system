@@ -47,12 +47,16 @@ export class RecentActivitiesComponent {
   private readonly data = inject(DashboardDataService);
   private readonly language = inject(LanguageService);
 
+  /** Periods of the segmented filter, in display order. */
   protected readonly periods: Period[] = ['today', 'week', 'month'];
+  /** Selected period. */
   protected readonly period = signal<Period>('month');
+  /** False shows the first COLLAPSED_COUNT items; true shows the whole period. */
   protected readonly showAll = signal(false);
+  /** Dot colour per activity type. */
   protected readonly kindStyle = KIND_STYLE;
 
-  /** Activities inside the selected period, newest first. */
+  /** Activities inside the selected period (newest first), with replies placed under their message. */
   private readonly inPeriod = computed(() => {
     const since = startOfDay(new Date());
     since.setDate(since.getDate() - (PERIOD_DAYS[this.period()] - 1));
@@ -63,9 +67,10 @@ export class RecentActivitiesComponent {
     return threadReplies(list);
   });
 
+  /** True when there are more items than the collapsed list shows (the "Show all" link appears). */
   protected readonly hasMore = computed(() => this.inPeriod().length > COLLAPSED_COUNT);
 
-  /** Visible items grouped under day headings. */
+  /** Visible items (all, or the first few) grouped under day headings. */
   protected readonly groups = computed<ActivityGroup[]>(() => {
     const items = this.showAll() ? this.inPeriod() : this.inPeriod().slice(0, COLLAPSED_COUNT);
     const groups: ActivityGroup[] = [];

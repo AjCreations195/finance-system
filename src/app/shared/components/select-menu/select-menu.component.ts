@@ -33,7 +33,7 @@ import { IconComponent } from '../icon/icon.component';
       </button>
 
       @if (open()) {
-        <ul #list class="dropdown-menu show menu" [class.align-start]="align() === 'start'" role="listbox" [attr.aria-label]="ariaLabel() | translate" (keydown)="onListKeydown($event, trigger)">
+        <ul #list class="dropdown-menu show menu" [class.align-start]="align() === 'start'" [class.open-up]="placement() === 'up'" role="listbox" [attr.aria-label]="ariaLabel() | translate" (keydown)="onListKeydown($event, trigger)">
           @for (opt of options(); track opt.value) {
             <li>
               <button type="button" class="dropdown-item option" role="option" [class.selected]="opt.value === value()" [attr.aria-selected]="opt.value === value()"
@@ -103,6 +103,12 @@ import { IconComponent } from '../icon/icon.component';
         inset-inline-end: auto;
         inset-inline-start: 0;
       }
+
+      /* Opens above the trigger, for dropdowns near the bottom of a card (which clips overflow) */
+      &.open-up {
+        top: auto;
+        bottom: calc(100% + 0.375rem);
+      }
     }
     .option {
       display: flex;
@@ -143,10 +149,15 @@ export class SelectMenuComponent {
   readonly appearance = input<'button' | 'text'>('button');
   /** Which edge of the trigger the list lines up with. */
   readonly align = input<'start' | 'end'>('end');
+  /** Which way the list opens: 'down' (default) or 'up', for controls near the bottom of a card. */
+  readonly placement = input<'down' | 'up'>('down');
 
+  /** Whether the option list is visible. */
   protected readonly open = signal(false);
+  /** The option matching the current value; falls back to the first option if none matches. */
   protected readonly selected = computed(() => this.options().find((o) => o.value === this.value()) ?? this.options()[0]);
 
+  /** Opens or closes the list; opening moves focus to the selected option. */
   protected toggle(): void {
     this.open.set(!this.open());
     if (this.open()) this.focusSelectedAfterRender();
@@ -159,11 +170,13 @@ export class SelectMenuComponent {
     this.focusSelectedAfterRender();
   }
 
+  /** Picks an option, closes the list and returns focus to the button. */
   protected select(value: string, trigger: HTMLButtonElement): void {
     this.value.set(value);
     this.close(trigger);
   }
 
+  /** Keyboard handling inside the open list: arrows/Home/End move, Escape closes, Tab leaves. */
   protected onListKeydown(event: KeyboardEvent, trigger: HTMLButtonElement): void {
     const moves: Record<string, 'next' | 'prev' | 'first' | 'last'> = { ArrowDown: 'next', ArrowUp: 'prev', Home: 'first', End: 'last' };
     if (moves[event.key]) {
@@ -178,15 +191,18 @@ export class SelectMenuComponent {
     }
   }
 
+  /** Closes the list when a click lands outside this component. */
   protected onDocumentClick(event: MouseEvent): void {
     if (this.open() && !this.host.nativeElement.contains(event.target as Node)) this.open.set(false);
   }
 
+  /** Closes the list and gives focus back to the button that opened it (keyboard users keep their place). */
   private close(trigger: HTMLButtonElement): void {
     this.open.set(false);
     trigger.focus();
   }
 
+  /** Focuses the selected option once the list has been drawn. */
   private focusSelectedAfterRender(): void {
     afterNextRender(() => this.focusOption('selected'), { injector: this.injector });
   }

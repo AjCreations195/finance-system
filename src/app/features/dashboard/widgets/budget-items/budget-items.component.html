@@ -1,4 +1,5 @@
 <app-dashboard-card title="budget.title" icon="chart">
+  <!-- Header filter: show spent, remaining or both series -->
   <div card-actions>
     <app-filter-menu [options]="seriesOptions" [(value)]="series" />
   </div>
@@ -13,10 +14,8 @@
     <app-chart [options]="chartOptions()" />
   </div>
 
-  <!-- Year selector (bottom center, as in the design) -->
-  <select class="form-select form-select-sm year-select" [value]="year()" (change)="year.set(+$any($event.target).value)" [attr.aria-label]="'budget.year' | translate">
-    @for (y of years; track y) {
-      <option [value]="y">{{ y }}</option>
-    }
-  </select>
+  <!-- Year selector (bottom center, as in the design), styled like the other dropdowns -->
+  <div class="year-wrap">
+    <app-select-menu [options]="yearOptions" [value]="String(year())" (valueChange)="year.set(+$any($event))" appearance="text" align="start" placement="up" ariaLabel="budget.year" />
+  </div>
 </app-dashboard-card>

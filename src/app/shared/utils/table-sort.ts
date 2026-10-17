@@ -12,9 +12,12 @@ import { signal } from '@angular/core';
  *   <th [attr.aria-sort]="sort.aria('date')"><button (click)="sort.toggle('date')">…<app-icon [name]="sort.icon('date')" class="sort-icon" /></button></th>
  */
 export class TableSort<K extends string> {
+  /** Column being sorted, or null when unsorted. */
   readonly key = signal<K | null>(null);
+  /** Direction of the sorted column. */
   readonly dir = signal<'asc' | 'desc'>('asc');
 
+  /** Cycles a column's header: unsorted → ascending → descending → unsorted. Clicking a new column starts it ascending. */
   toggle(key: K): void {
     if (this.key() !== key) {
       this.key.set(key);

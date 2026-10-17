@@ -24,6 +24,7 @@ import { IconComponent } from '../icon/icon.component';
   selector: 'app-dashboard-card',
   imports: [IconComponent, TranslatePipe],
   template: `
+    <!-- The card: "expanded" adds the full-screen styling; aria-labelledby names the section after its title -->
     <section class="dash-card" [class.expanded]="expanded()" [attr.aria-labelledby]="headingId">
       <header class="dash-card-header">
         <div class="title-group">
@@ -32,6 +33,7 @@ import { IconComponent } from '../icon/icon.component';
           </span>
           <h2 class="dash-card-title" [id]="headingId">{{ title() | translate }}</h2>
           <span class="title-sep" aria-hidden="true"></span>
+          <!-- ⤢ button: toggles full-screen; aria-pressed tells screen readers its state -->
           <button
             type="button"
             class="expand-btn"
@@ -42,19 +44,23 @@ import { IconComponent } from '../icon/icon.component';
             <app-icon [name]="expanded() ? 'collapse' : 'expand'" />
           </button>
         </div>
+        <!-- Toolbar slot: the parent puts controls here with the card-actions attribute -->
         <div class="card-actions">
           <ng-content select="[card-actions]" />
         </div>
       </header>
+      <!-- Body slot: any other content the parent places inside the card -->
       <div class="dash-card-body">
         <ng-content />
       </div>
     </section>
+    <!-- Dark layer behind a full-screen card; clicking it closes the card -->
     @if (expanded()) {
       <div class="expand-backdrop" (click)="expanded.set(false)" aria-hidden="true"></div>
     }
   `,
   styleUrl: './dashboard-card.component.scss',
+  // Esc anywhere on the page leaves full-screen mode.
   host: { '(document:keydown.escape)': 'expanded.set(false)' },
 })
 export class DashboardCardComponent {
@@ -63,7 +69,9 @@ export class DashboardCardComponent {
   /** Icon in the small square: an SVG name in public/icons. */
   readonly icon = input('grid');
 
+  /** Whether the card currently fills the screen. */
   protected readonly expanded = signal(false);
+  /** Unique id of the title, so the section can be labelled by it (aria-labelledby). */
   protected readonly headingId = `card-title-${nextId++}`;
 
   constructor() {
@@ -73,4 +81,5 @@ export class DashboardCardComponent {
   }
 }
 
+/** Counter that gives each card instance its own heading id. */
 let nextId = 0;

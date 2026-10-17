@@ -8,6 +8,7 @@ import { WorkspaceTabsComponent } from '../workspace-tabs/workspace-tabs.compone
 import { ChatPanelComponent } from '../chat-panel/chat-panel.component';
 import { ChatFabComponent } from '../chat-fab/chat-fab.component';
 
+/** localStorage key that remembers whether the desktop sidebar is collapsed. */
 const COLLAPSE_KEY = 'fs-sidebar-collapsed';
 
 /**
@@ -40,7 +41,9 @@ const COLLAPSE_KEY = 'fs-sidebar-collapsed';
 export class MainLayoutComponent {
   private readonly router = inject(Router);
 
+  /** Mobile/tablet sidebar: true while it is slid in over the page. */
   protected readonly sidebarOpen = signal(false);
+  /** Desktop sidebar: true while it is shown as the narrow icon rail. */
   protected readonly sidebarCollapsed = signal(readCollapsed());
 
   constructor() {
@@ -62,11 +65,13 @@ export class MainLayoutComponent {
     });
   }
 
+  /** Switches the desktop sidebar between the full menu and the icon rail. */
   protected toggleCollapsed(): void {
     this.sidebarCollapsed.update((c) => !c);
   }
 }
 
+/** Reads the saved collapsed state; defaults to expanded when storage is missing or blocked. */
 function readCollapsed(): boolean {
   try {
     return localStorage.getItem(COLLAPSE_KEY) === 'true';

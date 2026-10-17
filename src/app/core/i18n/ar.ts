@@ -363,7 +363,6 @@ export const AR: TranslationDictionary = {
     },
     actions: {
       copyNumber: 'نسخ رقم المعاملة',
-      emailEmployee: 'مراسلة الموظف',
       hide: 'إخفاء من المعاملات الأخيرة',
     },
     toast: {

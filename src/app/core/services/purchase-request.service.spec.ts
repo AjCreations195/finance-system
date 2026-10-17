@@ -87,7 +87,7 @@ describe('PurchaseRequestService', () => {
       expect(stat('inProgress').higherIsBetter).toBe(false);
       expect(stat('posted').higherIsBetter).toBe(true);
       expect(Number.isFinite(stat('posted').change)).toBe(true);
-      expect(stat('available').periodParams).toEqual({ year: 2025 });
+      expect(stat('available').periodParams).toEqual({ year: new Date().getFullYear() });
     });
   });
 });
