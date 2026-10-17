@@ -14,12 +14,21 @@
 
 /* --------------------------------------------------------------------------
    0. Lusail font (from the design). Uses an installed copy if there is one,
-      otherwise the files in public/fonts/. Until those files exist, the
-      fallbacks in --bs-font-sans-serif are used.
+      otherwise the WOFF2 files in public/fonts/ (copied from the Lusail font
+      package, WOFF folder). WOFF2 is supported by all modern browsers, so the
+      .woff/.otf/.ttf files are not needed for the app.
    -------------------------------------------------------------------------- */
 @font-face {
   font-family: 'Lusail';
-  src: local('Lusail+'), local('Lusail'), local('Lusail Regular'), url('/fonts/Lusail-Regular.woff2') format('woff2');
+  src: local('Lusail+ Light'), local('Lusail Light'), url('../public/fonts/Lusail-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lusail';
+  src: local('Lusail+'), local('Lusail'), local('Lusail Regular'), url('../public/fonts/Lusail-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -27,7 +36,7 @@
 
 @font-face {
   font-family: 'Lusail';
-  src: local('Lusail+ Medium'), local('Lusail Medium'), url('/fonts/Lusail-Medium.woff2') format('woff2');
+  src: local('Lusail+ Medium'), local('Lusail Medium'), url('../public/fonts/Lusail-Medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -35,7 +44,7 @@
 
 @font-face {
   font-family: 'Lusail';
-  src: local('Lusail+ Bold'), local('Lusail Bold'), url('/fonts/Lusail-Bold.woff2') format('woff2');
+  src: local('Lusail+ Bold'), local('Lusail Bold'), url('../public/fonts/Lusail-Bold.woff2') format('woff2');
   font-weight: 600 700;
   font-style: normal;
   font-display: swap;
@@ -347,7 +356,7 @@ body {
   &.icon-btn-sm {
     width: 2rem;
     height: 2rem;
-    font-size: 0.875rem;
+    font-size: 1rem;
   }
 }
 
@@ -357,7 +366,7 @@ body {
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 0.5rem;
-  font-size: 0.9rem;
+  font-size: 1rem;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
 }
 
@@ -372,12 +381,12 @@ body {
 /* ---- Data table used by all dashboard widgets (design: zebra rows, light header) ---- */
 .fs-table {
   margin-bottom: 0;
-  font-size: 0.7495rem;
+  font-size: 0.9375rem;
 
   th {
     background: var(--fs-surface);
     color: var(--fs-text-muted);
-    font-size: 0.75rem;
+    font-size: 0.9375rem;
     font-weight: 500;
     white-space: nowrap;
     padding-block: 0.75rem;
@@ -441,7 +450,7 @@ body {
 
   /* Sort indicator next to column titles */
   .sort-icon {
-    font-size: 0.875rem;
+    font-size: 1rem;
     opacity: 0.6;
     margin-inline-start: 0.25rem;
   }
@@ -469,7 +478,7 @@ body {
   position: fixed;
   z-index: 1080;
   width: 11rem;
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
 
   .dropdown-item app-icon {
     vertical-align: -0.15em;
@@ -550,7 +559,7 @@ body {
   padding: 0.875rem 1.25rem;
   border-top: 1px solid var(--fs-border);
   color: var(--fs-text);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 
@@ -566,7 +575,7 @@ body {
   border-top: 1px solid var(--fs-border);
   background: none;
   color: var(--fs-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   width: 100%;
 
   &:hover {
@@ -584,7 +593,7 @@ body {
     border-radius: 50%;
     background: var(--fs-text-muted);
     color: var(--fs-surface);
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     transition: background-color 0.15s ease;
   }
 
@@ -641,7 +650,7 @@ body {
   }
 
   .person-email {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     direction: ltr;
     unicode-bidi: isolate;
   }
@@ -655,7 +664,7 @@ body {
   padding: 0.125rem 0.5rem;
   border-radius: 999px;
   border: 1px solid transparent;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 500;
   white-space: nowrap;
 
@@ -679,7 +688,7 @@ body {
   border-radius: 0.5rem;
   background: var(--fs-surface);
   color: var(--fs-text);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
 
@@ -710,7 +719,7 @@ body {
     border: 0;
     background: var(--fs-surface);
     color: var(--fs-text);
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     white-space: nowrap;
 
@@ -879,7 +888,7 @@ body {
     border-radius: 0.5rem;
     background: var(--fs-surface);
     color: var(--fs-text);
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
     box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
 
     &:focus {
@@ -916,7 +925,7 @@ body {
     background: transparent; /* override Bootstrap's dark <kbd> */
     box-shadow: none;
     color: var(--fs-text-muted);
-    font-size: 0.6875rem;
+    font-size: 0.8125rem;
     line-height: 1.4;
     unicode-bidi: isolate;
   }

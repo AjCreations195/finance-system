@@ -68,14 +68,14 @@
 
 .chat-title {
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--fs-text);
 }
 
 .chat-subtitle {
   color: var(--fs-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .header-btn {
@@ -140,7 +140,7 @@
 .welcome-text {
   margin-bottom: 1rem;
   color: var(--fs-text-muted);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
 }
 
 .suggestions {
@@ -159,7 +159,7 @@
   border-radius: 0.625rem;
   background: var(--fs-surface);
   color: var(--fs-text);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   text-align: start;
 
   &:hover {
@@ -187,7 +187,7 @@
   border-end-start-radius: 0.25rem;
   background: var(--fs-surface-2);
   color: var(--fs-text);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.6;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -257,7 +257,7 @@
   border-radius: 0.375rem;
   background: none;
   color: var(--fs-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 600;
 
   &:hover {
@@ -267,7 +267,7 @@
 
   &.icon-only {
     padding: 0.25rem;
-    font-size: 0.875rem;
+    font-size: 1rem;
   }
 }
 
@@ -289,13 +289,13 @@
   border: 1px solid var(--fs-border);
   border-radius: 1rem;
   color: var(--fs-text-muted);
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
 }
 
 .msg-note {
   margin-top: 0.25rem;
   color: var(--fs-text-muted);
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
 
   &.error {
     color: var(--fs-badge-rejected);
@@ -372,7 +372,7 @@
   resize: none;
   background: none;
   color: var(--fs-text);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.4;
   field-sizing: content; /* grows with the text where supported */
 
@@ -393,7 +393,7 @@
   border-radius: 0.5rem;
   background: var(--fs-primary);
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 1rem;
 
   &:hover:not(:disabled) {
     background: var(--fs-primary-hover);
@@ -412,6 +412,6 @@
 .composer-hint {
   margin: 0.5rem 0 0;
   color: var(--fs-text-muted);
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
   text-align: center;
 }

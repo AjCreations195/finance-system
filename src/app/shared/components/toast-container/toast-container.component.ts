@@ -67,7 +67,7 @@ const ICONS: Record<ToastType, string> = {
       border-radius: 0.625rem;
       background: var(--fs-surface);
       color: var(--fs-text);
-      font-size: 0.8125rem;
+      font-size: 0.9375rem;
       font-weight: 500;
       box-shadow: 0 12px 24px -6px rgba(16, 24, 40, 0.16), 0 4px 8px -4px rgba(16, 24, 40, 0.08);
       animation: toast-in 0.25s ease-out;

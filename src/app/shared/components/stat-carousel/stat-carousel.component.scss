@@ -37,6 +37,8 @@
   /* Width so that exactly --per-view cards fit (minus the gaps) */
   flex: 0 0 calc((100% - (var(--per-view) - 1) * var(--gap)) / var(--per-view));
   scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--fs-border);
   border-radius: var(--fs-radius);
@@ -44,8 +46,11 @@
   box-shadow: var(--fs-shadow);
 }
 
+/* Top grows to fill the card, so the bottom row lines up across all cards
+   even when a card has no request count line */
 .stat-top {
   display: flex;
+  flex: 1;
   align-items: center;
   gap: 0.875rem;
   padding: 1.125rem 1rem;
@@ -85,7 +90,7 @@
 .stat-label {
   margin: 0 0 0.25rem;
   color: var(--fs-text-muted);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -102,7 +107,7 @@
 .stat-count {
   margin: 0.125rem 0 0;
   color: var(--fs-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 /* ---- Filter cards (selectable): whole card clickable; the selected one is not styled differently ---- */
@@ -149,7 +154,7 @@
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   color: var(--fs-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .trend {
@@ -170,7 +175,7 @@
   &.pill {
     padding: 0.125rem 0.5rem;
     border-radius: 0.375rem;
-    font-size: 0.6875rem;
+    font-size: 0.8125rem;
 
     &.good {
       background: var(--fs-badge-completed-bg);
@@ -196,7 +201,7 @@
   border-radius: 50%;
   background: var(--fs-surface);
   color: var(--fs-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   box-shadow: var(--fs-shadow);
   transform: translateY(-50%);
 

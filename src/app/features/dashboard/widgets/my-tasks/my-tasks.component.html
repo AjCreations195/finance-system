@@ -2,7 +2,8 @@
   <!-- ===== Toolbar: filter + search ===== -->
   <div card-actions class="d-flex flex-wrap gap-2">
     <app-filter-menu [options]="statusOptions" [value]="status()" (valueChange)="onStatus($event)" />
-    <div class="search-box" style="width: 15rem">
+    <!-- Shrinks on phones so Filter and Search stay on one row -->
+    <div class="search-box" style="flex: 1 1 6rem; max-width: 15rem; min-width: 0">
       <app-icon name="search" class="search-icon" />
       <input type="search" [value]="search()" (input)="onSearch($any($event.target).value)" [placeholder]="'common.search' | translate" [attr.aria-label]="'common.search' | translate" />
     </div>

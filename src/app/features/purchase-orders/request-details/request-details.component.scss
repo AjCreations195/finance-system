@@ -80,7 +80,7 @@
   p {
     margin: 0;
     color: var(--fs-text-muted);
-    font-size: 0.75rem;
+    font-size: 0.875rem;
   }
 }
 
@@ -98,7 +98,7 @@
   border: 1px solid var(--fs-border);
   border-radius: 999px;
   color: var(--fs-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 
   /* eye a little larger than the 12px count */
   app-icon {
@@ -181,7 +181,7 @@
   top: calc(100% + 0.375rem);
   inset-inline-end: 0;
   min-width: 12rem;
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
 }
 
 .final-note {
@@ -190,7 +190,7 @@
   gap: 0.375rem;
   margin: 0;
   color: var(--fs-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   justify-content: flex-end;
 }
 
@@ -251,7 +251,7 @@
   flex-wrap: wrap;
   gap: 0 0.5rem;
   color: var(--fs-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 
   .sep {
     color: var(--fs-border);
@@ -266,7 +266,7 @@
 
   span {
     color: var(--fs-text-muted);
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 600;
   }
 
@@ -304,13 +304,13 @@
 
   dt {
     color: var(--fs-text-muted);
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
     font-weight: 500;
   }
 
   dd {
     margin: 0;
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
     font-weight: 600;
   }
 
@@ -328,7 +328,7 @@
   border-radius: 999px;
   background: var(--fs-badge-review-bg);
   color: var(--fs-badge-review);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 
   &::before {
     content: '';
@@ -348,7 +348,7 @@
 .section {
   h3 {
     margin: 0 0 0.875rem;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     font-weight: 700;
   }
 }
@@ -419,12 +419,12 @@
   background: var(--fs-surface);
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
   color: var(--step-icon-pending);
-  font-size: 0.875rem;
+  font-size: 1rem;
 }
 
 .step-title {
   color: var(--step-title);
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -432,7 +432,7 @@
 .step-person {
   margin-top: 0.125rem;
   color: var(--step-person);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .step-done .step-icon {
@@ -452,7 +452,7 @@
 
   .step-person {
     color: var(--step-current-person);
-    font-size: 0.875rem;
+    font-size: 1rem;
   }
 }
 
@@ -530,7 +530,7 @@
 
   p {
     margin: 0.125rem 0 0;
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
   }
 }
 
@@ -541,12 +541,12 @@
   gap: 0.25rem 0.75rem;
 
   strong {
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
   }
 
   time {
     color: var(--fs-text-muted);
-    font-size: 0.6875rem;
+    font-size: 0.8125rem;
   }
 }
 
@@ -593,13 +593,13 @@
 }
 
 .file-name {
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   font-weight: 600;
 }
 
 .file-size {
   color: var(--fs-text-muted);
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
 }
 
 .tags {
@@ -616,7 +616,7 @@
   border-radius: 999px;
   background: var(--fs-badge-executed-bg);
   color: var(--fs-badge-executed);
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
 
   &.danger {
@@ -640,17 +640,17 @@
   flex-direction: column;
 
   strong {
-    font-size: 0.875rem;
+    font-size: 1rem;
   }
 
   span {
     color: var(--fs-text-muted);
-    font-size: 0.6875rem;
+    font-size: 0.8125rem;
   }
 
   a {
     color: var(--fs-navy);
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
     font-weight: 500;
     text-decoration: none;
 
@@ -702,7 +702,7 @@
   border-radius: 0.5rem;
   background: var(--tile-bg);
   color: var(--fs-text-muted);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   font-weight: 500;
 
   .attachment-pdf {

@@ -38,12 +38,12 @@ const BAR_COLORS_DARK = { spent: '#3e5c9a', remaining: '#8db4f5' };
     .chart-title {
       margin: 0;
       color: var(--fs-text);
-      font-size: 0.875rem;
+      font-size: 1rem;
       font-weight: 700;
     }
     .total {
       color: var(--fs-text-muted);
-      font-size: 0.75rem;
+      font-size: 0.875rem;
     }
     .total strong {
       color: var(--fs-text);
@@ -57,7 +57,7 @@ const BAR_COLORS_DARK = { spent: '#3e5c9a', remaining: '#8db4f5' };
       margin: 0 auto 1rem;
       border: 0;
       background-color: transparent;
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       font-weight: 600;
     }
   `,

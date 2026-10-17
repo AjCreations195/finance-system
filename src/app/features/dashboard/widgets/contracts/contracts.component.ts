@@ -42,7 +42,7 @@ const ROW_MENU_WIDTH = 224;
       height: 1.5rem;
       border-radius: 50%;
       color: #fff;
-      font-size: 0.6875rem;
+      font-size: 0.8125rem;
       font-weight: 700;
     }
 

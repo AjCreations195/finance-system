@@ -48,7 +48,7 @@ export interface FilterOption {
       top: calc(100% + 0.375rem);
       inset-inline-end: 0;
       min-width: 11rem;
-      font-size: 0.8125rem;
+      font-size: 0.9375rem;
       z-index: 1050;
     }
   `,

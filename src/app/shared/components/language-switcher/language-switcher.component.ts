@@ -60,7 +60,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
       border-radius: 0.5rem; /* outer 12px minus the 4px padding: parallel curves */
       background: transparent;
       color: var(--fs-text-muted);
-      font-size: 0.9375rem;
+      font-size: 1rem;
       font-weight: 600;
       line-height: 1;
       transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
@@ -87,7 +87,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
     .compact .lang-option {
       min-width: 2.5rem;
       padding: 0 0.75rem;
-      font-size: 0.875rem;
+      font-size: 1rem;
     }
 
     /* Phones: narrower, so the navbar fits 360px screens */

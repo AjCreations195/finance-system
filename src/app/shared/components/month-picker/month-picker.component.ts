@@ -67,11 +67,11 @@ export function monthsBetween(from: YearMonth, to: YearMonth): number {
   `,
   styles: `
     .trigger {
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       white-space: nowrap;
     }
     .chevron {
-      font-size: 0.625rem;
+      font-size: 0.75rem;
       color: var(--fs-text-muted);
     }
     .picker {
@@ -90,7 +90,7 @@ export function monthsBetween(from: YearMonth, to: YearMonth): number {
     }
     .year {
       color: var(--fs-text);
-      font-size: 0.875rem;
+      font-size: 1rem;
       font-weight: 700;
     }
     .nav-btn {
@@ -127,7 +127,7 @@ export function monthsBetween(from: YearMonth, to: YearMonth): number {
       border-radius: 0.375rem;
       background: none;
       color: var(--fs-text);
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       font-weight: 500;
 
       &:hover:not(:disabled) {
@@ -155,7 +155,7 @@ export function monthsBetween(from: YearMonth, to: YearMonth): number {
       border-top: 1px solid var(--fs-border);
       background: none;
       color: var(--fs-primary-text);
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       font-weight: 600;
     }
   `,

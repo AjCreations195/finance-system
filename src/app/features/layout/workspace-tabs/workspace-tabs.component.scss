@@ -12,7 +12,7 @@
   margin: 0 0 0.875rem;
   padding: 0;
   list-style: none;
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   color: var(--fs-text-muted);
 
   li {
@@ -31,7 +31,7 @@
   }
 
   .sep {
-    font-size: 0.65rem;
+    font-size: 0.8125rem;
   }
 
   /* Current page in burgundy, as in the design */
@@ -75,7 +75,7 @@
   border-start-end-radius: 0.5rem;
   background: var(--fs-surface-2);
   color: var(--fs-text);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   white-space: nowrap;
   transition: background-color 0.15s ease, color 0.15s ease;
   animation: tab-in 0.2s ease-out;
@@ -158,7 +158,7 @@
   border-radius: 999px;
   background: var(--fs-primary-soft);
   color: var(--fs-primary-text);
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.125rem;
   text-align: center;
@@ -171,7 +171,7 @@
 
 .pin {
   color: var(--fs-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .tab-close {
@@ -185,7 +185,7 @@
   border-radius: 0.25rem;
   background: transparent;
   color: var(--fs-text-muted);
-  font-size: 0.875rem;
+  font-size: 1rem;
 
   .active & {
     color: inherit;
@@ -229,7 +229,7 @@
   background: var(--fs-surface);
   color: var(--fs-text);
   box-shadow: 0 12px 28px rgba(16, 24, 40, 0.14), 0 2px 6px rgba(16, 24, 40, 0.06);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   transform: translateX(-50%);
   animation: tip-in 0.14s ease-out;
 
@@ -268,12 +268,12 @@
   gap: 0.375rem 0.5rem;
 
   strong {
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
     font-variant-numeric: tabular-nums;
   }
 
   .task-badge {
-    font-size: 0.6875rem;
+    font-size: 0.8125rem;
   }
 }
 
@@ -310,7 +310,7 @@
   background: var(--fs-surface);
   color: var(--fs-text);
   box-shadow: 0 12px 32px rgba(16, 24, 40, 0.16);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   animation: menu-in 0.12s ease-out;
 }
 
@@ -375,7 +375,7 @@
     background: var(--fs-surface-2);
     color: var(--fs-text-muted);
     font-family: inherit;
-    font-size: 0.6875rem;
+    font-size: 0.8125rem;
     box-shadow: none;
   }
 }
@@ -408,7 +408,7 @@
     outline: none;
     background: none;
     color: var(--fs-text);
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
   }
 }
 
@@ -421,7 +421,7 @@
 .menu-heading {
   margin: 0.5rem 0.625rem 0.25rem;
   color: var(--fs-text-muted);
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -432,7 +432,7 @@
   border-radius: 999px;
   background: var(--fs-badge-completed-bg);
   color: var(--fs-badge-completed);
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
 
   &.muted {
@@ -456,7 +456,7 @@
 .result-desc {
   overflow: hidden;
   color: var(--fs-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -472,5 +472,5 @@
   padding: 0.5rem 0.625rem 0.125rem;
   border-top: 1px solid var(--fs-border);
   color: var(--fs-text-muted);
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
 }

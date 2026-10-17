@@ -55,7 +55,7 @@ import { IconComponent } from '../icon/icon.component';
   styles: `
     .trigger {
       max-width: 14rem;
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       white-space: nowrap;
     }
     .trigger-label {
@@ -71,7 +71,7 @@ import { IconComponent } from '../icon/icon.component';
       border: 0;
       background: none;
       color: var(--fs-text-muted);
-      font-size: 0.8125rem;
+      font-size: 0.9375rem;
 
       &:hover,
       &[aria-expanded='true'] {
@@ -80,7 +80,7 @@ import { IconComponent } from '../icon/icon.component';
     }
     .chevron {
       margin-inline-start: 0.125rem;
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       color: var(--fs-text-muted);
       transition: transform 0.2s ease;
 
@@ -110,7 +110,7 @@ import { IconComponent } from '../icon/icon.component';
       gap: 0.5rem;
       padding: 0.45rem 0.625rem;
       border-radius: 0.375rem;
-      font-size: 0.8125rem;
+      font-size: 0.9375rem;
 
       &.selected {
         background: var(--fs-primary-soft);

@@ -51,7 +51,7 @@ import { IconComponent } from '../icon/icon.component';
       border-radius: 999px;
       background: var(--fs-primary);
       color: #fff;
-      font-size: 0.6875rem;
+      font-size: 0.8125rem;
     }
     .filter-dropdown {
       position: absolute;
@@ -59,7 +59,7 @@ import { IconComponent } from '../icon/icon.component';
       inset-inline-end: 0;
       min-width: 13rem;
       padding: 0.375rem;
-      font-size: 0.8125rem;
+      font-size: 0.9375rem;
       z-index: 1050;
     }
     fieldset {
@@ -72,7 +72,7 @@ import { IconComponent } from '../icon/icon.component';
       margin: 0;
       padding: 0.25rem 0.625rem 0.375rem;
       color: var(--fs-text-muted);
-      font-size: 0.6875rem;
+      font-size: 0.8125rem;
       font-weight: 600;
       text-transform: uppercase;
     }
@@ -96,7 +96,7 @@ import { IconComponent } from '../icon/icon.component';
       border-top: 1px solid var(--fs-border);
       background: none;
       color: var(--fs-primary-text);
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       font-weight: 600;
       text-align: start;
 

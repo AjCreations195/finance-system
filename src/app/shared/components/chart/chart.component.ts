@@ -39,6 +39,8 @@ export class ChartComponent {
   private readonly theme = inject(ThemeService);
   private readonly language = inject(LanguageService);
   private chart?: ApexCharts;
+  /** Last data drawn, so language/theme-only updates don't replay the animation. */
+  private lastSeries = '';
 
   /** Parent options combined with theme and language defaults. */
   private readonly mergedOptions = computed<ApexCharts.ApexOptions>(() => {
@@ -66,12 +68,18 @@ export class ChartComponent {
     // Runs after Angular renders, and again whenever mergedOptions changes.
     afterRenderEffect(() => {
       const options = this.mergedOptions();
+      const series = JSON.stringify(options.series);
       if (!this.chart) {
         this.chart = new ApexCharts(this.host().nativeElement, options);
+        this.lastSeries = series;
         void this.chart.render();
       } else {
-        // redrawPaths=false, animate=true: smooth transition, no full redraw
-        void this.chart.updateOptions(options, false, true);
+        // Animate only when the numbers change. A language or theme switch
+        // updates labels, fonts and colors in place, without replaying the sweep.
+        const dataChanged = series !== this.lastSeries;
+        this.lastSeries = series;
+        // redrawPaths=false: no full redraw; animate only on data change
+        void this.chart.updateOptions(options, false, dataChanged);
       }
     });
 
