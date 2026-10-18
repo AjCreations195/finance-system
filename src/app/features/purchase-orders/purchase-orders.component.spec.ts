@@ -32,18 +32,18 @@ describe('PurchaseOrdersComponent', () => {
   const printRows = () => el.querySelectorAll('.print-report tbody tr');
 
   describe('listing and pagination', () => {
-    it('shows 13 rows per page out of 130 requests', () => {
-      expect(rows().length).toBe(13);
-      expect(bodyRows().length).toBe(13);
-      expect(component['totalPages']()).toBe(10);
+    it('shows 10 rows per page out of 130 requests', () => {
+      expect(rows().length).toBe(10);
+      expect(bodyRows().length).toBe(10);
+      expect(component['totalPages']()).toBe(13);
     });
 
     it('moves between pages and clamps out-of-range pages', () => {
       component['goTo'](2);
-      expect(rows()[0].id).toBe(14);
+      expect(rows()[0].id).toBe(11);
 
       component['goTo'](999);
-      expect(component['currentPage']()).toBe(10);
+      expect(component['currentPage']()).toBe(13);
 
       component['goTo'](-5);
       expect(component['currentPage']()).toBe(1);
@@ -160,7 +160,7 @@ describe('PurchaseOrdersComponent', () => {
     it('"select all" selects and then clears the current page', () => {
       component['toggleAllOnPage']();
       expect(component['allOnPageSelected']()).toBe(true);
-      expect(component['selectedCount']()).toBe(13);
+      expect(component['selectedCount']()).toBe(10);
 
       component['toggleAllOnPage']();
       expect(component['selectedCount']()).toBe(0);

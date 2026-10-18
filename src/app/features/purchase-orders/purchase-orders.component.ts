@@ -27,8 +27,8 @@ import { IconComponent } from '../../shared/components/icon/icon.component';
 
 type SortKey = 'number' | 'budgetItem' | 'description' | 'products' | 'notes' | 'status' | 'creator' | 'date';
 
-/** Rows per page (13, as in the design). */
-const PAGE_SIZE = 13;
+/** Rows per page. */
+const PAGE_SIZE = 10;
 
 /** List state kept while the page's workspace tab is in the background (PageStateService key: the tab id). */
 const STATE_KEY = 'procurement';

@@ -63,7 +63,7 @@ npm start          # http://localhost:4200
 | Dark/Light mode on all components | ✅ | Every color comes from theme variables |
 | Organized, commented code | ✅ | The page, its details panel, the data service and the models are separate files |
 
-> The Figma design titles this screen **Purchase requests (طلب مشتريات)**, so the page title and URL (`/procurement/purchase-requests`) use that name. `/purchase-orders` redirects to it.
+> The Figma design titles this screen **Purchase requests (طلب مشتريات)**, so the page title and URL (`/procurement/purchase-requests`) use that name.
 
 ---
 

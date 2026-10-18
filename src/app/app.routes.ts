@@ -37,6 +37,6 @@ export const routes: Routes = [
     ],
   },
 
-  // Unknown URLs
+  // Unknown URLs - wildcard route must be last, otherwise it will catch all URLs and prevent the other routes from working
   { path: '**', redirectTo: '' },
 ];
