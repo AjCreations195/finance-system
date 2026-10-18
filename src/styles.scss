@@ -441,6 +441,22 @@ body {
     box-shadow: inset -1px 0 0 var(--fs-border);
   }
 
+  /* My tasks: its ⋮ column is pinned on phones only, and scrolls on wider screens */
+  @media (max-width: 767.98px) {
+    .actions-cell {
+      position: sticky;
+      inset-inline-end: 0;
+      z-index: 1;
+      background: var(--fs-surface);
+      padding-inline: 0.375rem;
+      box-shadow: inset 1px 0 0 var(--fs-border);
+    }
+
+    [dir='rtl'] & .actions-cell {
+      box-shadow: inset -1px 0 0 var(--fs-border);
+    }
+  }
+
   /* Long text that may wrap onto two lines instead of widening the table */
   .cell-wrap {
     min-width: 8rem;
