@@ -158,6 +158,9 @@
         <span class="count-pill">{{ selectedCount() }}</span>
       }
     </button>
+  </div>
+
+  <div class="d-flex align-items-center gap-2">
     <!-- Actions dropdown (applies to the selected rows) -->
     <div class="position-relative">
       <button type="button" class="btn-fs actions-btn" (click)="toggleActions($event)" [attr.aria-expanded]="actionsOpen()" aria-haspopup="menu">
@@ -171,9 +174,6 @@
         </ul>
       }
     </div>
-  </div>
-
-  <div class="d-flex align-items-center gap-2">
     <!-- Phones: icon only (the label comes back from sm up), so all the buttons fit in two rows -->
     <button type="button" class="btn-fs" (click)="print()" [attr.aria-label]="'requests.print' | translate"><app-icon name="print" /> <span class="d-none d-sm-inline">{{ 'requests.print' | translate }}</span></button>
     <button type="button" class="btn-fs" (click)="back()" [attr.aria-label]="'requests.back' | translate"><app-icon name="return" /> <span class="d-none d-sm-inline">{{ 'requests.back' | translate }}</span></button>

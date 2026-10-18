@@ -256,11 +256,10 @@
     margin-inline: -1.5rem;
   }
 
-  /* Phones: both groups flow as one list, so the buttons make two rows
-     (Create + Send, then Actions + icon buttons) instead of three */
+  /* Phones: the bar wraps into two rows, Create + Send, then Actions + icon buttons */
   @media (max-width: 575.98px) {
-    > div {
-      display: contents;
+    .actions-caret {
+      margin-inline-start: 0.5rem;
     }
   }
 }

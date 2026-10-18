@@ -60,12 +60,15 @@
       @let i = pageResults().length + j;
       <div class="result" role="option" [id]="'gs-opt-' + i" [class.active]="active() === i"
         [attr.aria-selected]="active() === i" (click)="choose(i)" (mousemove)="active.set(i)">
-        <span class="status-dot" [style.background]="'var(--fs-badge-' + statusBadge[r.status] + ')'" aria-hidden="true"></span>
         <span class="result-text">
           <span class="result-title" dir="ltr">{{ r.number }}</span>
           <span class="result-sub">{{ r.description | localize }}</span>
         </span>
-        <span class="result-meta">{{ 'requests.status.' + r.status | translate }}</span>
+        <!-- Status dot and label together, at the end of the row -->
+        <span class="result-meta">
+          <span class="status-dot" [style.background]="'var(--fs-badge-' + statusBadge[r.status] + ')'" aria-hidden="true"></span>
+          {{ 'requests.status.' + r.status | translate }}
+        </span>
       </div>
       }
       @let all = options().length - 1;
