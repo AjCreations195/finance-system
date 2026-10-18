@@ -613,7 +613,7 @@
     margin-inline: 0.25rem 0;
 
     input {
-      height: 2.75rem;
+      height: 2.25rem; /* same as the navbar icon buttons on phones */
       /* 16px: iOS zooms the page into any field smaller than this on focus */
       font-size: 1rem;
       padding-inline: 2.75rem 2.75rem;
