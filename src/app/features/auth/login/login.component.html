@@ -53,12 +53,12 @@
                 autocapitalize="none"
                 spellcheck="false"
                 [placeholder]="'login.identifierPlaceholder' | translate"
-                [class.is-invalid]="showError(f.identifier)"
-                [attr.aria-invalid]="showError(f.identifier)"
-                [attr.aria-describedby]="showError(f.identifier) ? 'identifier-error' : null"
+                [class.is-invalid]="showError(f.identifier, submitted())"
+                [attr.aria-invalid]="showError(f.identifier, submitted())"
+                [attr.aria-describedby]="showError(f.identifier, submitted()) ? 'identifier-error' : null"
                 aria-required="true"
               />
-              @if (showError(f.identifier)) {
+              @if (showError(f.identifier, submitted())) {
                 <div id="identifier-error" class="invalid-feedback d-block">
                   @if (f.identifier.hasError('required')) {
                     {{ 'login.errors.identifierRequired' | translate }}
@@ -82,9 +82,9 @@
                   autocomplete="current-password"
                   [type]="showPassword() ? 'text' : 'password'"
                   [placeholder]="'login.passwordPlaceholder' | translate: { min: passwordMinLength }"
-                  [class.is-invalid]="showError(f.password)"
-                  [attr.aria-invalid]="showError(f.password)"
-                  [attr.aria-describedby]="showError(f.password) ? 'password-error' : capsLock() ? 'caps-warning' : null"
+                  [class.is-invalid]="showError(f.password, submitted())"
+                  [attr.aria-invalid]="showError(f.password, submitted())"
+                  [attr.aria-describedby]="showError(f.password, submitted()) ? 'password-error' : capsLock() ? 'caps-warning' : null"
                   aria-required="true"
                   (keydown)="onPasswordKey($event)"
                   (keyup)="onPasswordKey($event)"
@@ -100,7 +100,7 @@
                   <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" />
                 </button>
               </div>
-              @if (showError(f.password)) {
+              @if (showError(f.password, submitted())) {
                 <div id="password-error" class="invalid-feedback d-block">
                   @if (f.password.hasError('required')) {
                     {{ 'login.errors.passwordRequired' | translate }}
@@ -321,7 +321,8 @@
                     <app-icon name="caps-lock" />
                     {{ 'login.capsLock' | translate }}
                   </div>
-                } @else {
+                } @else if (r.password.dirty && r.password.invalid) {
+                  <!-- The rules hint shows only after the user starts typing, and only while the password doesn't meet them yet -->
                   <div class="field-hint">{{ 'login.passwordHint' | translate: { min: passwordMinLength } }}</div>
                 }
               </div>

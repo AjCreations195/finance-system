@@ -413,7 +413,6 @@ export class PurchaseOrdersComponent {
   }
 
   /** Approve / approve & send from the panel (one request, so no confirmation, like the row menu). */
-  /** Approve from the panel: sets the status and shows the matching toast. */
   protected approveFromDetails(status: 'accepted' | 'sent'): void {
     const request = this.viewing();
     if (!request || !this.canApprove(request)) return;
@@ -488,11 +487,11 @@ export class PurchaseOrdersComponent {
   }
 
   /**
+   * Sends every ticked request ("sent" status), then clears the selection.
    * Bulk actions clear the rows they handled from the selection, so the same
    * action can't be repeated on them by accident. Rows that were skipped stay
    * selected, so the user can see which ones need attention.
    */
-  /** Sends every ticked request ("sent" status), then clears the selection. */
   protected sendSelected(): void {
     this.withSelection((list) => {
       this.service.setStatus(list.map((r) => r.id), 'sent');

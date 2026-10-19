@@ -130,8 +130,22 @@ describe('LoginComponent', () => {
       await submit();
 
       expect(el.querySelector('[role="alert"]')).not.toBeNull();
+      // The zoneless re-render runs after a macrotask, which whenStable() does not wait for.
+      await new Promise((resolve) => setTimeout(resolve));
+      await fixture.whenStable();
       expect(el.querySelector<HTMLInputElement>('#password')!.value).toBe('');
+      expect(el.querySelector('#password-error')).toBeNull();
       expect(router.navigateByUrl).not.toHaveBeenCalled();
+    });
+
+    it('does not keep a stale password error after leaving and returning to sign-in', async () => {
+      await submit();
+      expect(el.querySelector('#password-error')).not.toBeNull();
+
+      await click('.link-muted[href="#"]');
+      await click('.form-wrapper .back-link');
+      expect(component['view']()).toBe('login');
+      expect(el.querySelector('#password-error')).toBeNull();
     });
 
     it('hides the error alert as soon as the user edits a field', async () => {
@@ -222,6 +236,33 @@ describe('LoginComponent', () => {
       terms.checked = true;
       terms.dispatchEvent(new Event('change'));
     }
+
+    it('shows the password rules hint only after typing, and hides it once the password is valid', async () => {
+      await openRegister();
+      expect(el.querySelector('#reg-password-help .field-hint')).toBeNull();
+
+      type('#reg-password', 'Secret');
+      await fixture.whenStable();
+      expect(el.querySelector('#reg-password-help .field-hint')).not.toBeNull();
+
+      type('#reg-password', 'Secret123');
+      await fixture.whenStable();
+      expect(el.querySelector('#reg-password-help .field-hint')).toBeNull();
+    });
+
+    it('clears the password error as soon as the password becomes valid', async () => {
+      await openRegister();
+      await submit();
+      expect(el.querySelector('#reg-password-help .invalid-feedback')).not.toBeNull();
+
+      type('#reg-password', 'Secretxx');
+      await fixture.whenStable();
+      expect(el.querySelector('#reg-password-help .invalid-feedback')?.textContent).toContain('letters and numbers');
+
+      type('#reg-password', 'Secret123');
+      await fixture.whenStable();
+      expect(el.querySelector('#reg-password-help .invalid-feedback')).toBeNull();
+    });
 
     it('shows errors for an empty form', async () => {
       await openRegister();

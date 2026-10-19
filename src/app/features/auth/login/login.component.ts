@@ -241,6 +241,8 @@ export class LoginComponent {
           // Standard practice: clear the wrong password. emitEvent: false so this
           // doesn't count as "user edited" and instantly hide the alert again.
           this.f.password.reset('', { emitEvent: false });
+          // The cleared field is untouched again, so hide its "required" error until the user acts.
+          this.submitted.set(false);
           this.focus('#password');
         },
       });
@@ -263,6 +265,8 @@ export class LoginComponent {
 
   /** Returns from the "forgot password" view to the sign-in form. */
   protected backToLogin(): void {
+    // Start the sign-in form fresh: errors from an earlier submit should not reappear.
+    this.submitted.set(false);
     this.view.set('login');
     this.focus('#identifier');
   }
